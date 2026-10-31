@@ -37,7 +37,12 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          if [ -f bun.lock ]; then
+            bun install --frozen-lockfile
+          else
+            bun install
+          fi
 
       - name: Lint, typecheck, unit tests, and build
         run: bun run verify
@@ -64,7 +69,12 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          if [ -f bun.lock ]; then
+            bun install --frozen-lockfile
+          else
+            bun install
+          fi
 
       - name: Install Playwright Chromium
         run: bun run test:e2e:install
@@ -107,7 +117,12 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          if [ -f bun.lock ]; then
+            bun install --frozen-lockfile
+          else
+            bun install
+          fi
 
       - name: Build frontend
         run: bun run build
