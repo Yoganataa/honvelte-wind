@@ -6,7 +6,7 @@ Uses Bun's built-in Bun.SQL PostgreSQL adapter. No package install is required. 
 
 Copy .env.example to a local, untracked environment file or export the variables in your shell. Use a dedicated application database and a separate disposable test database.
 
-DATABASE_URL must point to the application database. DATABASE_URL_TEST is used only by the integration test and is intentionally required to end in _test as a guard against accidentally running the test against an ordinary database.
+DATABASE_URL must point to the application database. DATABASE_URL_TEST is used only by the integration test and is intentionally required to end in _test as a guard against accidentally running the test against an ordinary database. The integration test sets Bun's explicit database option from that validated URL path rather than relying on the ambient PGDATABASE value.
 
 ## Run
 
