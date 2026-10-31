@@ -32,8 +32,8 @@ The current CI run is green, but the baseline is not yet fully reproducible or p
 | Commit `bun.lock` | Open — no lockfile in repository | Generate with the pinned Bun version, commit it, and use `bun install --frozen-lockfile` in every CI job. Remove the unlocked fallback. |
 | Restore formatting as a quality gate | Open — `format:check` is separate from `verify` | Run Prettier across the repository, review the formatting-only diff, add `format:check` to `verify`, and keep CI documentation aligned. |
 | Protect `main` | Open — branch protection is disabled | Require pull requests and successful Quality gates + Browser E2E checks; disable force pushes and deletion. Confirm the selected check names against a real PR. |
-| Pin GitHub Actions | Open — actions use version tags | Pin third-party actions to verified full commit SHAs and add Dependabot updates for Actions. |
-| Security scanning | Open | Add CodeQL for TypeScript/JavaScript, dependency vulnerability checks, and a documented security reporting process. Keep permissions least-privilege. |
+| Pin GitHub Actions | Done in this change | Checkout, Bun setup, artifact upload, and CodeQL actions use verified full commit SHAs; Dependabot checks action updates weekly. |
+| Security scanning | Partially implemented | CodeQL analysis, weekly Bun/Actions Dependabot version updates, and `SECURITY.md` are in place. Still verify/enable repository dependency alerts and security updates; review CodeQL findings after the first completed scan. |
 | API body limit | Done in this change | Enforces the 1 KiB limit against streamed bytes, with a fast `Content-Length` rejection and a regression test for requests without that header. |
 
 **P0 exit gate:** a clean checkout installs only from the committed lockfile; formatting, lint, type checks, unit tests, E2E, and production artifact smoke tests pass; protected `main` cannot accept an unverified change.
