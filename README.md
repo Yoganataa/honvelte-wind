@@ -45,6 +45,8 @@ API health: http://127.0.0.1:3000/api/health
 
 The API composition root is `apps/api/src/app.ts`. Feature endpoints live in `apps/api/src/routes`, cross-cutting request middleware in `apps/api/src/middleware`, and reusable HTTP parsing/error handling in `apps/api/src/http`. Keep route handlers focused on HTTP orchestration. Introduce feature services/use-cases when real business rules need to be tested independently; do not add empty service layers for trivial examples.
 
+The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI, state, and API calls in `apps/web/src/features/<feature>`. Put small primitives shared across features in `apps/web/src/lib/components/ui`; keep theme tokens and global focus/reduced-motion defaults in `app.css`. Use native HTML semantics and defer client-side routing until multiple real routes need it.
+
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
@@ -110,7 +112,7 @@ Install Chromium once:
 bun run test:e2e:install
 ```
 
-Run `bun run format` to apply Prettier when changing formatting. `bun run verify` includes `format:check`, coverage reporting, audit, lint, typecheck, unit tests, and build; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
+Run `bun run format` to apply Prettier when changing formatting. `bun run verify` includes `format:check`, coverage reporting, audit, lint, typecheck, unit tests, and build; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, keyboard navigation, and API route behavior. axe-core scans the initial, validation, and success UI states.
 
 ## Agent instructions and skills
 

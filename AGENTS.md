@@ -15,7 +15,7 @@ You are working in Honvelte Wind, a Svelte 5 + Vite SPA, Hono API, Tailwind CSS 
 
 ## Architecture boundaries
 
-- `apps/web`: browser UI and client-side routing. API calls use the same-origin `/api` path.
+- `apps/web`: page shell, feature-owned browser UI, and reusable UI primitives. Keep feature code in `src/features/<feature>` and only move genuinely shared primitives into `src/lib/components/ui`. API calls use the same-origin `/api` path; defer a router until multiple real routes require one.
 - `apps/api`: HTTP routes, middleware, application services, infrastructure, and Bun server entry.
 - `packages/contracts`: dependency-light schemas and types safe to import from both apps.
 - Do not import `apps/api` implementation modules into the browser app.

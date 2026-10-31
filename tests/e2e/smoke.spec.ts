@@ -17,8 +17,57 @@ test('submits a greeting through the API', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText('Hello, Nata!')
 })
 
-test('shows client-side validation for an empty name', async ({ page }) => {
+test('shows and clears accessible client-side validation feedback', async ({
+  page,
+}) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Say hello' }).click()
-  await expect(page.getByRole('alert')).toContainText('Name is required')
+
+  const nameField = page.getByLabel('Your name')
+  const validationMessage = page.getByRole('alert')
+  await expect(validationMessage).toContainText('Name is required')
+  await expect(nameField).toHaveAttribute('aria-invalid', 'true')
+
+  const describedBy = await nameField.getAttribute('aria-describedby')
+  expect(describedBy).toBeTruthy()
+  await expect(page.locator(`#${describedBy}`)).toContainText(
+    'Name is required',
+  )
+
+  await nameField.fill('Nata')
+  await expect(nameField).not.toHaveAttribute('aria-invalid', 'true')
+  await expect(validationMessage).toHaveCount(0)
+})
+
+test('supports keyboard navigation through the greeting form', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('Your name')).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Say hello' })).toBeFocused()
+})
+
+test('shows API errors without exposing unexpected response details', async ({
+  page,
+}) => {
+  await page.route('**/api/greet', async (route) => {
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Internal server error',
+        },
+      }),
+    })
+  })
+
+  await page.goto('/')
+  await page.getByLabel('Your name').fill('Nata')
+  await page.getByRole('button', { name: 'Say hello' }).click()
+  await expect(page.getByRole('alert')).toHaveText('Internal server error')
+  await expect(page.getByRole('status')).toHaveCount(0)
 })
