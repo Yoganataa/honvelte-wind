@@ -8,8 +8,9 @@ export const greetingSchema = z.object({
     .max(80, 'Name must be 80 characters or fewer'),
 })
 
-export type GreetingInput = z.infer<typeof greetingSchema>
+export const greetingResponseSchema = z.object({
+  message: z.string().min(1),
+})
 
-export interface GreetingResponse {
-  message: string
-}
+export type GreetingInput = z.infer<typeof greetingSchema>
+export type GreetingResponse = z.infer<typeof greetingResponseSchema>
