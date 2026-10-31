@@ -117,7 +117,7 @@ Run `bun run format` to apply Prettier when changing formatting. `bun run verify
 Read `AGENTS.md` before making changes. Skills under `.agents/skills/` are the canonical sources:
 
 - `project-development`: implementation and architecture rules.
-- `testing`: unit, integration, contract, and E2E.
+- `testing`: unit, integration, contract, and regression tests.
 - `playwright-e2e`: browser automation and E2E workflow.
 
 Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, generated skill aliases can be refreshed with `bun run agents:sync:claude`.
