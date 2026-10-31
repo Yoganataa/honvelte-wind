@@ -13,12 +13,26 @@ test('rejects non-PostgreSQL connection URLs', () => {
 
 test('requires verified TLS for production connections', () => {
   const previousNodeEnv = process.env.NODE_ENV
+  const previousTlsOverride = process.env.NODE_TLS_REJECT_UNAUTHORIZED
   process.env.NODE_ENV = 'production'
 
   try {
     expect(() =>
       createPostgresDatabase('postgres://user:password@db.example.com/app'),
     ).toThrow('require sslmode=verify-full')
+
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+    expect(() =>
+      createPostgresDatabase(
+        'postgres://user:password@db.example.com/app?sslmode=verify-full',
+      ),
+    ).toThrow('must not disable TLS certificate verification')
+
+    if (previousTlsOverride === undefined) {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+    } else {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousTlsOverride
+    }
 
     const database = createPostgresDatabase(
       'postgres://user:password@db.example.com/app?sslmode=verify-full',
@@ -29,6 +43,12 @@ test('requires verified TLS for production connections', () => {
       delete process.env.NODE_ENV
     } else {
       process.env.NODE_ENV = previousNodeEnv
+    }
+
+    if (previousTlsOverride === undefined) {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+    } else {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousTlsOverride
     }
   }
 })
