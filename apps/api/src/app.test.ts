@@ -1,3 +1,7 @@
+import {
+  apiErrorResponseSchema,
+  greetingResponseSchema,
+} from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
 import app from './app'
 
@@ -11,7 +15,7 @@ describe('API app', () => {
     expect(body.status).toBe('ok')
   })
 
-  test('returns a greeting for valid input', async () => {
+  test('returns a greeting matching the shared response contract', async () => {
     const response = await app.request('/api/greet', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -19,10 +23,12 @@ describe('API app', () => {
     })
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ message: 'Hello, Nata!' })
+    expect(greetingResponseSchema.parse(await response.json())).toEqual({
+      message: 'Hello, Nata!',
+    })
   })
 
-  test('rejects invalid input with a validation error', async () => {
+  test('rejects invalid input with a validation error contract', async () => {
     const response = await app.request('/api/greet', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -30,12 +36,12 @@ describe('API app', () => {
     })
 
     expect(response.status).toBe(400)
-    expect(await response.json()).toMatchObject({
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'VALIDATION_ERROR' },
     })
   })
 
-  test('rejects malformed JSON', async () => {
+  test('rejects malformed JSON with a shared error contract', async () => {
     const response = await app.request('/api/greet', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -43,7 +49,7 @@ describe('API app', () => {
     })
 
     expect(response.status).toBe(400)
-    expect(await response.json()).toMatchObject({
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'BAD_REQUEST' },
     })
   })
@@ -59,7 +65,7 @@ describe('API app', () => {
     })
 
     expect(response.status).toBe(413)
-    expect(await response.json()).toMatchObject({
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'PAYLOAD_TOO_LARGE' },
     })
   })
@@ -72,15 +78,18 @@ describe('API app', () => {
     })
 
     expect(response.status).toBe(413)
-    expect(await response.json()).toMatchObject({
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'PAYLOAD_TOO_LARGE' },
     })
   })
 
-  test('returns a JSON 404 for unknown API routes', async () => {
+  test('returns a shared JSON error contract for unknown API routes', async () => {
     const response = await app.request('/api/unknown')
 
     expect(response.status).toBe(404)
     expect(response.headers.get('content-type')).toContain('application/json')
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
+      error: { code: 'NOT_FOUND' },
+    })
   })
 })
