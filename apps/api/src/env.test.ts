@@ -9,6 +9,24 @@ describe('API environment schema', () => {
     expect(parsed.SERVER_MAX_REQUEST_BODY_BYTES).toBe(1_048_576)
     expect(parsed.SHUTDOWN_READINESS_DELAY_MS).toBe(1_000)
     expect(parsed.SHUTDOWN_TIMEOUT_MS).toBe(15_000)
+    expect(parsed.METRICS_ENABLED).toBe(false)
+    expect(parsed.METRICS_TOKEN).toBeUndefined()
+  })
+
+  test('requires a sufficiently long token when metrics are enabled', () => {
+    expect(envSchema.safeParse({ METRICS_ENABLED: 'true' }).success).toBe(false)
+    expect(
+      envSchema.safeParse({
+        METRICS_ENABLED: 'true',
+        METRICS_TOKEN: 'short',
+      }).success,
+    ).toBe(false)
+    expect(
+      envSchema.safeParse({
+        METRICS_ENABLED: 'true',
+        METRICS_TOKEN: 'm'.repeat(32),
+      }).success,
+    ).toBe(true)
   })
 
   test('rejects out-of-range Bun server limits', () => {

@@ -2,11 +2,26 @@ import { serveStatic } from 'hono/bun'
 import { resolve } from 'node:path'
 import { createApp } from './app'
 import { env } from './env'
+import {
+  createHttpMetrics,
+  createNoopHttpMetrics,
+} from './observability/http-metrics'
+import { createLogger } from './observability/logger'
 import { createRuntimeLifecycle } from './runtime/lifecycle'
 import { stopServerGracefully } from './runtime/shutdown'
 
 const lifecycle = createRuntimeLifecycle()
-const app = createApp(lifecycle)
+const logger = createLogger({ level: env.LOG_LEVEL })
+const metrics = env.METRICS_ENABLED
+  ? createHttpMetrics()
+  : createNoopHttpMetrics()
+const app = createApp({
+  lifecycle,
+  logger,
+  metrics,
+  metricsEnabled: env.METRICS_ENABLED,
+  ...(env.METRICS_TOKEN ? { metricsToken: env.METRICS_TOKEN } : {}),
+})
 const webDist = resolve(import.meta.dir, '../../web/dist')
 
 if (env.NODE_ENV === 'production') {
@@ -31,9 +46,11 @@ const server = Bun.serve({
   fetch: app.fetch,
 })
 
-console.info(
-  `Honvelte Wind listening on http://${server.hostname}:${server.port}`,
-)
+logger.info('server.started', {
+  host: server.hostname,
+  port: server.port,
+  metricsEnabled: env.METRICS_ENABLED,
+})
 
 let shutdownPromise: Promise<void> | undefined
 
@@ -41,9 +58,9 @@ function shutdown(signal: 'SIGINT' | 'SIGTERM'): Promise<void> {
   if (shutdownPromise) return shutdownPromise
 
   lifecycle.beginShutdown()
-  console.info({
-    event: 'server.shutdown.started',
+  logger.info('server.shutdown.started', {
     signal,
+    readinessDelayMs: env.SHUTDOWN_READINESS_DELAY_MS,
     gracePeriodMs: env.SHUTDOWN_TIMEOUT_MS,
   })
 
@@ -56,24 +73,21 @@ function shutdown(signal: 'SIGINT' | 'SIGTERM'): Promise<void> {
   })()
     .then((outcome) => {
       if (outcome === 'forced') {
-        console.warn({
-          event: 'server.shutdown.forced',
+        logger.warn('server.shutdown.forced', {
           signal,
           gracePeriodMs: env.SHUTDOWN_TIMEOUT_MS,
         })
       }
 
-      console.info({
-        event: 'server.shutdown.completed',
+      logger.info('server.shutdown.completed', {
         signal,
         outcome,
       })
     })
     .catch((error: unknown) => {
-      console.error({
-        event: 'server.shutdown.failed',
+      logger.error('server.shutdown.failed', {
         signal,
-        error,
+        errorType: error instanceof Error ? error.name : typeof error,
       })
       process.exitCode = 1
     })

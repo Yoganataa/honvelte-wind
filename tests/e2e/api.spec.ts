@@ -25,3 +25,10 @@ test('unknown API paths return JSON 404 rather than the SPA', async ({
   expect(response.status()).toBe(404)
   expect(response.headers()['content-type']).toContain('application/json')
 })
+
+test('metrics endpoint is not exposed by default', async ({ request }) => {
+  const response = await request.get('/api/metrics')
+
+  expect(response.status()).toBe(404)
+  expect(response.headers()['content-type']).toContain('application/json')
+})
