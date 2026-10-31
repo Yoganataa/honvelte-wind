@@ -33,22 +33,7 @@ const HTTP_METHODS = new Set([
   'QUERY',
 ])
 
-const DURATION_BUCKETS_SECONDS = [
-  0.005,
-  0.01,
-  0.025,
-  0.05,
-  0.075,
-  0.1,
-  0.25,
-  0.5,
-  0.75,
-  1,
-  2.5,
-  5,
-  7.5,
-  10,
-] as const
+const DURATION_BUCKETS_SECONDS = [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10] as const
 
 const MAX_SERIES = 250
 const OVERFLOW_SERIES_KEY = '_OTHER\u0000__overflow__\u00000'
@@ -70,10 +55,7 @@ function normalizeStatus(statusCode: number): number {
 }
 
 function escapeLabel(value: string): string {
-  return value
-    .replace(/\\/g, '\\\\')
-    .replace(/\n/g, '\\n')
-    .replace(/"/g, '\\"')
+  return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/"/g, '\\"')
 }
 
 function formatLabels(series: RequestSeries): string {
@@ -144,13 +126,16 @@ export function createHttpMetrics(): HttpMetrics {
       if (statusCode >= 500) current.errorCount += 1
       current.durationSumSeconds += durationSeconds
 
-      for (
-        let index = 0;
-        index < DURATION_BUCKETS_SECONDS.length;
-        index += 1
-      ) {
-        if (durationSeconds <= DURATION_BUCKETS_SECONDS[index]) {
-          current.bucketCounts[index] += 1
+      for (let index = 0; index < DURATION_BUCKETS_SECONDS.length; index += 1) {
+        const bucket = DURATION_BUCKETS_SECONDS[index]
+        const bucketCount = current.bucketCounts[index]
+
+        if (
+          bucket !== undefined &&
+          bucketCount !== undefined &&
+          durationSeconds <= bucket
+        ) {
+          current.bucketCounts[index] = bucketCount + 1
         }
       }
     },
@@ -191,10 +176,18 @@ export function createHttpMetrics(): HttpMetrics {
       for (const current of series.values()) {
         const labels = formatLabels(current)
 
-        for (let index = 0; index < DURATION_BUCKETS_SECONDS.length; index += 1) {
-          lines.push(
-            `http_server_request_duration_seconds_bucket{${labels},le="${DURATION_BUCKETS_SECONDS[index]}"} ${current.bucketCounts[index]}`,
-          )
+        for (
+          let index = 0;
+          index < DURATION_BUCKETS_SECONDS.length;
+          index += 1
+        ) {
+          const bucket = DURATION_BUCKETS_SECONDS[index]
+          const bucketCount = current.bucketCounts[index]
+          if (bucket !== undefined && bucketCount !== undefined) {
+            lines.push(
+              `http_server_request_duration_seconds_bucket{${labels},le="${bucket}"} ${bucketCount}`,
+            )
+          }
         }
 
         lines.push(
