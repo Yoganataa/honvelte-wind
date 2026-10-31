@@ -24,7 +24,7 @@ The repository currently provides:
 - A production tarball smoke test that exercises the extracted bundle, API health endpoint, and SPA response.
 - Agent instructions and local skills for implementation, testing, and browser E2E.
 
-The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 6, Vite 8, Svelte Vite Plugin 7, and current stable compatible packages. A Bun 1.4.4 text-based `bun.lock` is committed and every CI install uses `--frozen-lockfile`. CI also runs a Bun advisory audit, dependency review, and a three-day package release-age gate. `format:check` is part of `bun run verify`. The active `Protect main` repository ruleset requires pull requests, up-to-date required checks, and blocks force pushes and deletion. Repository-level Dependabot alerts and security updates still require confirmation.
+The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 6, Vite 8, Svelte Vite Plugin 7, and current stable compatible packages. A Bun 1.4.4 text-based `bun.lock` is committed and every CI install uses `--frozen-lockfile`. CI also runs a Bun advisory audit, dependency review, and a three-day package release-age gate. `format:check` is part of `bun run verify`. The active `Protect main` repository ruleset requires pull requests, up-to-date required checks, and blocks force pushes and deletion. The dependency graph, automatic dependency submission, Dependabot alerts and security updates, malware alerts, private vulnerability reporting, and secret protection are enabled.
 
 ## Priorities
 
@@ -34,7 +34,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 - **Restore formatting as a quality gate — Done.** The Prettier baseline is applied to tracked files; `format:check` is part of `bun run verify` and runs in CI.
 - **Protect `main` — Done.** The active `Protect main` ruleset targets `refs/heads/main`, requires pull requests and the four required checks, requires the branch to be up to date, blocks force pushes and deletion, and has no bypass actors.
 - **Pin GitHub Actions — Done.** Checkout v7.0.1, Bun setup v2, artifact upload v7, CodeQL v4.39.1, and Dependency Review v5 use verified full commit SHAs; Dependabot checks action updates weekly.
-- **Security scanning — Partially implemented.** CodeQL, `bun audit` at low severity, the three-day release-age cooldown, dependency review, Bun/GitHub Actions version updates, and `SECURITY.md` are configured. Confirm repository-level Dependabot alerts and security updates; GitHub supports Bun 1.4 and text-based `bun.lock`.
+- **Security scanning — Done.** CodeQL, `bun audit` at low severity, the three-day release-age cooldown, dependency review, Bun/GitHub Actions version updates, `SECURITY.md`, the dependency graph, automatic dependency submission, Dependabot alerts/security updates, malware alerts, private vulnerability reporting, and secret protection are enabled. GitHub supports Bun 1.4 and text-based `bun.lock`.
 - **API body limit — Done.** The 1 KiB limit is enforced against streamed bytes, with a fast `Content-Length` rejection and a regression test for requests without that header.
 
 **P0 exit gate:** a clean checkout installs only from the committed lockfile; formatting, lint, type checks, unit tests, E2E, and production artifact smoke tests pass; protected `main` cannot accept an unverified change.
@@ -74,11 +74,13 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 | Runtime/deployment profiles | Document and test Bun server, static hosting, and supported serverless/edge adapters where APIs permit.        | Each profile has a reproducible build, deployment instructions, environment contract, and smoke test.                                 |
 | Delivery automation         | Add opt-in deploy jobs for selected providers, with separate staging and production environments.              | Deployment requires explicit environment configuration; secrets are not stored in repository files; rollback procedure is documented. |
 | Observability               | Structured logs, configurable log levels, request correlation, metrics, tracing, and error reporting adapters. | Sensitive data is redacted; health and readiness semantics are distinct; telemetry can be disabled or replaced.                       |
-| Runtime resilience          | Graceful shutdown, bounded request handling, health/readiness checks, and documented proxy trust.              | Shutdown drains work safely; readiness reflects dependencies; operational limits are configurable.                                    |
+| Runtime resilience          | Baseline implemented — graceful shutdown, bounded Bun server limits, separate liveness/readiness probes, and proxy guidance. | In-flight HTTP work drains before forced close; readiness reflects lifecycle (and required dependencies when introduced); limits are configurable. |
 | Background work             | Optional queue/job adapter and scheduled task pattern.                                                         | Jobs are idempotent, retry policies are bounded, and no queue service is required by the base starter.                                |
 | Storage                     | Optional object-storage adapter with local development strategy.                                               | File size/type validation and authorization are enforced server-side; provider credentials remain server-only.                        |
 
 **P2 exit gate:** a selected deployment profile can move through staging to production with health checks, telemetry, secrets management, and a documented rollback path.
+
+**Runtime resilience progress (this PR):** The Bun entry point now handles `SIGINT` and `SIGTERM`, flips readiness before stopping, lets Bun drain in-flight HTTP requests, and force-closes remaining connections after a configurable grace period. The server has validated idle-timeout and maximum-body-size settings. `/api/health` remains liveness; `/api/ready` reports lifecycle readiness. Because the default application has no mandatory external services, dependency reachability checks remain an application-specific extension rather than a false-positive readiness claim.
 
 ### P3 — Multi-project starter ecosystem
 
