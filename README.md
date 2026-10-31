@@ -29,7 +29,7 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run lint` | ESLint |
 | `bun run test` | API and contracts unit tests |
 | `bun run test:e2e` | Playwright browser tests |
-| `bun run verify` | Lint, format check, check, unit tests, build |
+| `bun run verify` | Lint, typecheck, unit tests, and production build |
 | `bun run verify:all` | All verification including E2E |
 
 ## Architecture
@@ -71,7 +71,7 @@ Install Chromium once:
 bun run test:e2e:install
 ```
 
-Then run `bun run verify:all`. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
+Run `bun run format:check` to check formatting and `bun run format` to apply Prettier. Then run `bun run verify:all`. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
 
 ## Agent instructions and skills
 
