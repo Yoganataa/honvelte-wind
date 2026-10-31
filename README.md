@@ -66,7 +66,7 @@ Playwright reports and traces are uploaded even when E2E fails.
 - `bun audit --audit-level=moderate` is part of `bun run verify` and blocks known moderate, high, and critical advisories in the resolved dependency tree.
 - Dependabot checks Bun packages and GitHub Actions weekly. Routine minor/patch updates are grouped by toolchain; major upgrades remain separate for compatibility review.
 - GitHub Actions are pinned to full commit SHAs.
-- Keep `bun.lock` committed and use `bun install --frozen-lockfile` in CI so the audit and tests operate on the same reproducible dependency graph.
+- `bun.lock` is committed and every CI install uses `bun install --frozen-lockfile`, so audits and tests operate on the same reproducible dependency graph.
 
 GitHub's dependency graph currently does not list Bun as a supported lockfile ecosystem. The local/CI `bun audit` therefore remains the source of truth for vulnerabilities in Bun's resolved dependency tree; the dependency-review workflow is an additional check, not a replacement.
 
