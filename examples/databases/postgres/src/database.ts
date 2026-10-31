@@ -29,6 +29,15 @@ export function createPostgresDatabase(
     throw new Error('DATABASE_URL must use postgres:// or postgresql://.')
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    const sslMode = url.searchParams.get('sslmode') ?? process.env.PGSSLMODE
+    if (sslMode !== 'verify-full') {
+      throw new Error(
+        'Production PostgreSQL connections require sslmode=verify-full or PGSSLMODE=verify-full.',
+      )
+    }
+  }
+
   return new SQL(url.toString(), {
     max: parsePoolMax(process.env.PG_POOL_MAX),
     connectionTimeout: 10,
