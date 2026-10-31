@@ -38,7 +38,7 @@ export function createApp(options: CreateAppOptions = {}) {
       options.metricsToken.length > 256)
   ) {
     throw new Error(
-      'A metrics bearer token between 32 and 256 characters is required when the metrics endpoint is enabled.',
+      'A metrics bearer token between 32 and 256 characters is required',
     )
   }
 
