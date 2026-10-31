@@ -72,21 +72,27 @@ describe('HTTP metrics', () => {
     expect(metrics.renderPrometheus()).toContain('route="/quoted/\\"route\\""')
   })
 
-  test('bounds the number of exported time series', () => {
+  test('caps total exported Prometheus series including 5xx metrics', () => {
     const metrics = createHttpMetrics()
 
     for (let index = 0; index < 300; index += 1) {
       metrics.recordRequest({
         method: 'GET',
         route: `/route-${index}`,
-        statusCode: 200,
+        statusCode: 500,
         durationSeconds: 0.01,
       })
     }
 
     const output = metrics.renderPrometheus()
+    const exportedSeries = output.split('\n').filter((line) =>
+      /^(http_server_requests_total|http_server_request_errors_total|http_server_request_duration_seconds_(bucket|sum|count))\{/.test(
+        line,
+      ),
+    )
 
-    expect(output.match(/^http_server_requests_total\{/gm)).toHaveLength(250)
+    expect(exportedSeries).toHaveLength(247)
+    expect(exportedSeries.length).toBeLessThanOrEqual(250)
     expect(output).toContain('route="__overflow__"')
   })
 })
