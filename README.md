@@ -197,6 +197,12 @@ NODE_ENV=production HOST=0.0.0.0 PORT=3000 bun run start
 
 For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarded headers to trusted proxy infrastructure.
 
+## Deployment profiles
+
+The default profile runs the Hono API and built Svelte SPA in one Bun process. An optional Cloudflare Workers profile serves the SPA through Workers Static Assets and routes same-origin `/api/*` requests to a Fetch-compatible Hono entry point. See [deployment profiles](examples/deployments/README.md) for build commands, runtime boundaries, environment requirements, and CI validation.
+
+CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not deploy to a live Cloudflare account. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
+
 ## Testing
 
 Run `bun run test` for quick unit-test feedback. Run `bun run test:coverage` to generate line/function text summaries and LCOV reports for API and shared contracts. The reports are written under `coverage/api` and `coverage/contracts`. Bun enforces at least 80% line coverage and 90% function coverage for each measured source file; this is a regression guard, not a substitute for meaningful assertions or integration coverage.
