@@ -50,7 +50,11 @@ function sanitizeValue(
   seen: WeakSet<object>,
   depth: number,
 ): unknown {
-  if (value === null || typeof value === 'boolean' || typeof value === 'number') {
+  if (
+    value === null ||
+    typeof value === 'boolean' ||
+    typeof value === 'number'
+  ) {
     return value
   }
 
@@ -133,7 +137,11 @@ export function createLogger({
   level,
   sink = writeConsoleRecord,
 }: LoggerOptions): Logger {
-  const write = (recordLevel: LogLevel, event: string, fields: LogFields = {}) => {
+  const write = (
+    recordLevel: LogLevel,
+    event: string,
+    fields: LogFields = {},
+  ) => {
     if (levelWeight[recordLevel] < levelWeight[level]) return
 
     const record: LogRecord = {
