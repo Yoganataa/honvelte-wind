@@ -7,6 +7,8 @@ import {
   readinessResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
+import { createHttpMetrics } from './observability/http-metrics'
+import { createLogger, type LogRecord } from './observability/logger'
 import app, { createApp } from './app'
 import { createRuntimeLifecycle } from './runtime/lifecycle'
 
@@ -129,7 +131,7 @@ describe('API app', () => {
 
   test('reports draining readiness separately from liveness', async () => {
     const lifecycle = createRuntimeLifecycle()
-    const runtimeApp = createApp(lifecycle)
+    const runtimeApp = createApp({ lifecycle })
 
     lifecycle.beginShutdown()
 
@@ -145,7 +147,7 @@ describe('API app', () => {
 
   test('rejects new application requests after shutdown begins', async () => {
     const lifecycle = createRuntimeLifecycle()
-    const runtimeApp = createApp(lifecycle)
+    const runtimeApp = createApp({ lifecycle })
     lifecycle.beginShutdown()
 
     const response = await runtimeApp.request(API_BASE_PATH + apiPaths.greet, {
@@ -159,4 +161,85 @@ describe('API app', () => {
       error: { code: 'SERVICE_UNAVAILABLE' },
     })
   })
+  test('replaces invalid inbound request IDs instead of reflecting them', async () => {
+    const response = await app.request(API_BASE_PATH + apiPaths.health, {
+      headers: { 'x-request-id': 'invalid request id' },
+    })
+
+    const requestId = response.headers.get('x-request-id')
+
+    expect(requestId).toBeTruthy()
+    expect(requestId).not.toBe('invalid request id')
+    expect(requestId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    )
+  })
+
+  test('keeps the metrics endpoint disabled unless explicitly enabled', async () => {
+    const response = await app.request(API_BASE_PATH + apiPaths.metrics)
+
+    expect(response.status).toBe(404)
+  })
+
+  test('protects metrics with a bearer token and exports Prometheus text', async () => {
+    const metrics = createHttpMetrics()
+    metrics.recordRequest({
+      method: 'GET',
+      route: '/api/health',
+      statusCode: 200,
+      durationSeconds: 0.02,
+    })
+    const token = 'm'.repeat(32)
+    const metricsApp = createApp({
+      metrics,
+      metricsEnabled: true,
+      metricsToken: token,
+    })
+
+    const denied = await metricsApp.request(API_BASE_PATH + apiPaths.metrics)
+    expect(denied.status).toBe(401)
+    expect(denied.headers.get('www-authenticate')).toBe('Bearer')
+    expect(apiErrorResponseSchema.parse(await denied.json())).toMatchObject({
+      error: { code: 'UNAUTHORIZED' },
+    })
+
+    const accepted = await metricsApp.request(
+      API_BASE_PATH + apiPaths.metrics,
+      { headers: { authorization: `Bearer ${token}` } },
+    )
+
+    expect(accepted.status).toBe(200)
+    expect(accepted.headers.get('cache-control')).toBe('no-store')
+    expect(accepted.headers.get('content-type')).toContain('text/plain')
+    expect(await accepted.text()).toContain('http_server_requests_total')
+  })
+
+  test('logs a route template and request ID without query strings', async () => {
+    const records: LogRecord[] = []
+    const logger = createLogger({
+      level: 'debug',
+      sink: (record) => records.push(record),
+    })
+    const metricsApp = createApp({ logger })
+
+    const response = await metricsApp.request(
+      `${API_BASE_PATH}${apiPaths.health}?access_token=never-log-this`,
+      { headers: { 'x-request-id': 'observability-test-123' } },
+    )
+
+    expect(response.status).toBe(200)
+    const requestLog = records.find(
+      (record) => record.event === 'http.server.request.completed',
+    )
+
+    expect(requestLog).toMatchObject({
+      level: 'info',
+      requestId: 'observability-test-123',
+      method: 'GET',
+      route: '/api/health',
+      statusCode: 200,
+    })
+    expect(JSON.stringify(records)).not.toContain('never-log-this')
+  })
+
 })
