@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
+    "check": "tsc --noEmit -p tsconfig.json",
     "test": "bun test"
   },
   "dependencies": {
