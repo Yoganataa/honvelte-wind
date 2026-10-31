@@ -4,7 +4,6 @@ import {
   apiPaths,
   greetingResponseSchema,
   healthResponseSchema,
-  healthResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
 import app from './app'
