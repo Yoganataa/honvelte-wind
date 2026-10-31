@@ -20,20 +20,20 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command                  | Description                                                             |
-| ------------------------ | ----------------------------------------------------------------------- |
-| `bun run dev`            | Run API and Vite concurrently                                           |
-| `bun run build`          | Build contracts and SPA                                                 |
-| `bun run start`          | Serve API + static SPA with Bun                                         |
-| `bun run check`          | TypeScript and Svelte diagnostics                                       |
-| `bun run lint`           | ESLint                                                                  |
-| `bun run format:check`   | Prettier formatting check                                               |
-| `bun run audit`          | Audit locked dependencies for known advisories                          |
-| `bun run test`           | Fast API and contracts unit tests                                       |
-| `bun run test:coverage`  | Run API and contracts tests with text and LCOV coverage reports         |
-| `bun run test:e2e`       | Playwright browser tests                                                |
-| `bun run verify`         | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`     | All verification including E2E                                          |
+| Command                 | Description                                                             |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `bun run dev`           | Run API and Vite concurrently                                           |
+| `bun run build`         | Build contracts and SPA                                                 |
+| `bun run start`         | Serve API + static SPA with Bun                                         |
+| `bun run check`         | TypeScript and Svelte diagnostics                                       |
+| `bun run lint`          | ESLint                                                                  |
+| `bun run format:check`  | Prettier formatting check                                               |
+| `bun run audit`         | Audit locked dependencies for known advisories                          |
+| `bun run test`          | Fast API and contracts unit tests                                       |
+| `bun run test:coverage` | Run API and contracts tests with text and LCOV coverage reports         |
+| `bun run test:e2e`      | Playwright browser tests                                                |
+| `bun run verify`        | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`    | All verification including E2E                                          |
 
 ## Architecture
 
