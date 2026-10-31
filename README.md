@@ -29,11 +29,11 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run lint`          | ESLint                                                                  |
 | `bun run format:check`  | Prettier formatting check                                               |
 | `bun run audit`         | Audit locked dependencies for known advisories                          |
-| `bun run test`           | Fast API and contracts unit tests                                       |
+| `bun run test`          | Fast API and contracts unit tests                                       |
 | `bun run test:coverage` | Run API and contracts tests with text and LCOV coverage reports         |
-| `bun run test:e2e`       | Playwright browser tests                                                |
-| `bun run verify`         | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`     | All verification including E2E                                          |
+| `bun run test:e2e`      | Playwright browser tests                                                |
+| `bun run verify`        | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`    | All verification including E2E                                          |
 
 ## Architecture
 
