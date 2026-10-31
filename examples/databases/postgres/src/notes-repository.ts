@@ -41,7 +41,9 @@ export function createNotesRepository(database: SQL) {
 
     async list(limit = 50): Promise<Note[]> {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-        throw new RangeError('Note list limit must be an integer between 1 and 100.')
+        throw new RangeError(
+          'Note list limit must be an integer between 1 and 100.',
+        )
       }
 
       const rows = await database.unsafe(
