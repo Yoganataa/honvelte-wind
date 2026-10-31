@@ -63,7 +63,8 @@ Playwright reports and traces are uploaded even when E2E fails.
 
 - Bun is pinned to 1.4.4 so local development and CI use the same runtime.
 - `bunfig.toml` enforces a three-day npm release-age cooldown. This reduces exposure to newly published malicious or compromised package versions while allowing routine updates after the cooldown.
-- `bun audit --audit-level=moderate` is part of `bun run verify` and blocks known moderate, high, and critical advisories in the resolved dependency tree.
+- The upstream `deepmerge@4.3.1` has no official patched release for GHSA-gcqx-75wg-m249. The Svelte Vite plugin uses it only in its build/configuration toolchain, so the repository temporarily overrides it with the reviewed `@oss-cve-patches/deepmerge@4.3.2` fork, which rejects `__proto__` keys and includes regression tests. Remove this override when the Svelte plugin ships its own replacement or the upstream package publishes a maintained fix; review the fork before every refresh.
+- `bun audit --audit-level=low` is part of `bun run verify` and blocks all known low, moderate, high, and critical advisories in the resolved dependency tree.
 - Dependabot checks Bun packages and GitHub Actions weekly. Routine minor/patch updates are grouped by toolchain; major upgrades remain separate for compatibility review.
 - GitHub Actions are pinned to full commit SHAs.
 - `bun.lock` is committed and every CI install uses `bun install --frozen-lockfile`, so audits and tests operate on the same reproducible dependency graph.
