@@ -27,19 +27,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Format Markdown for baseline inspection
-        run: bun x prettier --write README.md roadmap.md
-
-      - name: Upload formatted Markdown baseline
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: prettier-markdown-baseline-${{ github.run_id }}
-          path: |
-            README.md
-            roadmap.md
-          if-no-files-found: error
-          retention-days: 1
-
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
