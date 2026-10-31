@@ -3,7 +3,10 @@ import { Hono } from 'hono'
 import { secureHeaders } from 'hono/secure-headers'
 import { handleApiError } from './http/error-handler'
 import { requestId } from './middleware/request-id'
-import { createRuntimeLifecycle, type RuntimeLifecycle } from './runtime/lifecycle'
+import {
+  createRuntimeLifecycle,
+  type RuntimeLifecycle,
+} from './runtime/lifecycle'
 import greetingRoutes from './routes/greeting'
 import { createHealthRoutes } from './routes/health'
 
