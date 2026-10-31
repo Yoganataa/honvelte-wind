@@ -126,15 +126,10 @@ export function createHttpMetrics(): HttpMetrics {
       if (statusCode >= 500) current.errorCount += 1
       current.durationSumSeconds += durationSeconds
 
-      for (let index = 0; index < DURATION_BUCKETS_SECONDS.length; index += 1) {
-        const bucket = DURATION_BUCKETS_SECONDS[index]
+      for (const [index, bucket] of DURATION_BUCKETS_SECONDS.entries()) {
         const bucketCount = current.bucketCounts[index]
 
-        if (
-          bucket !== undefined &&
-          bucketCount !== undefined &&
-          durationSeconds <= bucket
-        ) {
+        if (bucketCount !== undefined && durationSeconds <= bucket) {
           current.bucketCounts[index] = bucketCount + 1
         }
       }
