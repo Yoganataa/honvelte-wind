@@ -20,19 +20,20 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command                | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `bun run dev`          | Run API and Vite concurrently                           |
-| `bun run build`        | Build contracts and SPA                                 |
-| `bun run start`        | Serve API + static SPA with Bun                         |
-| `bun run check`        | TypeScript and Svelte diagnostics                       |
-| `bun run lint`         | ESLint                                                  |
-| `bun run format:check` | Prettier formatting check                               |
-| `bun run audit`        | Audit locked dependencies for known advisories          |
-| `bun run test`         | API and contracts unit tests                            |
-| `bun run test:e2e`     | Playwright browser tests                                |
-| `bun run verify`       | Prettier, audit, lint, typecheck, unit tests, and build |
-| `bun run verify:all`   | All verification including E2E                          |
+| Command                 | Description                                                             |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `bun run dev`           | Run API and Vite concurrently                                           |
+| `bun run build`         | Build contracts and SPA                                                 |
+| `bun run start`         | Serve API + static SPA with Bun                                         |
+| `bun run check`         | TypeScript and Svelte diagnostics                                       |
+| `bun run lint`          | ESLint                                                                  |
+| `bun run format:check`  | Prettier formatting check                                               |
+| `bun run audit`         | Audit locked dependencies for known advisories                          |
+| `bun run test`          | Fast API and contracts unit tests                                       |
+| `bun run test:coverage` | Run API and contracts tests with text and LCOV coverage reports         |
+| `bun run test:e2e`      | Playwright browser tests                                                |
+| `bun run verify`        | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`    | All verification including E2E                                          |
 
 ## Architecture
 
@@ -50,11 +51,13 @@ See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criter
 
 GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
 
-1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
+1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests with line/function coverage, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
 4. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
 5. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+
+Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
@@ -83,17 +86,19 @@ For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarde
 
 ## Testing
 
+Run `bun run test` for quick unit-test feedback. Run `bun run test:coverage` to generate line/function text summaries and LCOV reports for API and shared contracts. The reports are written under `coverage/api` and `coverage/contracts`. Bun enforces at least 80% line coverage and 90% function coverage for each measured source file; this is a regression guard, not a substitute for meaningful assertions or integration coverage.
+
 Install Chromium once:
 
 ```bash
 bun run test:e2e:install
 ```
 
-Run `bun run format` to apply Prettier when changing formatting. `bun run verify` now includes `format:check`; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
+Run `bun run format` to apply Prettier when changing formatting. `bun run verify` includes `format:check`, coverage reporting, audit, lint, typecheck, unit tests, and build; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
 
 ## Agent instructions and skills
 
-Read `AGENTS.md` before making changes. Skills under `.agents/skills` are the canonical sources:
+Read `AGENTS.md` before making changes. Skills under `.agents/skills/` are the canonical sources:
 
 - `project-development`: implementation and architecture rules.
 - `testing`: unit, integration, contract, and regression tests.

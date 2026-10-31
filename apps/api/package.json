@@ -6,7 +6,8 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "check": "tsc --noEmit -p tsconfig.json",
-    "test": "bun test"
+    "test": "bun test",
+    "test:coverage": "bun --config=../../bunfig.toml test --coverage --coverage-dir=../../coverage/api"
   },
   "dependencies": {
     "@honvelte/contracts": "workspace:*",

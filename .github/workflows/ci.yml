@@ -27,8 +27,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Lint, typecheck, dependency audit, unit tests, and build
+      - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
+
+      - name: Upload unit test coverage
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-test-coverage-${{ github.run_id }}
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
 
   e2e:
     name: Browser E2E

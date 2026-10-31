@@ -4,3 +4,8 @@ minimumReleaseAge = 259200
 
 [run]
 shell = "system"
+
+[test]
+coverageReporter = ["text", "lcov"]
+coverageSkipTestFiles = true
+coverageThreshold = { lines = 0.8, functions = 0.9 }
