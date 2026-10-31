@@ -130,12 +130,28 @@ export function createRateLimit(
     }
 
     const currentTime = now()
-    const decision = await options.store.consume({
-      key: scope + ':' + principalKey,
-      now: currentTime,
-      limit: options.limit,
-      windowMs: options.windowMs,
-    })
+    let decision: RateLimitDecision
+    try {
+      decision = await options.store.consume({
+        key: JSON.stringify([scope, principalKey]),
+        now: currentTime,
+        limit: options.limit,
+        windowMs: options.windowMs,
+      })
+    } catch (error) {
+      if (!(error instanceof RateLimitCapacityError)) throw error
+
+      context.header('Retry-After', '1')
+      return context.json(
+        {
+          error: {
+            code: 'RATE_LIMIT_UNAVAILABLE',
+            message: 'Rate-limit capacity is temporarily unavailable.',
+          },
+        },
+        503,
+      )
+    }
 
     const resetSeconds = Math.max(
       0,
