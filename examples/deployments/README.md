@@ -51,7 +51,7 @@ After authenticating with Wrangler and selecting the intended Cloudflare account
 npx --yes wrangler@4.156.0 deploy
 ```
 
-The Wrangler version is pinned in CI so configuration and bundling checks are reproducible. The profile uses the Workers `nodejs_compat` compatibility flag because the shared API module graph includes Node's `timingSafeEqual` implementation for the optional metrics route. The metrics route remains disabled by default. Do not enable process-local Prometheus metrics in a multi-isolate Worker deployment and assume they represent global traffic.
+The Wrangler version is pinned in CI so configuration and bundling checks are reproducible. The profile uses a compatibility date of `2026-11-01`. Workers automatically provide the supported Node.js built-ins for compatibility dates on or after `2026-08-04`; this covers the shared API module graph's `node:crypto` use for the optional metrics route. No explicit compatibility flag is required. The metrics route remains disabled by default. Do not enable process-local Prometheus metrics in a multi-isolate Worker deployment and assume they represent global traffic.
 
 ### Worker runtime boundaries
 
