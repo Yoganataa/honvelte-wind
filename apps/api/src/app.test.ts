@@ -127,9 +127,7 @@ describe('API app', () => {
     })
   })
 
-  test(
-    'marks readiness false during shutdown but keeps liveness available',
-    async () => {
+  test('reports draining readiness separately from liveness', async () => {
     const lifecycle = createRuntimeLifecycle()
     const runtimeApp = createApp(lifecycle)
 
@@ -147,8 +145,7 @@ describe('API app', () => {
       readinessResponseSchema.parse(await readiness.json()).status,
     ).toBe('not_ready')
     expect(liveness.status).toBe(200)
-    },
-  )
+  })
 
   test('rejects new application requests after shutdown begins', async () => {
     const lifecycle = createRuntimeLifecycle()
