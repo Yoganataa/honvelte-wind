@@ -28,15 +28,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Upload generated lockfile for temporary refresh
-        if: github.event_name == 'pull_request' && github.head_ref == 'chore/secure-dependency-refresh'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: bun-lock-refresh-${{ github.run_id }}
-          path: bun.lock
-          if-no-files-found: error
-          retention-days: 1
-
       - name: Lint, typecheck, dependency audit, unit tests, and build
         run: bun run verify
 
