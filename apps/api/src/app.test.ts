@@ -133,12 +133,8 @@ describe('API app', () => {
 
     lifecycle.beginShutdown()
 
-    const readiness = await runtimeApp.request(
-      API_BASE_PATH + apiPaths.ready,
-    )
-    const liveness = await runtimeApp.request(
-      API_BASE_PATH + apiPaths.health,
-    )
+    const readiness = await runtimeApp.request(API_BASE_PATH + apiPaths.ready)
+    const liveness = await runtimeApp.request(API_BASE_PATH + apiPaths.health)
 
     expect(readiness.status).toBe(503)
     expect(
