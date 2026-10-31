@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Temporarily inspect Prettier output
+        run: |
+          bunx prettier --write apps/web/src/features/greeting/GreetingPanel.svelte apps/web/src/lib/components/ui/TextField.svelte
+          git diff -- apps/web/src/features/greeting/GreetingPanel.svelte apps/web/src/lib/components/ui/TextField.svelte
+
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
