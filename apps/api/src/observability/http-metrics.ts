@@ -33,7 +33,9 @@ const HTTP_METHODS = new Set([
   'QUERY',
 ])
 
-const DURATION_BUCKETS_SECONDS = [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10] as const
+const DURATION_BUCKETS_SECONDS = [
+  0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10,
+] as const
 
 const MAX_SERIES = 250
 const OVERFLOW_SERIES_KEY = '_OTHER\u0000__overflow__\u00000'
