@@ -59,7 +59,10 @@ afterEach(() => {
 describe('SessionService', () => {
   test('stores only a verifier hash and resolves an opaque cookie token', async () => {
     const store = new MemorySessionStore()
-    const sessions = new SessionService(store, { ttlMs: 60_000, now: () => 1_000 })
+    const sessions = new SessionService(store, {
+      ttlMs: 60_000,
+      now: () => 1_000,
+    })
 
     const issued = await sessions.create('user-123')
     const [sessionId, secret] = issued.cookieValue.split('.')
@@ -189,12 +192,10 @@ describe('Hono authentication and authorization middleware', () => {
       cookie: SESSION_COOKIE_NAME + '=' + issued.cookieValue,
     }
 
-    expect(
-      (await app.request('/private/reports', { headers })).status,
-    ).toBe(200)
-    expect(
-      (await app.request('/private/admin', { headers })).status,
-    ).toBe(403)
+    expect((await app.request('/private/reports', { headers })).status).toBe(
+      200,
+    )
+    expect((await app.request('/private/admin', { headers })).status).toBe(403)
   })
 
   test('requires an exact Origin and matching synchronizer token on mutations', async () => {
