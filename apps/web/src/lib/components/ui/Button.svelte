@@ -8,8 +8,12 @@
     busy?: boolean
   }
 
-  let { children, type = 'button', disabled = false, busy = false }: Props =
-    $props()
+  let {
+    children,
+    type = 'button',
+    disabled = false,
+    busy = false,
+  }: Props = $props()
 </script>
 
 <button
