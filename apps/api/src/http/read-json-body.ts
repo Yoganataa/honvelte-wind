@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception'
 
-export const MAX_REQUEST_BODY_BYTES = 1024
+const MAX_REQUEST_BODY_BYTES = 1024
 
 export async function readJsonBody(request: Request): Promise<unknown> {
   const contentLength = request.headers.get('content-length')
