@@ -131,6 +131,33 @@ Playwright reports and traces are uploaded even when E2E fails.
 
 GitHub Dependabot supports Bun 1.4 and the current text-based `bun.lock` format; the legacy binary `bun.lockb` format is not supported. This repository pins Bun 1.4.4 and commits `bun.lock`, so the configured `bun` ecosystem is supported for version updates and dependency-graph analysis. Keep `bun audit` in CI as an independent check, not as a replacement for GitHub alerts. See [supported ecosystems](https://docs.github.com/en/code-security/reference/supply-chain-security/supported-ecosystems-and-repositories) and the [Bun 1.4 support announcement](https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4/).
 
+Repository security settings are enabled: dependency graph, automatic dependency submission, Dependabot alerts, malware alerts, Dependabot security updates, private vulnerability reporting, and secret protection. Dependabot version updates remain separately configured through `.github/dependabot.yml`.
+
+## Runtime lifecycle and limits
+
+The Bun server exposes separate process liveness and traffic readiness probes:
+
+- `GET /api/health` is a liveness endpoint. It returns `200` while the application process can serve the probe.
+- `GET /api/ready` returns `200` while the server is accepting application traffic and `503` after shutdown begins.
+
+The base starter has no mandatory external runtime dependencies. Readiness therefore reports the server lifecycle only; it does not claim that optional database, identity-provider, or other example integrations are reachable. Add explicit dependency checks when an application makes an external service mandatory.
+
+The Bun HTTP server limits are validated at startup and configurable through environment variables:
+
+| Variable | Default | Allowed range | Purpose |
+| --- | ---: | ---: | --- |
+| `SERVER_IDLE_TIMEOUT_SECONDS` | `30` | 1–255 | Connection inactivity timeout in seconds. |
+| `SERVER_MAX_REQUEST_BODY_BYTES` | `1048576` | 1 KiB–10 MiB | Maximum body size accepted by Bun. |
+| `SHUTDOWN_TIMEOUT_MS` | `15000` | 100–120000 | Grace period before active connections are force-closed. |
+
+The global Bun body limit is an outer transport limit. The existing greeting JSON parser keeps its stricter 1 KiB application-level limit. Increase either limit only for a concrete endpoint requirement, and continue streaming or bounding large uploads instead of buffering arbitrary payloads in memory.
+
+On `SIGINT` or `SIGTERM`, the server marks readiness false, rejects new application requests with `503 SERVICE_UNAVAILABLE`, and calls Bun's `server.stop()` to stop accepting connections while in-flight HTTP work finishes. If the configured grace period expires, it calls `server.stop(true)` to close remaining active connections. Requests still running at that point can be interrupted; keep the deployment platform's termination grace period longer than `SHUTDOWN_TIMEOUT_MS` plus a small process-exit margin.
+
+Bun's idle timeout also applies to quiet periods during streaming responses. The starter does not currently expose SSE or WebSocket routes; when adding long-lived streams, configure their transport timeout deliberately rather than globally disabling connection timeouts. See the [Bun HTTP server lifecycle and timeout documentation](https://bun.com/docs/runtime/http/server).
+
+For reverse-proxy deployments, terminate TLS at the proxy and trust forwarded headers only from ingress infrastructure that strips client-supplied forwarding headers and writes canonical values. Keep proxy connection, body, and upstream timeouts consistent with the application limits.
+
 ## Production
 
 ```bash
