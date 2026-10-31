@@ -15,6 +15,14 @@ describe('API app', () => {
     expect(body.status).toBe('ok')
   })
 
+  test('preserves a caller-provided request ID', async () => {
+    const response = await app.request('/api/health', {
+      headers: { 'x-request-id': 'request-test-123' },
+    })
+
+    expect(response.headers.get('x-request-id')).toBe('request-test-123')
+  })
+
   test('returns a greeting matching the shared response contract', async () => {
     const response = await app.request('/api/greet', {
       method: 'POST',
@@ -38,6 +46,18 @@ describe('API app', () => {
     expect(response.status).toBe(400)
     expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'VALIDATION_ERROR' },
+    })
+  })
+
+  test('rejects requests without a body', async () => {
+    const response = await app.request('/api/greet', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+    })
+
+    expect(response.status).toBe(400)
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
+      error: { code: 'BAD_REQUEST' },
     })
   })
 
