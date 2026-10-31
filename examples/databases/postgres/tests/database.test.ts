@@ -1,5 +1,8 @@
 import { expect, test } from 'bun:test'
-import { createPostgresDatabase } from '../src/database'
+import {
+  assertProductionPostgresTls,
+  createPostgresDatabase,
+} from '../src/database'
 
 test('requires a PostgreSQL connection URL', () => {
   expect(() => createPostgresDatabase('')).toThrow('DATABASE_URL is required')
@@ -11,44 +14,23 @@ test('rejects non-PostgreSQL connection URLs', () => {
   ).toThrow('DATABASE_URL must use postgres:// or postgresql://')
 })
 
-test('requires verified TLS for production connections', () => {
-  const previousNodeEnv = process.env.NODE_ENV
-  const previousTlsOverride = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-  process.env.NODE_ENV = 'production'
+test('requires verified TLS and rejects the global TLS bypass', () => {
+  const urlWithoutSsl = new URL(
+    'postgres://user:password@db.example.com/app',
+  )
+  const urlWithVerifiedSsl = new URL(
+    'postgres://user:password@db.example.com/app?sslmode=verify-full',
+  )
 
-  try {
-    expect(() =>
-      createPostgresDatabase('postgres://user:password@db.example.com/app'),
-    ).toThrow('require sslmode=verify-full')
+  expect(() =>
+    assertProductionPostgresTls(urlWithoutSsl, undefined, undefined),
+  ).toThrow('require sslmode=verify-full')
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-    expect(() =>
-      createPostgresDatabase(
-        'postgres://user:password@db.example.com/app?sslmode=verify-full',
-      ),
-    ).toThrow('must not disable TLS certificate verification')
+  expect(() =>
+    assertProductionPostgresTls(urlWithVerifiedSsl, '0', undefined),
+  ).toThrow('must not disable TLS certificate verification')
 
-    if (previousTlsOverride === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousTlsOverride
-    }
-
-    const database = createPostgresDatabase(
-      'postgres://user:password@db.example.com/app?sslmode=verify-full',
-    )
-    return database.close()
-  } finally {
-    if (previousNodeEnv === undefined) {
-      delete process.env.NODE_ENV
-    } else {
-      process.env.NODE_ENV = previousNodeEnv
-    }
-
-    if (previousTlsOverride === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = previousTlsOverride
-    }
-  }
+  expect(() =>
+    assertProductionPostgresTls(urlWithoutSsl, undefined, 'verify-full'),
+  ).not.toThrow()
 })
