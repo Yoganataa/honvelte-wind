@@ -136,6 +136,20 @@ describe('createRateLimit', () => {
     expect(second.headers.get('retry-after')).toBe('1')
   })
 
+  test('rejects unsafe structured-field policy names', () => {
+    const store = new InMemoryFixedWindowStore()
+
+    expect(() =>
+      createRateLimit({
+        limit: 5,
+        windowMs: 1_000,
+        store,
+        scope: 'invalid"scope',
+        key: () => 'user-1',
+      }),
+    ).toThrow('safe ASCII token characters')
+  })
+
   test('rejects invalid options and an empty principal key', async () => {
     const store = new InMemoryFixedWindowStore()
 
