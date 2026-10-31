@@ -3,19 +3,22 @@ import { apiPaths } from '@honvelte/contracts'
 import { Hono } from 'hono'
 import type { HttpMetrics } from '../observability/http-metrics'
 
-function isAuthorized(authorization: string | undefined, expectedToken: string) {
+function isAuthorized(
+  authorization: string | undefined,
+  expectedToken: string,
+) {
   if (!authorization?.startsWith('Bearer ')) return false
 
   const supplied = Buffer.from(authorization.slice(7))
   const expected = Buffer.from(expectedToken)
 
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  return (
+    supplied.length === expected.length &&
+    timingSafeEqual(supplied, expected)
+  )
 }
 
-export function createMetricsRoutes(
-  metrics: HttpMetrics,
-  token: string,
-) {
+export function createMetricsRoutes(metrics: HttpMetrics, token: string) {
   const routes = new Hono()
 
   routes.get(apiPaths.metrics, (c) => {
