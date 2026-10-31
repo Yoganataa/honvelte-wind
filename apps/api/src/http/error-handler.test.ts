@@ -2,12 +2,18 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { describe, expect, test } from 'bun:test'
 import { apiErrorResponseSchema } from '@honvelte/contracts'
-import { handleApiError } from './error-handler'
+import { createApiErrorHandler } from './error-handler'
+import { createLogger, type LogRecord } from '../observability/logger'
 
 describe('API error handler', () => {
-  test('maps a gateway timeout to the shared timeout error code', async () => {
+  test('maps gateway timeouts to the shared timeout error code', async () => {
+    const records: LogRecord[] = []
+    const logger = createLogger({
+      level: 'debug',
+      sink: (record) => records.push(record),
+    })
     const app = new Hono()
-    app.onError(handleApiError)
+    app.onError(createApiErrorHandler(logger))
     app.get('/timeout', () => {
       throw new HTTPException(504, {
         message: 'Request deadline exceeded.',
@@ -19,13 +25,24 @@ describe('API error handler', () => {
 
     expect(response.status).toBe(504)
     expect(body.error.code).toBe('GATEWAY_TIMEOUT')
+    expect(records).toHaveLength(0)
   })
 
-  test('returns a sanitized 500 response for unexpected errors', async () => {
+  test('returns a sanitized 500 and logs only safe error metadata', async () => {
+    const records: LogRecord[] = []
+    const logger = createLogger({
+      level: 'debug',
+      sink: (record) => records.push(record),
+    })
     const app = new Hono()
-    app.onError(handleApiError)
+
+    app.use('*', async (c, next) => {
+      c.header('x-request-id', 'error-test-123')
+      await next()
+    })
+    app.onError(createApiErrorHandler(logger))
     app.get('/failure', () => {
-      throw new Error('internal implementation detail')
+      throw new Error('internal password=must-not-be-logged')
     })
 
     const response = await app.request('/failure')
@@ -38,5 +55,12 @@ describe('API error handler', () => {
         message: 'Internal server error',
       },
     })
+    expect(records).toHaveLength(1)
+    expect(records[0]).toMatchObject({
+      event: 'http.server.unhandled_error',
+      requestId: 'error-test-123',
+      errorType: 'Error',
+    })
+    expect(JSON.stringify(records)).not.toContain('must-not-be-logged')
   })
 })
