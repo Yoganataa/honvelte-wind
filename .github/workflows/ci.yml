@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Temporarily inspect shared API client formatting
+        run: |
+          bunx prettier --write apps/web/src/lib/api/client.ts apps/web/src/lib/api/client.test.ts README.md roadmap.md
+          git diff -- apps/web/src/lib/api/client.ts apps/web/src/lib/api/client.test.ts README.md roadmap.md
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
