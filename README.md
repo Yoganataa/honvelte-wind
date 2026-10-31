@@ -38,10 +38,12 @@ API health: http://127.0.0.1:3000/api/health
 ## Architecture
 
 - `apps/web`: Svelte 5 SPA, Vite, Tailwind CSS 4.
-- `apps/api`: Hono app and Bun production entry point.
+- `apps/api`: Hono composition root, feature routes, request middleware, HTTP safety/error utilities, and Bun production entry point.
 - `packages/contracts`: Zod schemas and shared API contracts.
 - `.agents/skills`: canonical Agent Skills source.
 - `AGENTS.md`: repository-wide instructions for coding agents.
+
+The API composition root is `apps/api/src/app.ts`. Feature endpoints live in `apps/api/src/routes`, cross-cutting request middleware in `apps/api/src/middleware`, and reusable HTTP parsing/error handling in `apps/api/src/http`. Keep route handlers focused on HTTP orchestration. Introduce feature services/use-cases when real business rules need to be tested independently; do not add empty service layers for trivial examples.
 
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
@@ -115,7 +117,7 @@ Run `bun run format` to apply Prettier when changing formatting. `bun run verify
 Read `AGENTS.md` before making changes. Skills under `.agents/skills/` are the canonical sources:
 
 - `project-development`: implementation and architecture rules.
-- `testing`: unit, integration, contract, and regression tests.
+- `testing`: unit, integration, contract, and E2E.
 - `playwright-e2e`: browser automation and E2E workflow.
 
 Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, generated skill aliases can be refreshed with `bun run agents:sync:claude`.
