@@ -2,7 +2,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import type { SQL } from 'bun'
 
-const MIGRATION_PATTERN = /^\d{4}_[a-z0-9_]+\.sql$'
+const MIGRATION_PATTERN = /^\d{4}_[a-z0-9_]+\.sql$/
 
 export async function migratePostgres(
   database: SQL,
