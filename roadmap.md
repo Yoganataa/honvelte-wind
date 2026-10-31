@@ -80,7 +80,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 **P2 exit gate:** a selected deployment profile can move through staging to production with health checks, telemetry, secrets management, and a documented rollback path.
 
-**Runtime resilience progress (this PR):** The Bun entry point now handles `SIGINT` and `SIGTERM`, flips readiness before stopping, lets Bun drain in-flight HTTP requests, and force-closes remaining connections after a configurable grace period. The server has validated idle-timeout and maximum-body-size settings. `/api/health` remains liveness; `/api/ready` reports lifecycle readiness. Because the default application has no mandatory external services, dependency reachability checks remain an application-specific extension rather than a false-positive readiness claim.
+**Runtime resilience progress (this PR):** The Bun entry point now handles `SIGINT` and `SIGTERM`, flips readiness first, waits a configurable propagation delay, lets Bun drain in-flight HTTP requests, and force-closes remaining connections after a configurable grace period. The server has validated idle-timeout and maximum-body-size settings. `/api/health` remains liveness; `/api/ready` reports lifecycle readiness. Because the default application has no mandatory external services, dependency reachability checks remain an application-specific extension rather than a false-positive readiness claim.
 
 ### P3 — Multi-project starter ecosystem
 
