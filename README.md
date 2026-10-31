@@ -129,7 +129,7 @@ Playwright reports and traces are uploaded even when E2E fails.
 - GitHub Actions are pinned to full commit SHAs.
 - `bun.lock` is committed and every CI install uses `bun install --frozen-lockfile`, so audits and tests operate on the same reproducible dependency graph.
 
-GitHub's dependency graph currently does not list Bun as a supported lockfile ecosystem. The local/CI `bun audit` therefore remains the source of truth for vulnerabilities in Bun's resolved dependency tree; the dependency-review workflow is an additional check, not a replacement.
+GitHub Dependabot supports Bun 1.4 and the current text-based `bun.lock` format; the legacy binary `bun.lockb` format is not supported. This repository pins Bun 1.4.4 and commits `bun.lock`, so the configured `bun` ecosystem is supported for version updates and dependency-graph analysis. Keep `bun audit` in CI as an independent check, not as a replacement for GitHub alerts. See [supported ecosystems](https://docs.github.com/en/code-security/reference/supply-chain-security/supported-ecosystems-and-repositories) and the [Bun 1.4 support announcement](https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4/).
 
 ## Production
 
@@ -176,10 +176,6 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 
 ## Repository governance
 
-The repository has not yet been configured with a ruleset for `main`. Before treating it as protected, create a branch ruleset targeting `main` with these requirements:
+The active repository ruleset **Protect main** targets `refs/heads/main`. It requires pull requests and the status checks `Quality gates`, `Browser E2E`, `Analyze JavaScript and TypeScript`, and `Review dependency changes`; it also requires the branch to be up to date and blocks force pushes and deletion. Its bypass list is empty, and the required approval count is zero to support the current single-maintainer workflow. Review the approval requirement if the maintainer team grows.
 
-- Require pull requests before merging.
-- Require the status checks `Quality gates`, `Browser E2E`, `Analyze JavaScript and TypeScript`, and `Review dependency changes`.
-- Block force pushes and branch deletion; do not configure a bypass for routine contributors.
-
-Enable Dependabot alerts and Dependabot security updates under **Settings → Security and quality → Code security and analysis**. These are repository security settings, separate from Dependabot version updates in `.github/dependabot.yml`.
+Repository-level Dependabot alerts and Dependabot security updates are separate from version updates configured in `.github/dependabot.yml`. Confirm both under **Settings → Security and quality → Advanced Security**. The repository's Bun and GitHub Actions version-update schedules are already configured in `.github/dependabot.yml`.
