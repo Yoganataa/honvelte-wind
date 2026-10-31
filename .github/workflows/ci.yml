@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Temporarily inspect remaining auth formatting
+        run: |
+          bunx prettier --write examples/auth/tests/auth.test.ts README.md roadmap.md
+          git diff -- examples/auth/tests/auth.test.ts README.md roadmap.md
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
