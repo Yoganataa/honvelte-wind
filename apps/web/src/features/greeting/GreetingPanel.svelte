@@ -59,7 +59,7 @@
       id="name"
       label="Your name"
       bind:value={name}
-      maxlength={80}
+      maxLength={80}
       autocomplete="name"
       placeholder="Enter your name"
       error={validationError}
