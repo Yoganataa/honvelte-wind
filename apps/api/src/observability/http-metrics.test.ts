@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { createHttpMetrics } from './http-metrics'
 
 describe('HTTP metrics', () => {
-  test('tracks active requests, request counts, errors, and duration buckets', () => {
+  test('tracks request counts, errors, active requests, and durations', () => {
     const metrics = createHttpMetrics()
 
     metrics.beginRequest()
@@ -44,7 +44,7 @@ describe('HTTP metrics', () => {
     )
   })
 
-  test('normalizes unknown methods, invalid routes, and invalid status values', () => {
+  test('normalizes unrecognized metric labels and status values', () => {
     const metrics = createHttpMetrics()
     metrics.recordRequest({
       method: 'CUSTOM-CLIENT-METHOD',
