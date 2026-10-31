@@ -88,6 +88,6 @@ describe('structured logger', () => {
       event: 'http.server.started',
       port: 3000,
     })
-    expect(records[0].timestamp).toBeTruthy()
+    expect(records[0]?.timestamp).toBeTruthy()
   })
 })
