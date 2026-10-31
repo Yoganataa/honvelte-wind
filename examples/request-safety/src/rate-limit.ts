@@ -97,6 +97,14 @@ export type RateLimitOptions = {
   now?: () => number
 }
 
+function quoteStructuredFieldString(value: string): string {
+  if (!/^[\\x20-\\x7e]*$/.test(value)) {
+    throw new TypeError('Rate-limit scope must contain printable ASCII only.')
+  }
+
+  return '"' + value.replace(/(["\\\\])/g, '\\\\$1') + '"'
+}
+
 function validateOptions(options: RateLimitOptions): void {
   if (!Number.isSafeInteger(options.limit) || options.limit < 1) {
     throw new RangeError('Rate-limit limit must be a positive safe integer.')
@@ -105,15 +113,19 @@ function validateOptions(options: RateLimitOptions): void {
   if (
     !Number.isSafeInteger(options.windowMs) ||
     options.windowMs < 1_000 ||
-    options.windowMs > 86_400_000
+    options.windowMs > 86_400_000 ||
+    options.windowMs % 1_000 !== 0
   ) {
     throw new RangeError(
-      'Rate-limit window must be between 1 second and 24 hours.',
+      'Rate-limit window must be a whole number of seconds between 1 second and 24 hours.',
     )
   }
 
-  if (options.scope !== undefined && !options.scope.trim()) {
-    throw new TypeError('Rate-limit scope must not be empty.')
+  if (options.scope !== undefined) {
+    if (!options.scope.trim()) {
+      throw new TypeError('Rate-limit scope must not be empty.')
+    }
+    quoteStructuredFieldString(options.scope)
   }
 }
 
@@ -158,9 +170,17 @@ export function createRateLimit(options: RateLimitOptions): MiddlewareHandler {
       Math.ceil((decision.resetAt - currentTime) / 1_000),
     )
 
-    context.header('RateLimit-Limit', String(decision.limit))
-    context.header('RateLimit-Remaining', String(decision.remaining))
-    context.header('RateLimit-Reset', String(resetSeconds))
+    const policyName = quoteStructuredFieldString(scope)
+    const windowSeconds = options.windowMs / 1_000
+
+    context.header(
+      'RateLimit-Policy',
+      policyName + ';q=' + decision.limit + ';w=' + windowSeconds,
+    )
+    context.header(
+      'RateLimit',
+      policyName + ';r=' + decision.remaining + ';t=' + resetSeconds,
+    )
 
     if (!decision.allowed) {
       context.header('Retry-After', String(Math.max(1, resetSeconds)))
