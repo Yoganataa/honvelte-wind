@@ -69,14 +69,12 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 ### P2 — Production operations and deployment
 
-| Workstream                  | Scope                                                                                                          | Acceptance criteria                                                                                                                   |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Runtime/deployment profiles | Document and test Bun server, static hosting, and supported serverless/edge adapters where APIs permit.        | Each profile has a reproducible build, deployment instructions, environment contract, and smoke test.                                 |
-| Delivery automation         | Add opt-in deploy jobs for selected providers, with separate staging and production environments.              | Deployment requires explicit environment configuration; secrets are not stored in repository files; rollback procedure is documented. |
-| Observability               | Structured logs, configurable log levels, request correlation, metrics, tracing, and error reporting adapters. | Sensitive data is redacted; health and readiness semantics are distinct; telemetry can be disabled or replaced.                       |
-| Runtime resilience          | Baseline implemented — graceful shutdown, bounded Bun server limits, separate liveness/readiness probes, and proxy guidance. | In-flight HTTP work drains before forced close; readiness reflects lifecycle (and required dependencies when introduced); limits are configurable. |
-| Background work             | Optional queue/job adapter and scheduled task pattern.                                                         | Jobs are idempotent, retry policies are bounded, and no queue service is required by the base starter.                                |
-| Storage                     | Optional object-storage adapter with local development strategy.                                               | File size/type validation and authorization are enforced server-side; provider credentials remain server-only.                        |
+- **Runtime/deployment profiles — Open.** Document and test Bun server, static hosting, and supported serverless/edge adapters; each profile needs a reproducible build, deployment instructions, environment contract, and smoke test.
+- **Delivery automation — Open.** Add opt-in deployment jobs with explicit staging/production environments, externally configured secrets, and a documented rollback procedure.
+- **Observability — Open.** Add structured logs, configurable log levels, request correlation, metrics, tracing, and replaceable error-reporting adapters; redact sensitive data and keep telemetry optional.
+- **Runtime resilience — Baseline implemented.** Graceful SIGINT/SIGTERM shutdown, readiness propagation delay, Bun-native drain with bounded force-close, separate liveness/readiness probes, and configurable idle/body limits are implemented. Readiness reflects lifecycle until the application declares mandatory external dependencies.
+- **Background work — Open.** Add an optional queue/job adapter and scheduled task pattern with idempotent jobs and bounded retries; no queue service should be required by the base starter.
+- **Storage — Open.** Add an optional object-storage adapter and local development strategy with server-side file size/type validation, authorization, and server-only provider credentials.
 
 **P2 exit gate:** a selected deployment profile can move through staging to production with health checks, telemetry, secrets management, and a documented rollback path.
 
