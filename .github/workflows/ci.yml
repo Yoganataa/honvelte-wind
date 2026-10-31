@@ -135,7 +135,36 @@ jobs:
           Do not commit secrets or the production `.env` file into this bundle.
           EOF
 
-          tar -czf "honvelte-wind-${GITHUB_SHA::7}.tar.gz" -C release-bundle .
+          archive="honvelte-wind-${GITHUB_SHA}.tar.gz"
+          tar -czf "$archive" -C release-bundle .
+          test -s "$archive"
+
+          # Verify the extracted artifact, not only the source checkout.
+          mkdir -p release-smoke
+          tar -xzf "$archive" -C release-smoke
+          (
+            cd release-smoke
+            bun install --production
+            NODE_ENV=production HOST=127.0.0.1 PORT=3300 bun run start > /tmp/honvelte-wind-smoke.log 2>&1 &
+            server_pid=$!
+            trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+            ready=false
+            for attempt in {1..30}; do
+              if curl --fail --silent http://127.0.0.1:3300/api/health > /dev/null; then
+                ready=true
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$ready" != true ]; then
+              cat /tmp/honvelte-wind-smoke.log
+              exit 1
+            fi
+
+            curl --fail --silent http://127.0.0.1:3300/ | grep -q "Honvelte Wind"
+          )
 
       - name: Upload production bundle
         uses: actions/upload-artifact@v7
