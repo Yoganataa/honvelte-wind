@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "noEmit": true,
+    "paths": {
+      "hono": ["../../apps/api/node_modules/hono/dist/types/index.d.ts"],
+      "hono/http-exception": [
+        "../../apps/api/node_modules/hono/dist/types/http-exception.d.ts"
+      ]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
