@@ -21,7 +21,7 @@ The repository currently provides:
 - A production tarball smoke test that exercises the extracted bundle, API health endpoint, and SPA response.
 - Agent instructions and local skills for implementation, testing, and browser E2E.
 
-The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 6, Vite 8, Svelte Vite Plugin 7, and current stable compatible packages. CI now runs a Bun advisory audit, dependency review, and a three-day package release-age gate. The repository still needs a committed `bun.lock`, frozen installs, formatting as a blocking check, and required status checks on `main`.
+The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 6, Vite 8, Svelte Vite Plugin 7, and current stable compatible packages. A Bun 1.4.4 `bun.lock` is committed and every CI install uses `--frozen-lockfile`. CI also runs a Bun advisory audit, dependency review, and a three-day package release-age gate. Formatting is not yet a blocking check and required status checks are not yet configured on `main`.
 
 ## Priorities
 
@@ -29,7 +29,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 | Item | Current status | Completion criteria |
 | --- | --- | --- |
-| Commit `bun.lock` | In progress — generated in CI for this branch | Commit the Bun 1.4.4 lockfile, switch every CI job to `bun install --frozen-lockfile`, and remove the unlocked fallback. |
+| Commit `bun.lock` | Done in this change | Bun 1.4.4 lockfile is committed; all CI jobs use `bun install --frozen-lockfile` with no unlocked fallback. |
 | Restore formatting as a quality gate | Open — `format:check` is separate from `verify` | Run Prettier across the repository, review the formatting-only diff, add `format:check` to `verify`, and keep CI documentation aligned. |
 | Protect `main` | Open — branch protection is disabled | Require pull requests and successful Quality gates + Browser E2E checks; disable force pushes and deletion. Confirm the selected check names against a real PR. |
 | Pin GitHub Actions | Done in this change | Checkout v7.0.1, Bun setup v2, artifact upload v7, CodeQL v4.39.1, and Dependency Review v5 use verified full commit SHAs; Dependabot checks action updates weekly. |
