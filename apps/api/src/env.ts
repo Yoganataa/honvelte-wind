@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-export const envSchema = z.object({
+export const envSchema = z
+  .object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
@@ -34,7 +35,8 @@ export const envSchema = z.object({
     .min(100)
     .max(120_000)
     .default(15_000),
-}).superRefine((configuration, context) => {
+  })
+  .superRefine((configuration, context) => {
   if (configuration.METRICS_ENABLED && !configuration.METRICS_TOKEN) {
     context.addIssue({
       code: 'custom',
@@ -42,6 +44,6 @@ export const envSchema = z.object({
       message: 'METRICS_TOKEN is required when METRICS_ENABLED is true.',
     })
   }
-})
+  })
 
 export const env = envSchema.parse(process.env)
