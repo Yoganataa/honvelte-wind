@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const apiErrorCodeSchema = z.enum([
   'BAD_REQUEST',
+  'UNAUTHORIZED',
   'VALIDATION_ERROR',
   'PAYLOAD_TOO_LARGE',
   'RATE_LIMITED',
