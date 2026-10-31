@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Show canonical Worker test formatting
-        run: bunx prettier apps/api/src/worker.test.ts
-
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
