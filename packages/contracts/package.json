@@ -11,7 +11,7 @@
     "build": "tsc --noEmit -p tsconfig.json",
     "check": "tsc --noEmit -p tsconfig.json",
     "test": "bun test",
-    "test:coverage": "bun test --coverage --coverage-dir=../../coverage/contracts"
+    "test:coverage": "bun --config=../../bunfig.toml test --coverage --coverage-dir=../../coverage/contracts"
   },
   "dependencies": {
     "zod": "^4.6.7"
