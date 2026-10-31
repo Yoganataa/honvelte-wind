@@ -57,7 +57,7 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 4. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
 5. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
-Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Coverage thresholds are intentionally not enforced until the baseline is reviewed and meaningful critical-path tests are in place.
+Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
@@ -86,7 +86,7 @@ For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarde
 
 ## Testing
 
-Run `bun run test` for quick unit-test feedback. Run `bun run test:coverage` to generate line/function text summaries and LCOV reports for API and shared contracts. The reports are written under `coverage/api` and `coverage/contracts`. Coverage is used to identify gaps; thresholds will be set after the baseline has been measured rather than selecting an arbitrary percentage.
+Run `bun run test` for quick unit-test feedback. Run `bun run test:coverage` to generate line/function text summaries and LCOV reports for API and shared contracts. The reports are written under `coverage/api` and `coverage/contracts`. Bun enforces at least 80% line coverage and 90% function coverage for each measured source file; this is a regression guard, not a substitute for meaningful assertions or integration coverage.
 
 Install Chromium once:
 
