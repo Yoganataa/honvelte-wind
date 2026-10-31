@@ -39,8 +39,7 @@ const DURATION_BUCKETS_SECONDS = [
 
 const MAX_EXPORTED_SERIES = 250
 // Request counter + finite/+Inf histogram buckets + histogram sum/count + 5xx counter.
-const MAX_SERIES_PER_LABEL_SET =
-  1 + DURATION_BUCKETS_SECONDS.length + 1 + 2 + 1
+const MAX_SERIES_PER_LABEL_SET = 1 + DURATION_BUCKETS_SECONDS.length + 1 + 2 + 1
 const MAX_LABEL_SETS = Math.floor(
   MAX_EXPORTED_SERIES / MAX_SERIES_PER_LABEL_SET,
 )
