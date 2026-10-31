@@ -184,7 +184,7 @@ The in-process registry exports (the scrape request itself is excluded from thes
 - `http_server_request_duration_seconds` — request-duration histogram, sum, and count.
 - `http_server_active_requests` — requests currently being handled.
 
-Metrics labels use registered route templates, not raw paths, query parameters, request IDs, IP addresses, or user identifiers. The registry bounds exported series to 250 and aggregates further unseen combinations into an overflow series. Counters and histograms are process-local and reset on restart; scrape each application instance separately. No Prometheus server, exporter, tracing SDK, or third-party telemetry service is added to the default workspace.
+Metrics labels use registered route templates, not raw paths, query parameters, request IDs, IP addresses, or user identifiers. The registry bounds total exported series to at most 250: it retains at most 13 label combinations, or 247 series in the worst case when 5xx error counters are present, and aggregates further unseen combinations into an overflow series. Counters and histograms are process-local and reset on restart; scrape each application instance separately. No Prometheus server, exporter, tracing SDK, or third-party telemetry service is added to the default workspace.
 
 The logger and `HttpMetrics` collector are injected through `createApp()`, so applications can replace the console sink or in-process registry with their own adapters without changing route handlers.
 
