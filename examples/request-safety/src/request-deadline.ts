@@ -10,7 +10,10 @@ export type RequestDeadlineEnv = {
 }
 
 export type DeadlineTimer = {
-  setTimeout(callback: () => void, delayMs: number): ReturnType<typeof setTimeout>
+  setTimeout(
+    callback: () => void,
+    delayMs: number,
+  ): ReturnType<typeof setTimeout>
   clearTimeout(timer: ReturnType<typeof setTimeout>): void
 }
 
@@ -24,7 +27,9 @@ export function createRequestDeadline(
   timer: DeadlineTimer = systemTimer,
 ): MiddlewareHandler<RequestDeadlineEnv> {
   if (!Number.isSafeInteger(durationMs) || durationMs < 1) {
-    throw new RangeError('Request deadline must be a positive integer in milliseconds.')
+    throw new RangeError(
+      'Request deadline must be a positive integer in milliseconds.',
+    )
   }
 
   return async (context, next) => {
