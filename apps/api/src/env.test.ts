@@ -7,6 +7,7 @@ describe('API environment schema', () => {
 
     expect(parsed.SERVER_IDLE_TIMEOUT_SECONDS).toBe(30)
     expect(parsed.SERVER_MAX_REQUEST_BODY_BYTES).toBe(1_048_576)
+    expect(parsed.SHUTDOWN_READINESS_DELAY_MS).toBe(1_000)
     expect(parsed.SHUTDOWN_TIMEOUT_MS).toBe(15_000)
   })
 
@@ -16,6 +17,9 @@ describe('API environment schema', () => {
     ).toBe(false)
     expect(
       envSchema.safeParse({ SERVER_MAX_REQUEST_BODY_BYTES: '0' }).success,
+    ).toBe(false)
+    expect(
+      envSchema.safeParse({ SHUTDOWN_READINESS_DELAY_MS: '30001' }).success,
     ).toBe(false)
     expect(envSchema.safeParse({ SHUTDOWN_TIMEOUT_MS: '120001' }).success).toBe(
       false,
