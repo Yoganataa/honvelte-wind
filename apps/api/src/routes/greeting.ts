@@ -1,10 +1,10 @@
-import { greetingSchema } from '@honvelte/contracts'
+import { apiPaths, greetingSchema } from '@honvelte/contracts'
 import { Hono } from 'hono'
 import { readJsonBody } from '../http/read-json-body'
 
 const greetingRoutes = new Hono()
 
-greetingRoutes.post('/greet', async (c) => {
+greetingRoutes.post(apiPaths.greet, async (c) => {
   const body = await readJsonBody(c.req.raw)
   const parsed = greetingSchema.safeParse(body)
 

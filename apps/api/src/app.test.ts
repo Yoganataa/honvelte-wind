@@ -1,22 +1,25 @@
 import {
+  API_BASE_PATH,
   apiErrorResponseSchema,
+  apiPaths,
   greetingResponseSchema,
+  healthResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
 import app from './app'
 
 describe('API app', () => {
   test('returns a health response with a request ID', async () => {
-    const response = await app.request('/api/health')
+    const response = await app.request(API_BASE_PATH + apiPaths.health)
     const body = await response.json()
 
     expect(response.status).toBe(200)
     expect(response.headers.get('x-request-id')).toBeTruthy()
-    expect(body.status).toBe('ok')
+    expect(healthResponseSchema.parse(body)).toMatchObject({ status: 'ok' })
   })
 
   test('preserves a caller-provided request ID', async () => {
-    const response = await app.request('/api/health', {
+    const response = await app.request(API_BASE_PATH + apiPaths.health, {
       headers: { 'x-request-id': 'request-test-123' },
     })
 
@@ -24,7 +27,7 @@ describe('API app', () => {
   })
 
   test('returns a greeting matching the shared response contract', async () => {
-    const response = await app.request('/api/greet', {
+    const response = await app.request(API_BASE_PATH + apiPaths.greet, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'Nata' }),
@@ -104,7 +107,7 @@ describe('API app', () => {
   })
 
   test('returns a shared JSON error contract for unknown API routes', async () => {
-    const response = await app.request('/api/unknown')
+    const response = await app.request(API_BASE_PATH + '/unknown')
 
     expect(response.status).toBe(404)
     expect(response.headers.get('content-type')).toContain('application/json')
