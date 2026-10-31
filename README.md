@@ -58,7 +58,9 @@ The repository does not currently commit `bun.lock`. CI temporarily falls back t
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
-Playwright reports and traces are uploaded even when E2E fails.
+Playwright reports and traces are uploaded even when E2E fails. A separate CodeQL workflow analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule. Dependabot checks Bun dependencies and GitHub Actions weekly; the workflow references are pinned to commit SHAs.
+
+See [SECURITY.md](./SECURITY.md) for vulnerability reporting instructions.
 
 ## Production
 
