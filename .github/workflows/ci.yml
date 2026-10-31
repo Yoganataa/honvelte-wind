@@ -106,6 +106,7 @@ jobs:
         run: bun run test:db-examples
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@127.0.0.1:5432/honvelte_wind_test
+          PGDATABASE: postgres
 
   delivery:
     name: Production delivery bundle
