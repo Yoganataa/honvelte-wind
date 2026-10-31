@@ -4,7 +4,7 @@ A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeS
 
 ## Requirements
 
-- Bun 1.3+ (use the version pinned in `.bun-version`)
+- Bun version pinned in `.bun-version`
 - Git
 
 ## Quick start
@@ -42,15 +42,26 @@ API health: http://127.0.0.1:3000/api/health
 
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
+## CI/CD
+
+GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
+
+1. **Quality gates:** lint, formatting, TypeScript/Svelte diagnostics, unit tests, and production build.
+2. **Browser E2E:** installs Chromium and tests the production Bun server.
+3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
+
+Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
+
+Playwright reports and traces are uploaded even when E2E fails.
+
 ## Production
 
 ```bash
-bun install --frozen-lockfile
-bun run build
-NODE_ENV=production bun run start
+bun install --production
+NODE_ENV=production HOST=0.0.0.0 PORT=3000 bun run start
 ```
 
-Set `PORT` and `HOST` as needed. The API process serves static assets from `apps/web/dist`. For deployment behind a reverse proxy, terminate TLS at the proxy and restrict forwarded headers to trusted proxy infrastructure.
+For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarded headers to trusted proxy infrastructure.
 
 ## Testing
 
@@ -60,7 +71,7 @@ Install Chromium once:
 bun run test:e2e:install
 ```
 
-Then run `bun run verify:all`. E2E config starts a production build and the Bun server, then exercises SPA rendering, API calls, form validation, API errors, and route fallback.
+Then run `bun run verify:all`. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
 
 ## Agent instructions and skills
 
