@@ -11,12 +11,12 @@ type SessionRow = {
 }
 
 export class SqliteSessionStore implements SessionStore {
-  private readonly insert: ReturnType<Database['query']>
-  private readonly find: ReturnType<Database['query']>
-  private readonly remove: ReturnType<Database['query']>
-  private readonly removeExpired: ReturnType<Database['query']>
+  private readonly insert: (record: SessionRecord) => void
+  private readonly find: (id: string) => SessionRow | undefined
+  private readonly remove: (id: string) => void
+  private readonly removeExpired: (now: number) => void
 
-  constructor(private readonly database: Database) {
+  constructor(database: Database) {
     database.run(`
       CREATE TABLE IF NOT EXISTS web_sessions (
         id TEXT PRIMARY KEY,
@@ -34,35 +34,46 @@ export class SqliteSessionStore implements SessionStore {
       'CREATE INDEX IF NOT EXISTS web_sessions_expires_at_idx ON web_sessions(expires_at)',
     )
 
-    this.insert = database.query(`
+    const insert = database.query(`
       INSERT INTO web_sessions (
         id, user_id, secret_hash, csrf_token, created_at, expires_at
       ) VALUES (?, ?, ?, ?, ?, ?)
     `)
-    this.find = database.query<SessionRow, [string]>(`
+    const find = database.query<SessionRow, [string]>(`
       SELECT id, user_id, secret_hash, csrf_token, created_at, expires_at
       FROM web_sessions
       WHERE id = ?
     `)
-    this.remove = database.query('DELETE FROM web_sessions WHERE id = ?')
-    this.removeExpired = database.query(
+    const remove = database.query('DELETE FROM web_sessions WHERE id = ?')
+    const removeExpired = database.query(
       'DELETE FROM web_sessions WHERE expires_at <= ?',
     )
+
+    this.insert = (record) => {
+      insert.run(
+        record.id,
+        record.userId,
+        record.secretHash,
+        record.csrfToken,
+        record.createdAt,
+        record.expiresAt,
+      )
+    }
+    this.find = (id) => find.get(id) ?? undefined
+    this.remove = (id) => {
+      remove.run(id)
+    }
+    this.removeExpired = (now) => {
+      removeExpired.run(now)
+    }
   }
 
   async create(record: SessionRecord): Promise<void> {
-    this.insert.run(
-      record.id,
-      record.userId,
-      record.secretHash,
-      record.csrfToken,
-      record.createdAt,
-      record.expiresAt,
-    )
+    this.insert(record)
   }
 
   async findById(id: string): Promise<SessionRecord | undefined> {
-    const row = this.find.get(id) as SessionRow | null
+    const row = this.find(id)
     if (!row) return undefined
 
     return {
@@ -76,10 +87,10 @@ export class SqliteSessionStore implements SessionStore {
   }
 
   async delete(id: string): Promise<void> {
-    this.remove.run(id)
+    this.remove(id)
   }
 
   async deleteExpired(now: number): Promise<void> {
-    this.removeExpired.run(now)
+    this.removeExpired(now)
   }
 }
