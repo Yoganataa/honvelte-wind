@@ -29,11 +29,11 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run lint`          | ESLint                                                                  |
 | `bun run format:check`  | Prettier formatting check                                               |
 | `bun run audit`         | Audit locked dependencies for known advisories                          |
-| `bun run test`          | Fast API and contracts unit tests                                       |
+| `bun run test`           | Fast API and contracts unit tests                                       |
 | `bun run test:coverage` | Run API and contracts tests with text and LCOV coverage reports         |
-| `bun run test:e2e`      | Playwright browser tests                                                |
-| `bun run verify`        | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`    | All verification including E2E                                          |
+| `bun run test:e2e`       | Playwright browser tests                                                |
+| `bun run verify`         | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`     | All verification including E2E                                          |
 
 ## Architecture
 
@@ -46,6 +46,20 @@ API health: http://127.0.0.1:3000/api/health
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
+
+## Icon system
+
+The web app uses `unplugin-icons` with Iconify collections. Lucide is the default icon style. Import icons as Svelte components with `~icons/{collection}/{icon}`; they are resolved at build time, so only the icons imported by the app are included in the bundle.
+
+```svelte
+<script lang="ts">
+  import HouseIcon from '~icons/lucide/house'
+</script>
+
+<HouseIcon class="size-5" aria-hidden="true" />
+```
+
+Keep Lucide as the default visual language. Add another Iconify JSON collection package only when the product needs icons that Lucide does not provide; avoid mixing icon styles without a clear reason.
 
 ## CI/CD
 
@@ -111,7 +125,7 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 - No database, ORM, auth provider, Redis, or queue is installed by default.
 - No Docker requirement.
 - Same-origin API/static hosting avoids default CORS configuration.
-- Runtime input validation uses Zod; TypeScript types alone are not runtime validation.
+- Runtime input validation uses Zod; TypeScript types alone do not validate network payloads.
 - Keep secrets in server environment only. Never expose them through Vite `VITE_*` variables.
 
 ## Repository governance
