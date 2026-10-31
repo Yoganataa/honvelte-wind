@@ -47,10 +47,16 @@ function shutdown(signal: 'SIGINT' | 'SIGTERM'): Promise<void> {
     gracePeriodMs: env.SHUTDOWN_TIMEOUT_MS,
   })
 
-  shutdownPromise = stopServerGracefully(
-    server,
-    env.SHUTDOWN_TIMEOUT_MS,
-  )
+  shutdownPromise = (async () => {
+    if (env.SHUTDOWN_READINESS_DELAY_MS > 0) {
+      await Bun.sleep(env.SHUTDOWN_READINESS_DELAY_MS)
+    }
+
+    return stopServerGracefully(
+      server,
+      env.SHUTDOWN_TIMEOUT_MS,
+    )
+  })()
     .then((outcome) => {
       if (outcome === 'forced') {
         console.warn({
