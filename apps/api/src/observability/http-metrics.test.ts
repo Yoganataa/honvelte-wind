@@ -85,11 +85,13 @@ describe('HTTP metrics', () => {
     }
 
     const output = metrics.renderPrometheus()
-    const exportedSeries = output.split('\n').filter((line) =>
-      /^(http_server_requests_total|http_server_request_errors_total|http_server_request_duration_seconds_(bucket|sum|count))\{/.test(
-        line,
-      ),
-    )
+    const exportedSeries = output
+      .split('\n')
+      .filter((line) =>
+        /^(http_server_requests_total|http_server_request_errors_total|http_server_request_duration_seconds_(bucket|sum|count))\{/.test(
+          line,
+        ),
+      )
 
     expect(exportedSeries).toHaveLength(247)
     expect(exportedSeries.length).toBeLessThanOrEqual(250)
