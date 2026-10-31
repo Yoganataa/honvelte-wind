@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { createLogger, redactLogFields, type LogRecord } from './logger'
+import { createLogger, noopLogger, redactLogFields, type LogRecord } from './logger'
 
 describe('structured logger', () => {
   test('filters records below the configured minimum level', () => {
@@ -67,6 +67,59 @@ describe('structured logger', () => {
     expect((safe.circular as Record<string, unknown>).self).toBe('[CIRCULAR]')
     expect(String(safe.longValue)).toContain('[TRUNCATED]')
     expect(JSON.stringify(safe)).toContain('[MAX_DEPTH]')
+  })
+
+  test('sanitizes URL query strings and bounds oversized objects', () => {
+    const fields = Object.fromEntries(
+      Array.from({ length: 51 }, (_, index) => [`field${index}`, index]),
+    )
+    const safe = redactLogFields({
+      endpoint: new URL('https://example.com/reports?token=private'),
+      createdAt: new Date('2026-10-31T00:00:00.000Z'),
+      ...fields,
+    })
+
+    expect(safe.endpoint).toBe('https://example.com/reports')
+    expect(safe.createdAt).toBe('2026-10-31T00:00:00.000Z')
+    expect(safe._truncated).toBe(true)
+    expect(JSON.stringify(safe)).not.toContain('private')
+  })
+
+  test('routes default logger output to the matching console severity', () => {
+    const calls = { debug: 0, info: 0, warn: 0, error: 0 }
+    const original = {
+      debug: console.debug,
+      info: console.info,
+      warn: console.warn,
+      error: console.error,
+    }
+
+    try {
+      console.debug = () => { calls.debug += 1 }
+      console.info = () => { calls.info += 1 }
+      console.warn = () => { calls.warn += 1 }
+      console.error = () => { calls.error += 1 }
+
+      const logger = createLogger({ level: 'debug' })
+      logger.debug('console.debug')
+      logger.info('console.info')
+      logger.warn('console.warn')
+      logger.error('console.error')
+
+      expect(calls).toEqual({ debug: 1, info: 1, warn: 1, error: 1 })
+    } finally {
+      console.debug = original.debug
+      console.info = original.info
+      console.warn = original.warn
+      console.error = original.error
+    }
+  })
+
+  test('noop logger accepts every severity without producing output', () => {
+    noopLogger.debug('noop.debug')
+    noopLogger.info('noop.info')
+    noopLogger.warn('noop.warn')
+    noopLogger.error('noop.error')
   })
 
   test('writes structured records with reserved metadata fields', () => {
