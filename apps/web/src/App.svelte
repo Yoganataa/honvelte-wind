@@ -136,7 +136,7 @@
       {#each [{ title: 'Frontend', detail: 'Svelte 5 + Vite' }, { title: 'Backend', detail: 'Hono + Bun' }, { title: 'Styling', detail: 'Tailwind CSS 4' }] as item (item.title)}
         <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
           <p class="font-medium">{item.title}</p>
-          <p class="mt-1 text-sm text-zinc-500">{item.detail}</p>
+          <p class="mt-1 text-sm text-zinc-400">{item.detail}</p>
         </div>
       {/each}
     </section>
