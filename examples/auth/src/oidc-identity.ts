@@ -36,14 +36,18 @@ export async function issueSessionForOidcIdentity(
 
   if (
     issuer.protocol !== 'https:' ||
-    !identity.subject ||
+    issuer.username.length > 0 ||
+    issuer.password.length > 0 ||
+    issuer.search.length > 0 ||
+    issuer.hash.length > 0 ||
+    !identity.subject.trim() ||
     identity.subject.length > 255
   ) {
     throw new TypeError('OIDC issuer and subject are not valid.')
   }
 
   const userId = await identityStore.findOrCreateUserId({
-    issuer: issuer.origin + issuer.pathname.replace(/\/$/, ''),
+    issuer: identity.issuer,
     subject: identity.subject,
     ...(identity.email ? { email: identity.email } : {}),
     ...(identity.emailVerified !== undefined
