@@ -105,10 +105,13 @@ export function createApiClient(fetcher: typeof fetch = fetch) {
       response = await fetcher(path, {
         ...init,
         credentials: 'same-origin',
-        headers: {
-          accept: 'application/json',
-          ...init.headers,
-        },
+        headers: (() => {
+          const headers = new Headers(init.headers)
+          if (!headers.has('accept')) {
+            headers.set('accept', 'application/json')
+          }
+          return headers
+        })(),
       })
     } catch (cause) {
       if (
