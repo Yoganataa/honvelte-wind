@@ -1,8 +1,4 @@
-import {
-  createHash,
-  randomBytes,
-  timingSafeEqual,
-} from 'node:crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{22}$/
 const SESSION_SECRET_PATTERN = /^[A-Za-z0-9_-]{43}$/
