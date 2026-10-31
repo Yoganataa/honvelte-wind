@@ -15,9 +15,7 @@ test('rejects non-PostgreSQL connection URLs', () => {
 })
 
 test('requires verified TLS and rejects the global TLS bypass', () => {
-  const urlWithoutSsl = new URL(
-    'postgres://user:password@db.example.com/app',
-  )
+  const urlWithoutSsl = new URL('postgres://user:password@db.example.com/app')
   const urlWithVerifiedSsl = new URL(
     'postgres://user:password@db.example.com/app?sslmode=verify-full',
   )
