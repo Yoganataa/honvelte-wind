@@ -7,7 +7,9 @@ describe('HTTP metrics', () => {
 
     metrics.beginRequest()
     metrics.beginRequest()
-    expect(metrics.renderPrometheus()).toContain('route="/quoted/\\"route\\""')
+    expect(metrics.renderPrometheus()).toContain(
+      'http_server_active_requests 2',
+    )
 
     metrics.recordRequest({
       method: 'GET',
