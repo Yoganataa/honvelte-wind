@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test'
 
 test('renders the starter and feature cards', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Honvelte Wind' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Honvelte Wind' }),
+  ).toBeVisible()
   await expect(page.getByText('Svelte 5 + Vite', { exact: true })).toBeVisible()
   await expect(page.getByText('Hono + Bun', { exact: true })).toBeVisible()
   await expect(page.getByText('Tailwind CSS 4', { exact: true })).toBeVisible()

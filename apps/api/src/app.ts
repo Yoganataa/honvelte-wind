@@ -95,10 +95,7 @@ app.post('/api/greet', async (c) => {
 })
 
 app.notFound((c) =>
-  c.json(
-    { error: { code: 'NOT_FOUND', message: 'Resource not found' } },
-    404,
-  ),
+  c.json({ error: { code: 'NOT_FOUND', message: 'Resource not found' } }, 404),
 )
 
 app.onError((error, c) => {
@@ -120,7 +117,12 @@ app.onError((error, c) => {
   })
 
   return c.json(
-    { error: { code: 'INTERNAL_SERVER_ERROR', message: 'Internal server error' } },
+    {
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Internal server error',
+      },
+    },
     500,
   )
 })

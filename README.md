@@ -20,18 +20,18 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Run API and Vite concurrently |
-| `bun run build` | Build contracts and SPA |
-| `bun run start` | Serve API + static SPA with Bun |
-| `bun run check` | TypeScript and Svelte diagnostics |
-| `bun run lint` | ESLint |
-| `bun run audit` | Audit locked dependencies for moderate-or-higher advisories |
-| `bun run test` | API and contracts unit tests |
-| `bun run test:e2e` | Playwright browser tests |
-| `bun run verify` | Audit, lint, typecheck, unit tests, and production build |
-| `bun run verify:all` | All verification including E2E |
+| Command              | Description                                                 |
+| -------------------- | ----------------------------------------------------------- |
+| `bun run dev`        | Run API and Vite concurrently                               |
+| `bun run build`      | Build contracts and SPA                                     |
+| `bun run start`      | Serve API + static SPA with Bun                             |
+| `bun run check`      | TypeScript and Svelte diagnostics                           |
+| `bun run lint`       | ESLint                                                      |
+| `bun run audit`      | Audit locked dependencies for moderate-or-higher advisories |
+| `bun run test`       | API and contracts unit tests                                |
+| `bun run test:e2e`   | Playwright browser tests                                    |
+| `bun run verify`     | Audit, lint, typecheck, unit tests, and production build    |
+| `bun run verify:all` | All verification including E2E                              |
 
 ## Architecture
 
@@ -93,6 +93,7 @@ Run `bun run format:check` to check formatting and `bun run format` to apply Pre
 ## Agent instructions and skills
 
 Read `AGENTS.md` before making changes. Skills under `.agents/skills` are the canonical sources:
+
 - `project-development`: implementation and architecture rules.
 - `testing`: unit, integration, contract, and regression tests.
 - `playwright-e2e`: browser automation and E2E workflow.
