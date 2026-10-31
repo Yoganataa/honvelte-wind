@@ -58,9 +58,7 @@ describe('Cloudflare Workers adapter', () => {
   })
 
   test('does not take ownership of static routes', async () => {
-    const response = await worker.fetch(
-      new Request('https://example.test/'),
-    )
+    const response = await worker.fetch(new Request('https://example.test/'))
 
     expect(response.status).toBe(404)
   })
