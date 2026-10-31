@@ -98,11 +98,13 @@ export type RateLimitOptions = {
 }
 
 function quoteStructuredFieldString(value: string): string {
-  if (!/^[\\x20-\\x7e]*$/.test(value)) {
-    throw new TypeError('Rate-limit scope must contain printable ASCII only.')
+  if (!/^[A-Za-z0-9._:/-]{1,64}$/.test(value)) {
+    throw new TypeError(
+      'Rate-limit scope must use 1-64 safe ASCII token characters.',
+    )
   }
 
-  return '"' + value.replace(/(["\\\\])/g, '\\\\$1') + '"'
+  return '"' + value + '"'
 }
 
 function validateOptions(options: RateLimitOptions): void {
