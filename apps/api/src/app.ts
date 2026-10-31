@@ -71,10 +71,7 @@ export function createApp(options: CreateAppOptions = {}) {
   app.route(API_BASE_PATH, greetingRoutes)
 
   if (metricsEnabled && options.metricsToken) {
-    app.route(
-      API_BASE_PATH,
-      createMetricsRoutes(metrics, options.metricsToken),
-    )
+    app.route(API_BASE_PATH, createMetricsRoutes(metrics, options.metricsToken))
   }
 
   app.notFound((c) =>
