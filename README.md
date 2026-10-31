@@ -158,6 +158,35 @@ Bun's idle timeout also applies to quiet periods during streaming responses. The
 
 For reverse-proxy deployments, terminate TLS at the proxy and trust forwarded headers only from ingress infrastructure that strips client-supplied forwarding headers and writes canonical values. Keep proxy connection, body, and upstream timeouts consistent with the application limits.
 
+## Observability
+
+The API server emits single-line JSON logs to stdout. `LOG_LEVEL` is an active minimum severity filter: `debug`, `info`, `warn`, or `error`. The server logs startup and shutdown lifecycle events and emits one completion event per HTTP request.
+
+Request completion records contain the validated request ID, HTTP method, Hono route template, status code, and duration in milliseconds. They deliberately exclude raw URLs, query strings, request/response bodies, and request headers. Inbound `X-Request-ID` values are reflected only when they match a bounded alphanumeric/punctuation allowlist; otherwise the server generates a UUID.
+
+The logger centrally redacts sensitive field names (authorization, cookies, passwords, secrets, tokens, credentials, sessions, CSRF values, and private keys), replaces bearer credentials embedded in strings, and omits error messages/stacks. Structured fields are depth- and size-bounded. Add new logging fields only when they are operationally useful and do not contain user content or secrets.
+
+### Prometheus metrics
+
+Metrics collection is opt-in. Set `METRICS_ENABLED=true` and configure `METRICS_TOKEN` with at least 32 random characters. Keep the token in the server environment or secret manager; never place it in browser variables or commit it to the repository. The endpoint is:
+
+```text
+GET /api/metrics
+Authorization: Bearer <METRICS_TOKEN>
+```
+
+The endpoint returns Prometheus text exposition and is disabled by default. Requests without the configured bearer token receive `401`. Responses use `Cache-Control: no-store`.
+
+The in-process registry exports:
+- `http_server_requests_total` — completed requests by normalized method, route template, and status code.
+- `http_server_request_errors_total` — requests ending in a 5xx response.
+- `http_server_request_duration_seconds` — request-duration histogram, sum, and count.
+- `http_server_active_requests` — requests currently being handled.
+
+Metrics labels use registered route templates, not raw paths, query parameters, request IDs, IP addresses, or user identifiers. The registry bounds exported series to 250 and aggregates further unseen combinations into an overflow series. Counters and histograms are process-local and reset on restart; scrape each application instance separately. No Prometheus server, exporter, tracing SDK, or third-party telemetry service is added to the default workspace.
+
+The logger and `HttpMetrics` collector are injected through `createApp()`, so applications can replace the console sink or in-process registry with their own adapters without changing route handlers.
+
 ## Production
 
 ```bash
