@@ -48,7 +48,7 @@ describe('API app', () => {
     })
   })
 
-  test('rejects requests above the configured body size', async () => {
+  test('rejects requests above the configured body size from Content-Length', async () => {
     const response = await app.request('/api/greet', {
       method: 'POST',
       headers: {
@@ -56,6 +56,19 @@ describe('API app', () => {
         'content-length': '1025',
       },
       body: JSON.stringify({ name: 'Nata' }),
+    })
+
+    expect(response.status).toBe(413)
+    expect(await response.json()).toMatchObject({
+      error: { code: 'PAYLOAD_TOO_LARGE' },
+    })
+  })
+
+  test('rejects oversized request bodies when Content-Length is absent', async () => {
+    const response = await app.request('/api/greet', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'a'.repeat(1100) }),
     })
 
     expect(response.status).toBe(413)
