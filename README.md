@@ -177,7 +177,7 @@ Authorization: Bearer <METRICS_TOKEN>
 
 The endpoint returns Prometheus text exposition and is disabled by default. Requests without the configured bearer token receive `401`. Responses use `Cache-Control: no-store`.
 
-The in-process registry exports:
+The in-process registry exports (the scrape request itself is excluded from these measurements):
 - `http_server_requests_total` — completed requests by normalized method, route template, and status code.
 - `http_server_request_errors_total` — requests ending in a 5xx response.
 - `http_server_request_duration_seconds` — request-duration histogram, sum, and count.
