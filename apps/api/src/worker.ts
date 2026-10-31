@@ -8,7 +8,7 @@ const app = createApp({
 })
 
 export default {
-  fetch(request: Request): Promise<Response> {
-    return app.fetch(request)
+  async fetch(request: Request): Promise<Response> {
+    return await app.fetch(request)
   },
 }
