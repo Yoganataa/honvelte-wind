@@ -1,3 +1,4 @@
+import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { MiddlewareHandler } from 'hono'
 
@@ -77,7 +78,7 @@ export function createRequestDeadline(
  * fetch(url, { signal: context.get('requestSignal') }).
  */
 export function getRequestSignal(
-  context: { get(key: 'requestSignal'): AbortSignal },
+  context: Context<RequestDeadlineEnv>,
 ): AbortSignal {
   return context.get('requestSignal')
 }
