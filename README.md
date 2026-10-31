@@ -33,7 +33,7 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run test:coverage`       | Run API and contracts tests with text and LCOV coverage reports         |
 | `bun run test:db-examples`    | Test the optional SQLite and PostgreSQL adapter examples                |
 | `bun run test:auth-examples`  | Test optional session, CSRF, OIDC identity, and RBAC examples           |
-| `bun run test:web-client`      | Test the typed browser API client                                       |
+| `bun run test:web-client`     | Test the typed browser API client                                       |
 | `bun run test:request-safety` | Test optional rate limiting and request deadline middleware             |
 | `bun run test:e2e`            | Playwright browser tests                                                |
 | `bun run verify`              | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
