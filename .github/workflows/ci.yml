@@ -27,10 +27,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Temporarily inspect roadmap formatting
-        run: |
-          bunx prettier --write roadmap.md
-          git diff -- roadmap.md
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
