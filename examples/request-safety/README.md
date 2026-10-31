@@ -6,7 +6,7 @@ This module adds route-scoped request limits and deadlines without adding a rate
 
 - Fixed-window rate limiting with a pluggable asynchronous `RateLimitStore`.
 - Bounded in-memory store for a single Bun process.
-- Explicit 429 responses with `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers.
+- Explicit 429 responses with `Retry-After` and the `RateLimit-Policy` / `RateLimit` fields from [draft-ietf-httpapi-ratelimit-headers-11](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/11/), a work-in-progress Internet-Draft (not a final RFC).
 - Fail-closed 503 response when the in-memory store reaches its configured key capacity.
 - Per-route request deadline that returns 504 and exposes an `AbortSignal` to downstream handlers.
 - Deterministic tests for window resets, quota exhaustion, capacity handling, cancellation, and timer cleanup.
