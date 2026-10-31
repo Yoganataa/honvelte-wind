@@ -22,9 +22,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'bun run build && NODE_ENV=production PORT=3000 HOST=127.0.0.1 bun run start',
-    url: baseURL + '/api/health',
+    command: 'bun run build && bun run start',
+    url: `${baseURL}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      NODE_ENV: 'production',
+      HOST: '127.0.0.1',
+      PORT: '3000',
+    },
   },
 })
