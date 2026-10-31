@@ -23,15 +23,14 @@ export async function stopServerGracefully(
   timer: ShutdownTimer = systemTimer,
 ): Promise<ShutdownOutcome> {
   if (!Number.isSafeInteger(gracePeriodMs) || gracePeriodMs < 0) {
-    throw new RangeError('Shutdown grace period must be a non-negative integer.')
+    throw new RangeError(
+      'Shutdown grace period must be a non-negative integer.',
+    )
   }
 
   let timerHandle: ReturnType<typeof setTimeout> | undefined
   const timeoutPromise = new Promise<ShutdownOutcome>((resolve) => {
-    timerHandle = timer.setTimeout(
-      () => resolve('forced'),
-      gracePeriodMs,
-    )
+    timerHandle = timer.setTimeout(() => resolve('forced'), gracePeriodMs)
   })
 
   try {
