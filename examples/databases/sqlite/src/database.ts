@@ -3,8 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { Database } from 'bun:sqlite'
 
 export function openSqliteDatabase(
-  filename =
-    process.env.SQLITE_DATABASE_PATH ??
+  filename = process.env.SQLITE_DATABASE_PATH ??
     resolve(import.meta.dir, '../data/app.sqlite'),
 ): Database {
   if (filename !== ':memory:') {
