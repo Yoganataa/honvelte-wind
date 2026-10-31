@@ -20,21 +20,22 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command                    | Description                                                             |
-| -------------------------- | ----------------------------------------------------------------------- |
-| `bun run dev`              | Run API and Vite concurrently                                           |
-| `bun run build`            | Build contracts and SPA                                                 |
-| `bun run start`            | Serve API + static SPA with Bun                                         |
-| `bun run check`            | TypeScript and Svelte diagnostics                                       |
-| `bun run lint`             | ESLint                                                                  |
-| `bun run format:check`     | Prettier formatting check                                               |
-| `bun run audit`            | Audit locked dependencies for known advisories                          |
-| `bun run test`             | Fast API and contracts unit tests                                       |
-| `bun run test:coverage`    | Run API and contracts tests with text and LCOV coverage reports         |
-| `bun run test:db-examples` | Test the optional SQLite and PostgreSQL adapter examples                |
-| `bun run test:e2e`         | Playwright browser tests                                                |
-| `bun run verify`           | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`       | All verification including database examples and browser E2E            |
+| Command                      | Description                                                             |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `bun run dev`                | Run API and Vite concurrently                                           |
+| `bun run build`              | Build contracts and SPA                                                 |
+| `bun run start`              | Serve API + static SPA with Bun                                         |
+| `bun run check`              | TypeScript and Svelte diagnostics                                       |
+| `bun run lint`               | ESLint                                                                  |
+| `bun run format:check`       | Prettier formatting check                                               |
+| `bun run audit`              | Audit locked dependencies for known advisories                          |
+| `bun run test`               | Fast API and contracts unit tests                                       |
+| `bun run test:coverage`      | Run API and contracts tests with text and LCOV coverage reports         |
+| `bun run test:db-examples`   | Test the optional SQLite and PostgreSQL adapter examples                |
+| `bun run test:auth-examples` | Test optional session, CSRF, OIDC identity, and RBAC examples           |
+| `bun run test:e2e`           | Playwright browser tests                                                |
+| `bun run verify`             | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`         | All verification including database, auth examples, and browser E2E     |
 
 ## Architecture
 
@@ -63,6 +64,12 @@ Both examples include ordered SQL migrations and a `schema_migrations` ledger. S
 
 Run `bun run test:db-examples` to test SQLite and the optional PostgreSQL example. PostgreSQL integration tests run only when `DATABASE_URL_TEST` is configured with a disposable database whose name ends in `_test`; the test runner refuses other database names. CI provisions a fresh PostgreSQL service and runs both adapters.
 
+## Optional authentication and authorization
+
+An opt-in reference implementation lives under `examples/auth`. It provides opaque server-side sessions, a SQLite `SessionStore`, secure cookie helpers, synchronizer CSRF and strict Origin validation, server-side permission checks, and an OIDC identity adapter keyed by `(issuer, subject)`. It does not add dependencies to the default workspace. OIDC protocol integration uses the optional `openid-client` v6 client only when an application chooses a provider; see `examples/auth/README.md` for the Authorization Code + PKCE integration boundary and deployment requirements.
+
+Run `bun run test:auth-examples` to test the session, cookie middleware, CSRF, OIDC identity boundary, SQLite store, and RBAC behavior.
+
 ## Icon system
 
 The web app uses `unplugin-icons` with Iconify collections. Lucide is the default icon style. Import icons as Svelte components with `~icons/{collection}/{icon}`; they are resolved at build time, so only the icons imported by the app are included in the bundle.
@@ -84,9 +91,10 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests with line/function coverage, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
-4. **Production delivery:** after quality, browser, and database-example jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-5. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-6. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
+5. **Production delivery:** after quality, browser, database, and authentication jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
+6. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+7. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
