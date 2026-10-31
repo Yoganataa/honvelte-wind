@@ -27,10 +27,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Temporarily inspect request-safety formatting
-        run: |
-          bunx prettier --write examples/request-safety/src/rate-limit.ts examples/request-safety/src/request-deadline.ts README.md roadmap.md .github/workflows/ci.yml
-          git diff -- examples/request-safety/src/rate-limit.ts examples/request-safety/src/request-deadline.ts README.md roadmap.md .github/workflows/ci.yml
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
@@ -152,7 +148,8 @@ jobs:
 
   delivery:
     name: Production delivery bundle
-    needs: [quality, e2e, database-examples, auth-examples, request-safety-examples]
+    needs:
+      [quality, e2e, database-examples, auth-examples, request-safety-examples]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
