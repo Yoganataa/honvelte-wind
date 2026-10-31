@@ -16,7 +16,8 @@ bun run dev
 ```
 
 Web: http://127.0.0.1:5173  
-API health: http://127.0.0.1:3000/api/health
+API health: http://127.0.0.1:3000/api/health  
+API readiness: http://127.0.0.1:3000/api/ready
 
 ## Commands
 
@@ -131,6 +132,32 @@ Playwright reports and traces are uploaded even when E2E fails.
 
 GitHub Dependabot supports Bun 1.4 and the current text-based `bun.lock` format; the legacy binary `bun.lockb` format is not supported. This repository pins Bun 1.4.4 and commits `bun.lock`, so the configured `bun` ecosystem is supported for version updates and dependency-graph analysis. Keep `bun audit` in CI as an independent check, not as a replacement for GitHub alerts. See [supported ecosystems](https://docs.github.com/en/code-security/reference/supply-chain-security/supported-ecosystems-and-repositories) and the [Bun 1.4 support announcement](https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4/).
 
+Repository security settings are enabled: dependency graph, automatic dependency submission, Dependabot alerts, malware alerts, Dependabot security updates, private vulnerability reporting, and secret protection. Dependabot version updates remain separately configured through `.github/dependabot.yml`.
+
+## Runtime lifecycle and limits
+
+The Bun server exposes separate process liveness and traffic readiness probes:
+
+- `GET /api/health` is a liveness endpoint. It returns `200` while the application process can serve the probe.
+- `GET /api/ready` returns `200` while the server is accepting application traffic and `503` after shutdown begins.
+
+The base starter has no mandatory external runtime dependencies. Readiness therefore reports the server lifecycle only; it does not claim that optional database, identity-provider, or other example integrations are reachable. Add explicit dependency checks when an application makes an external service mandatory.
+
+The Bun HTTP server limits are validated at startup and configurable through environment variables:
+
+- `SERVER_IDLE_TIMEOUT_SECONDS` (default `30`, range 1–255): connection inactivity timeout in seconds.
+- `SERVER_MAX_REQUEST_BODY_BYTES` (default `1048576`, range 1 KiB–10 MiB): maximum body size accepted by Bun.
+- `SHUTDOWN_READINESS_DELAY_MS` (default `1000`, range 0–30000): delay before stopping the listener so load balancers can observe readiness=false.
+- `SHUTDOWN_TIMEOUT_MS` (default `15000`, range 100–120000): grace period before active connections are force-closed.
+
+The global Bun body limit is an outer transport limit. The existing greeting JSON parser keeps its stricter 1 KiB application-level limit. Increase either limit only for a concrete endpoint requirement, and continue streaming or bounding large uploads instead of buffering arbitrary payloads in memory.
+
+On `SIGINT` or `SIGTERM`, the server marks readiness false and rejects new application requests with `503 SERVICE_UNAVAILABLE`. It then waits `SHUTDOWN_READINESS_DELAY_MS` (1 second by default) so a load balancer can observe the failed readiness probe before Bun stops accepting connections. Bun's `server.stop()` then lets in-flight HTTP work finish. If the configured grace period expires, it calls `server.stop(true)` to close remaining active connections. Requests still running at that point can be interrupted; keep the deployment platform's termination grace period longer than `SHUTDOWN_TIMEOUT_MS` plus `SHUTDOWN_READINESS_DELAY_MS` and a small process-exit margin.
+
+Bun's idle timeout also applies to quiet periods during streaming responses. The starter does not currently expose SSE or WebSocket routes; when adding long-lived streams, configure their transport timeout deliberately rather than globally disabling connection timeouts. See the [Bun HTTP server lifecycle and timeout documentation](https://bun.com/docs/runtime/http/server).
+
+For reverse-proxy deployments, terminate TLS at the proxy and trust forwarded headers only from ingress infrastructure that strips client-supplied forwarding headers and writes canonical values. Keep proxy connection, body, and upstream timeouts consistent with the application limits.
+
 ## Production
 
 ```bash
@@ -178,4 +205,4 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 
 The active repository ruleset **Protect main** targets `refs/heads/main`. It requires pull requests and the status checks `Quality gates`, `Browser E2E`, `Analyze JavaScript and TypeScript`, and `Review dependency changes`; it also requires the branch to be up to date and blocks force pushes and deletion. Its bypass list is empty, and the required approval count is zero to support the current single-maintainer workflow. Review the approval requirement if the maintainer team grows.
 
-Repository-level Dependabot alerts and Dependabot security updates are separate from version updates configured in `.github/dependabot.yml`. Confirm both under **Settings → Security and quality → Advanced Security**. The repository's Bun and GitHub Actions version-update schedules are already configured in `.github/dependabot.yml`.
+Repository-level dependency graph, automatic dependency submission, Dependabot alerts, malware alerts, Dependabot security updates, private vulnerability reporting, and secret protection are enabled. These controls are separate from the weekly Bun and GitHub Actions version updates configured in `.github/dependabot.yml`.

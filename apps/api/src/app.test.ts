@@ -4,9 +4,11 @@ import {
   apiPaths,
   greetingResponseSchema,
   healthResponseSchema,
+  readinessResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
-import app from './app'
+import app, { createApp } from './app'
+import { createRuntimeLifecycle } from './runtime/lifecycle'
 
 describe('API app', () => {
   test('returns a health response with a request ID', async () => {
@@ -16,6 +18,15 @@ describe('API app', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('x-request-id')).toBeTruthy()
     expect(healthResponseSchema.parse(body)).toMatchObject({ status: 'ok' })
+  })
+
+  test('returns a ready response while accepting requests', async () => {
+    const response = await app.request(API_BASE_PATH + apiPaths.ready)
+
+    expect(response.status).toBe(200)
+    expect(readinessResponseSchema.parse(await response.json()).status).toBe(
+      'ready',
+    )
   })
 
   test('preserves a caller-provided request ID', async () => {
@@ -113,6 +124,39 @@ describe('API app', () => {
     expect(response.headers.get('content-type')).toContain('application/json')
     expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
       error: { code: 'NOT_FOUND' },
+    })
+  })
+
+  test('reports draining readiness separately from liveness', async () => {
+    const lifecycle = createRuntimeLifecycle()
+    const runtimeApp = createApp(lifecycle)
+
+    lifecycle.beginShutdown()
+
+    const readiness = await runtimeApp.request(API_BASE_PATH + apiPaths.ready)
+    const liveness = await runtimeApp.request(API_BASE_PATH + apiPaths.health)
+
+    expect(readiness.status).toBe(503)
+    expect(readinessResponseSchema.parse(await readiness.json()).status).toBe(
+      'not_ready',
+    )
+    expect(liveness.status).toBe(200)
+  })
+
+  test('rejects new application requests after shutdown begins', async () => {
+    const lifecycle = createRuntimeLifecycle()
+    const runtimeApp = createApp(lifecycle)
+    lifecycle.beginShutdown()
+
+    const response = await runtimeApp.request(API_BASE_PATH + apiPaths.greet, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Nata' }),
+    })
+
+    expect(response.status).toBe(503)
+    expect(apiErrorResponseSchema.parse(await response.json())).toMatchObject({
+      error: { code: 'SERVICE_UNAVAILABLE' },
     })
   })
 })
