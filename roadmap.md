@@ -47,7 +47,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 | Frontend foundations             | Add an optional router, reusable accessible primitives, and feature-level organization.                                                   | Routing and UI dependencies are opt-in; keyboard navigation and accessible names are covered by tests.                        |
 | Database adapters                | Provide documented examples for SQLite and PostgreSQL with migrations; select one only when a project profile needs it.                   | Schema changes are versioned; integration tests use an isolated test database; no database dependency in the default starter. |
 | Authentication and authorization | Offer an adapter boundary for sessions/OIDC and explicit RBAC/permission checks.                                                          | Secure cookie/session defaults, CSRF strategy where applicable, authorization tests, and no secrets in client bundles.        |
-| Test strategy                    | Add coverage reporting and thresholds, API integration tests, accessibility checks, and critical-path regression tests.                   | Thresholds are evidence-based; flaky tests are not hidden with retries; reports are retained in CI.                           |
+| Test strategy                    | Coverage reporting is enabled for API and contracts tests. Continue with evidence-based thresholds, accessibility checks, and critical-path regression tests. | Coverage baseline must be reviewed before thresholds are enforced; CI retains LCOV reports; flaky tests are not hidden with retries. |
 | API request safety               | Add rate limiting and request timeouts at a clearly defined boundary when exposed publicly.                                               | Limits are configurable, tested, and documented for in-memory versus distributed deployments.                                 |
 
 **Shared API contract progress (PR #10):** The greeting endpoint now has shared Zod schemas for success responses and API error envelopes. The API tests validate endpoint payloads against those schemas, and the browser validates unknown response payloads before using them. This is a partial P1 completion; a reusable typed API client is intentionally deferred until multiple endpoints justify a shared transport abstraction.
@@ -93,3 +93,6 @@ A profile is eligible for inclusion when it has an owner, a maintained dependenc
 - Every optional module must state its dependencies, operational requirements, security implications, and removal path.
 - Every new profile must pass the same baseline quality gates and include profile-specific tests.
 - Update this roadmap when work is completed, deferred, or rejected, and keep status labels factual.
+
+
+**Test strategy progress (this change):** Bun coverage is collected for the API and shared contracts packages during `bun run verify`. CI prints line/function summaries and uploads LCOV reports. Coverage thresholds are deferred until the first baseline is reviewed; the repository still needs accessibility coverage and additional critical-path/API tests.
