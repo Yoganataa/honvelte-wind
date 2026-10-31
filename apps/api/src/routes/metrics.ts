@@ -12,7 +12,9 @@ function isAuthorized(
   const supplied = Buffer.from(authorization.slice(7))
   const expected = Buffer.from(expectedToken)
 
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  return (
+    supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  )
 }
 
 export function createMetricsRoutes(metrics: HttpMetrics, token: string) {
