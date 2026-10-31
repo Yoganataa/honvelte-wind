@@ -45,6 +45,30 @@ describe('InMemoryFixedWindowStore', () => {
     })
   })
 
+  test('throttles full-map pruning while still reclaiming expired entries', async () => {
+    const store = new InMemoryFixedWindowStore(1)
+    const request = {
+      limit: 1,
+      windowMs: 1_000,
+    }
+
+    await store.consume({ ...request, key: 'first', now: 1_000 })
+    await expect(
+      store.consume({ ...request, key: 'second', now: 1_000 }),
+    ).rejects.toBeInstanceOf(RateLimitCapacityError)
+    await expect(
+      store.consume({ ...request, key: 'third', now: 1_000 }),
+    ).rejects.toBeInstanceOf(RateLimitCapacityError)
+    await expect(
+      store.consume({ ...request, key: 'fourth', now: 1_999 }),
+    ).rejects.toBeInstanceOf(RateLimitCapacityError)
+
+    await expect(
+      store.consume({ ...request, key: 'reclaimed', now: 2_000 }),
+    ).resolves.toMatchObject({ allowed: true })
+    expect(store.size).toBe(1)
+  })
+
   test('bounds key storage and prunes expired keys before rejecting new keys', async () => {
     const store = new InMemoryFixedWindowStore(1)
     const base = { now: 1_000, limit: 5, windowMs: 1_000 }
