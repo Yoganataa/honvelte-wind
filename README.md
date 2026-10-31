@@ -33,9 +33,10 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run test:coverage`      | Run API and contracts tests with text and LCOV coverage reports         |
 | `bun run test:db-examples`   | Test the optional SQLite and PostgreSQL adapter examples                |
 | `bun run test:auth-examples` | Test optional session, CSRF, OIDC identity, and RBAC examples           |
+| `bun run test:request-safety` | Test optional rate limiting and request deadline middleware               |
 | `bun run test:e2e`           | Playwright browser tests                                                |
 | `bun run verify`             | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`         | All verification including database, auth examples, and browser E2E     |
+| `bun run verify:all`         | All verification including DB, auth, request safety, and browser E2E   |
 
 ## Architecture
 
@@ -70,6 +71,14 @@ An opt-in reference implementation lives under `examples/auth`. It provides opaq
 
 Run `bun run test:auth-examples` to test the session, cookie middleware, CSRF, OIDC identity boundary, SQLite store, and RBAC behavior.
 
+## Optional API request safety
+
+`examples/request-safety` contains route-scoped fixed-window rate limiting and request-deadline middleware. The limiter uses a bounded in-memory store for one Bun process and a pluggable `RateLimitStore` contract for a future Redis/Valkey implementation. Its key selector is explicit; authenticated routes should use a server-side user ID, while IP-based policies must use a trusted socket/proxy identity—not arbitrary `X-Forwarded-For` input.
+
+The request-deadline middleware returns 504 and exposes an `AbortSignal` to downstream handlers. Pass that signal into cancellable `fetch` or driver operations; JavaScript cannot forcibly terminate work that ignores cancellation. Do not apply request deadlines to SSE or WebSocket routes.
+
+Run `bun run test:request-safety` to run its strict type check and Bun tests. No new runtime dependency or service is added to the default workspace.
+
 ## Icon system
 
 The web app uses `unplugin-icons` with Iconify collections. Lucide is the default icon style. Import icons as Svelte components with `~icons/{collection}/{icon}`; they are resolved at build time, so only the icons imported by the app are included in the bundle.
@@ -92,9 +101,10 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
 4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
-5. **Production delivery:** after quality, browser, database, and authentication jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-6. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-7. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+5. **API request safety examples:** tests fixed-window rate limits, trusted key selection, bounded-store failure, timeout responses, abort signals, and cleanup.
+6. **Production delivery:** after quality, browser, database, authentication, and request-safety jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
+7. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+8. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
