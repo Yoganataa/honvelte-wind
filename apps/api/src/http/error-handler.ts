@@ -6,7 +6,18 @@ export function handleApiError(error: Error, c: Context) {
     return c.json(
       {
         error: {
-          code: error.status === 413 ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST',
+          code:
+            error.status === 413
+              ? 'PAYLOAD_TOO_LARGE'
+              : error.status === 429
+                ? 'RATE_LIMITED'
+                : error.status === 503
+                  ? 'RATE_LIMIT_UNAVAILABLE'
+                  : error.status === 504
+                    ? 'GATEWAY_TIMEOUT'
+                    : error.status === 404
+                      ? 'NOT_FOUND'
+                      : 'BAD_REQUEST',
           message: error.message,
         },
       },
