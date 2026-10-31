@@ -34,7 +34,7 @@ The current CI run is green, but the baseline is not yet fully reproducible or p
 | Protect `main` | Open — branch protection is disabled | Require pull requests and successful Quality gates + Browser E2E checks; disable force pushes and deletion. Confirm the selected check names against a real PR. |
 | Pin GitHub Actions | Open — actions use version tags | Pin third-party actions to verified full commit SHAs and add Dependabot updates for Actions. |
 | Security scanning | Open | Add CodeQL for TypeScript/JavaScript, dependency vulnerability checks, and a documented security reporting process. Keep permissions least-privilege. |
-| API body limit | In progress | Enforce the 1 KiB limit against bytes actually read, not only the optional `Content-Length` header; cover requests without that header in tests. |
+| API body limit | Done in this change | Enforces the 1 KiB limit against streamed bytes, with a fast `Content-Length` rejection and a regression test for requests without that header. |
 
 **P0 exit gate:** a clean checkout installs only from the committed lockfile; formatting, lint, type checks, unit tests, E2E, and production artifact smoke tests pass; protected `main` cannot accept an unverified change.
 
