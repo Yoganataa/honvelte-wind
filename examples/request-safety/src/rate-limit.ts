@@ -36,6 +36,7 @@ type WindowCounter = {
  */
 export class InMemoryFixedWindowStore implements RateLimitStore {
   private readonly windows = new Map<string, WindowCounter>()
+  private lastPruneAt = Number.NEGATIVE_INFINITY
 
   constructor(private readonly maxKeys = 50_000) {
     if (!Number.isSafeInteger(maxKeys) || maxKeys < 1) {
@@ -50,7 +51,12 @@ export class InMemoryFixedWindowStore implements RateLimitStore {
     let counter = this.windows.get(key)
 
     if (!counter || counter.resetAt <= now) {
-      if (!counter && this.windows.size >= this.maxKeys) {
+      if (
+        !counter &&
+        this.windows.size >= this.maxKeys &&
+        now - this.lastPruneAt >= 1_000
+      ) {
+        this.lastPruneAt = now
         this.prune(now)
       }
 
