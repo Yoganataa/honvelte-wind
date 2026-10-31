@@ -43,12 +43,7 @@ export function setSessionCookie(
   cookieValue: string,
   options: SessionCookieOptions,
 ): void {
-  setCookie(
-    context,
-    SESSION_COOKIE_NAME,
-    cookieValue,
-    cookieOptions(options),
-  )
+  setCookie(context, SESSION_COOKIE_NAME, cookieValue, cookieOptions(options))
 }
 
 export function clearSessionCookie(
@@ -73,7 +68,12 @@ export function createSessionAuth(
     if (!session) {
       context.header('Cache-Control', 'no-store')
       return context.json(
-        { error: { code: 'UNAUTHENTICATED', message: 'Authentication required.' } },
+        {
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required.',
+          },
+        },
         401,
       )
     }
@@ -114,7 +114,12 @@ export function requireCsrfProtection(
       !safeEqual(csrfToken, session.csrfToken)
     ) {
       return context.json(
-        { error: { code: 'CSRF_REJECTED', message: 'Request origin or CSRF token was rejected.' } },
+        {
+          error: {
+            code: 'CSRF_REJECTED',
+            message: 'Request origin or CSRF token was rejected.',
+          },
+        },
         403,
       )
     }
