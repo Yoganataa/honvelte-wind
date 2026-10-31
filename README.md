@@ -42,13 +42,19 @@ API health: http://127.0.0.1:3000/api/health
 
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
+See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
+
 ## CI/CD
 
 GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
 
-1. **Quality gates:** lint, formatting, TypeScript/Svelte diagnostics, unit tests, and production build.
+1. **Quality gates:** ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
+
+Formatting is available through `bun run format:check`, but is not currently a blocking part of `bun run verify`. This is tracked as a P0 item in the roadmap.
+
+The repository does not currently commit `bun.lock`. CI temporarily falls back to `bun install` when the lockfile is absent, so dependency resolution is not yet fully reproducible. Committing the lockfile and switching every job to frozen installs is also a P0 roadmap item.
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
