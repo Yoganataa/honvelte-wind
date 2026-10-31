@@ -30,6 +30,12 @@ export function createPostgresDatabase(
   }
 
   if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+      throw new Error(
+        'Production PostgreSQL connections must not disable TLS certificate verification.',
+      )
+    }
+
     const sslMode = url.searchParams.get('sslmode') ?? process.env.PGSSLMODE
     if (sslMode !== 'verify-full') {
       throw new Error(
