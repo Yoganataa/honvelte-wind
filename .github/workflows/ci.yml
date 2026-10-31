@@ -182,3 +182,46 @@ jobs:
           path: honvelte-wind-${{ github.sha }}.tar.gz
           if-no-files-found: error
           retention-days: 30
+
+  lockfile-bootstrap:
+    name: Commit generated Bun lockfile
+    needs: [quality, e2e]
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'chore/secure-dependency-refresh' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - name: Checkout dependency-refresh branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Download generated lockfile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "${GITHUB_RUN_ID}" \
+            --name "bun-lock-bootstrap-${GITHUB_RUN_ID}" \
+            --dir /tmp/bun-lock-bootstrap
+          test -s /tmp/bun-lock-bootstrap/bun.lock
+          cp /tmp/bun-lock-bootstrap/bun.lock ./bun.lock
+
+      - name: Commit lockfile and trigger frozen-install verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          if git diff --cached --quiet; then
+            echo "bun.lock already matches the generated dependency graph"
+            exit 0
+          fi
+          git commit -m "chore(deps): commit Bun 1.4.4 lockfile"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
+          gh workflow run ci.yml --ref "${GITHUB_HEAD_REF}"
