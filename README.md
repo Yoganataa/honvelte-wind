@@ -152,6 +152,10 @@ bun run test:e2e:install
 
 Run `bun run format` to apply Prettier when changing formatting. `bun run verify` includes `format:check`, coverage reporting, audit, lint, typecheck, unit tests, and build; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, keyboard navigation, and API route behavior. axe-core scans the initial, validation, and success UI states.
 
+## Manual accessibility review
+
+Automated Playwright and axe-core checks are regression safeguards, not a substitute for manual assistive-technology testing. Before a release, follow the [manual accessibility review checklist](docs/testing/accessibility-manual-checklist.md) and record the commit, browser, operating system, screen reader, and actual results. Passing CI does not imply that manual review has been completed.
+
 ## Agent instructions and skills
 
 Read `AGENTS.md` before making changes. Skills under `.agents/skills/` are the canonical sources:
