@@ -18,11 +18,18 @@ type ResponseSchema<T> = {
 }
 
 export type ApiClientErrorOptions = {
-  status?: number
-  code?: ApiErrorCode
-  requestId?: string
+  status?: number | undefined
+  code?: ApiErrorCode | undefined
+  requestId?: string | undefined
   cause?: unknown
 }
+
+export type ApiFetcher = (
+  input: string,
+  init: RequestInit,
+) => Promise<Response>
+
+const defaultFetcher: ApiFetcher = (input, init) => fetch(input, init)
 
 export class ApiClientError extends Error {
   readonly status: number | undefined
@@ -93,7 +100,7 @@ async function readJson<T>(
   return parsed.data
 }
 
-export function createApiClient(fetcher: typeof fetch = fetch) {
+export function createApiClient(fetcher: ApiFetcher = defaultFetcher) {
   async function request<T>(
     path: string,
     init: RequestInit,
