@@ -144,12 +144,12 @@ The base starter has no mandatory external runtime dependencies. Readiness there
 
 The Bun HTTP server limits are validated at startup and configurable through environment variables:
 
-| Variable | Default | Allowed range | Purpose |
-| --- | ---: | ---: | --- |
-| `SERVER_IDLE_TIMEOUT_SECONDS` | `30` | 1–255 | Connection inactivity timeout in seconds. |
-| `SERVER_MAX_REQUEST_BODY_BYTES` | `1048576` | 1 KiB–10 MiB | Maximum body size accepted by Bun. |
-| `SHUTDOWN_READINESS_DELAY_MS` | `1000` | 0–30000 | Delay before stopping the listener so load balancers can observe readiness=false. |
-| `SHUTDOWN_TIMEOUT_MS` | `15000` | 100–120000 | Grace period before active connections are force-closed. |
+| Variable                        | Default   | Allowed range | Purpose                                                                           |
+| ------------------------------- | --------: | ------------: | --------------------------------------------------------------------------------- |
+| `SERVER_IDLE_TIMEOUT_SECONDS`   |      `30` |         1–255 | Connection inactivity timeout in seconds.                                         |
+| `SERVER_MAX_REQUEST_BODY_BYTES` | `1048576` |  1 KiB–10 MiB | Maximum body size accepted by Bun.                                                |
+| `SHUTDOWN_READINESS_DELAY_MS`   |    `1000` |       0–30000 | Delay before stopping the listener so load balancers can observe readiness=false. |
+| `SHUTDOWN_TIMEOUT_MS`           |   `15000` |    100–120000 | Grace period before active connections are force-closed.                          |
 
 The global Bun body limit is an outer transport limit. The existing greeting JSON parser keeps its stricter 1 KiB application-level limit. Increase either limit only for a concrete endpoint requirement, and continue streaming or bounding large uploads instead of buffering arbitrary payloads in memory.
 
