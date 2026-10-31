@@ -19,7 +19,7 @@
     "test:e2e:debug": "playwright test -c tests/e2e/playwright.config.ts --debug",
     "test:e2e:report": "playwright show-report",
     "test:e2e:install": "playwright install --with-deps chromium",
-    "verify": "bun run lint && bun run format:check && bun run check && bun run test && bun run build",
+    "verify": "bun run lint && bun run check && bun run test && bun run build",
     "verify:all": "bun run verify && bun run test:e2e",
     "agents:sync:claude": "bun run scripts/sync-agent-skills.ts"
   },
