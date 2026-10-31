@@ -161,6 +161,7 @@ describe('API app', () => {
       error: { code: 'SERVICE_UNAVAILABLE' },
     })
   })
+
   test('replaces invalid inbound request IDs instead of reflecting them', async () => {
     const response = await app.request(API_BASE_PATH + apiPaths.health, {
       headers: { 'x-request-id': 'invalid request id' },
@@ -175,13 +176,13 @@ describe('API app', () => {
     )
   })
 
-  test('keeps the metrics endpoint disabled unless explicitly enabled', async () => {
+  test('keeps metrics disabled by default', async () => {
     const response = await app.request(API_BASE_PATH + apiPaths.metrics)
 
     expect(response.status).toBe(404)
   })
 
-  test('protects metrics with a bearer token and exports Prometheus text', async () => {
+  test('protects the Prometheus metrics endpoint', async () => {
     const metrics = createHttpMetrics()
     metrics.recordRequest({
       method: 'GET',
@@ -214,10 +215,10 @@ describe('API app', () => {
     const output = await accepted.text()
     expect(output).toContain('http_server_requests_total')
     expect(output).toContain('http_server_active_requests 0')
-    expect(output).not.toContain('route=\"/api/metrics\"')
+    expect(output).not.toContain('route="/api/metrics"')
   })
 
-  test('logs a route template and request ID without query strings', async () => {
+  test('logs route templates without query strings', async () => {
     const records: LogRecord[] = []
     const logger = createLogger({
       level: 'debug',
@@ -244,5 +245,4 @@ describe('API app', () => {
     })
     expect(JSON.stringify(records)).not.toContain('never-log-this')
   })
-
 })
