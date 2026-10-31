@@ -12,7 +12,11 @@ import {
 } from '../src/http'
 import { issueSessionForOidcIdentity } from '../src/oidc-identity'
 import { createAuthRoutes } from '../src/routes'
-import { SessionService, type SessionRecord, type SessionStore } from '../src/session'
+import {
+  SessionService,
+  type SessionRecord,
+  type SessionStore,
+} from '../src/session'
 import { SqliteSessionStore } from '../src/sqlite-session-store'
 import type { AuthEnv } from '../src/http'
 
