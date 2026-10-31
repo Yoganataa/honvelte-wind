@@ -41,7 +41,10 @@ export function createApp(
   app.route(API_BASE_PATH, greetingRoutes)
 
   app.notFound((c) =>
-    c.json({ error: { code: 'NOT_FOUND', message: 'Resource not found' } }, 404),
+    c.json(
+      { error: { code: 'NOT_FOUND', message: 'Resource not found' } },
+      404,
+    ),
   )
 
   app.onError(handleApiError)
