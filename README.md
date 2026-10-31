@@ -148,11 +148,12 @@ The Bun HTTP server limits are validated at startup and configurable through env
 | --- | ---: | ---: | --- |
 | `SERVER_IDLE_TIMEOUT_SECONDS` | `30` | 1–255 | Connection inactivity timeout in seconds. |
 | `SERVER_MAX_REQUEST_BODY_BYTES` | `1048576` | 1 KiB–10 MiB | Maximum body size accepted by Bun. |
+| `SHUTDOWN_READINESS_DELAY_MS` | `1000` | 0–30000 | Delay before stopping the listener so load balancers can observe readiness=false. |
 | `SHUTDOWN_TIMEOUT_MS` | `15000` | 100–120000 | Grace period before active connections are force-closed. |
 
 The global Bun body limit is an outer transport limit. The existing greeting JSON parser keeps its stricter 1 KiB application-level limit. Increase either limit only for a concrete endpoint requirement, and continue streaming or bounding large uploads instead of buffering arbitrary payloads in memory.
 
-On `SIGINT` or `SIGTERM`, the server marks readiness false, rejects new application requests with `503 SERVICE_UNAVAILABLE`, and calls Bun's `server.stop()` to stop accepting connections while in-flight HTTP work finishes. If the configured grace period expires, it calls `server.stop(true)` to close remaining active connections. Requests still running at that point can be interrupted; keep the deployment platform's termination grace period longer than `SHUTDOWN_TIMEOUT_MS` plus a small process-exit margin.
+On `SIGINT` or `SIGTERM`, the server marks readiness false and rejects new application requests with `503 SERVICE_UNAVAILABLE`. It then waits `SHUTDOWN_READINESS_DELAY_MS` (1 second by default) so a load balancer can observe the failed readiness probe before Bun stops accepting connections. Bun's `server.stop()` then lets in-flight HTTP work finish. If the configured grace period expires, it calls `server.stop(true)` to close remaining active connections. Requests still running at that point can be interrupted; keep the deployment platform's termination grace period longer than `SHUTDOWN_TIMEOUT_MS` plus a small process-exit margin.
 
 Bun's idle timeout also applies to quiet periods during streaming responses. The starter does not currently expose SSE or WebSocket routes; when adding long-lived streams, configure their transport timeout deliberately rather than globally disabling connection timeouts. See the [Bun HTTP server lifecycle and timeout documentation](https://bun.com/docs/runtime/http/server).
 
