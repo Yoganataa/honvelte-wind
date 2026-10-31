@@ -7,5 +7,6 @@ export const API_BASE_PATH = '/api' as const
 export const apiPaths = {
   health: '/health',
   ready: '/ready',
+  metrics: '/metrics',
   greet: '/greet',
 } as const
