@@ -135,7 +135,7 @@ At the callback, recover and consume that transaction exactly once, then let `op
 
 This is the protocol integration boundary, not a complete provider registration or callback route. Configure an exact redirect URI with the provider, keep client credentials server-side, require HTTPS in production, and test the chosen provider's logout and account-linking semantics before enabling it.
 
-Account mapping must use the issuer and subject pair. Never automatically link a new identity to an existing account based only on a matching email address; email can change and provider verification semantics differ. Treat provider-specific account linking as a separate, authenticated workflow.
+Account mapping must use the exact issuer identifier and subject pair, including its full path and trailing-slash form. Never automatically link a new identity to an existing account based only on a matching email address; email can change and provider verification semantics differ. Treat provider-specific account linking as a separate, authenticated workflow.
 
 ## CSRF and browser behavior
 
