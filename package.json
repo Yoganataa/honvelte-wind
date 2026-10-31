@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "audit": "bun audit --audit-level=moderate",
+    "audit": "bun audit --audit-level=low",
     "test": "bun run --filter @honvelte/api test && bun run --filter @honvelte/contracts test",
     "test:e2e": "playwright test -c tests/e2e/playwright.config.ts",
     "test:e2e:ui": "playwright test -c tests/e2e/playwright.config.ts --ui",
