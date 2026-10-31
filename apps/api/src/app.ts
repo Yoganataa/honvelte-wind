@@ -31,9 +31,14 @@ export function createApp(options: CreateAppOptions = {}) {
   const metrics = options.metrics ?? createNoopHttpMetrics()
   const metricsEnabled = options.metricsEnabled ?? false
 
-  if (metricsEnabled && !options.metricsToken) {
+  if (
+    metricsEnabled &&
+    (!options.metricsToken ||
+      options.metricsToken.length < 32 ||
+      options.metricsToken.length > 256)
+  ) {
     throw new Error(
-      'A metrics bearer token is required when the metrics endpoint is enabled.',
+      'A metrics bearer token between 32 and 256 characters is required when the metrics endpoint is enabled.',
     )
   }
 
