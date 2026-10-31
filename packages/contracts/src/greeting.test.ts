@@ -13,6 +13,8 @@ describe('greetingSchema', () => {
   })
 
   test('rejects names longer than 80 characters', () => {
-    expect(greetingSchema.safeParse({ name: 'a'.repeat(81) }).success).toBe(false)
+    expect(greetingSchema.safeParse({ name: 'a'.repeat(81) }).success).toBe(
+      false,
+    )
   })
 })

@@ -5,45 +5,45 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "06:00"
+      time: '06:00'
       timezone: Asia/Jakarta
     open-pull-requests-limit: 10
     labels:
       - dependencies
     commit-message:
-      prefix: "chore(deps)"
+      prefix: 'chore(deps)'
     groups:
       frontend-toolchain:
         patterns:
-          - "@sveltejs/*"
-          - "@tailwindcss/*"
-          - "svelte"
-          - "svelte-*"
-          - "tailwindcss"
-          - "vite"
+          - '@sveltejs/*'
+          - '@tailwindcss/*'
+          - 'svelte'
+          - 'svelte-*'
+          - 'tailwindcss'
+          - 'vite'
         update-types:
           - minor
           - patch
       backend-runtime:
         patterns:
-          - "hono"
-          - "zod"
+          - 'hono'
+          - 'zod'
         update-types:
           - minor
           - patch
       development-toolchain:
         patterns:
-          - "@eslint/*"
-          - "@playwright/*"
-          - "@types/bun"
-          - "eslint"
-          - "eslint-*"
-          - "globals"
-          - "prettier"
-          - "prettier-*"
-          - "svelte-check"
-          - "typescript"
-          - "typescript-eslint"
+          - '@eslint/*'
+          - '@playwright/*'
+          - '@types/bun'
+          - 'eslint'
+          - 'eslint-*'
+          - 'globals'
+          - 'prettier'
+          - 'prettier-*'
+          - 'svelte-check'
+          - 'typescript'
+          - 'typescript-eslint'
         update-types:
           - minor
           - patch
@@ -53,18 +53,18 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "06:15"
+      time: '06:15'
       timezone: Asia/Jakarta
     open-pull-requests-limit: 10
     labels:
       - dependencies
       - github-actions
     commit-message:
-      prefix: "chore(ci)"
+      prefix: 'chore(ci)'
     groups:
       github-actions:
         patterns:
-          - "*"
+          - '*'
         update-types:
           - minor
           - patch

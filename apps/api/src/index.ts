@@ -25,4 +25,6 @@ const server = Bun.serve({
   fetch: app.fetch,
 })
 
-console.info(`Honvelte Wind listening on http://${server.hostname}:${server.port}`)
+console.info(
+  `Honvelte Wind listening on http://${server.hostname}:${server.port}`,
+)

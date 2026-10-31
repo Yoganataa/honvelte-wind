@@ -20,18 +20,19 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Run API and Vite concurrently |
-| `bun run build` | Build contracts and SPA |
-| `bun run start` | Serve API + static SPA with Bun |
-| `bun run check` | TypeScript and Svelte diagnostics |
-| `bun run lint` | ESLint |
-| `bun run audit` | Audit locked dependencies for moderate-or-higher advisories |
-| `bun run test` | API and contracts unit tests |
-| `bun run test:e2e` | Playwright browser tests |
-| `bun run verify` | Audit, lint, typecheck, unit tests, and production build |
-| `bun run verify:all` | All verification including E2E |
+| Command                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| `bun run dev`          | Run API and Vite concurrently                           |
+| `bun run build`        | Build contracts and SPA                                 |
+| `bun run start`        | Serve API + static SPA with Bun                         |
+| `bun run check`        | TypeScript and Svelte diagnostics                       |
+| `bun run lint`         | ESLint                                                  |
+| `bun run format:check` | Prettier formatting check                               |
+| `bun run audit`        | Audit locked dependencies for known advisories          |
+| `bun run test`         | API and contracts unit tests                            |
+| `bun run test:e2e`     | Playwright browser tests                                |
+| `bun run verify`       | Prettier, audit, lint, typecheck, unit tests, and build |
+| `bun run verify:all`   | All verification including E2E                          |
 
 ## Architecture
 
@@ -49,7 +50,7 @@ See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criter
 
 GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
 
-1. **Quality gates:** Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
+1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
 4. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
@@ -88,11 +89,12 @@ Install Chromium once:
 bun run test:e2e:install
 ```
 
-Run `bun run format:check` to check formatting and `bun run format` to apply Prettier. Then run `bun run verify:all`. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
+Run `bun run format` to apply Prettier when changing formatting. `bun run verify` now includes `format:check`; run `bun run verify:all` before submitting a change. E2E config starts a production build and Bun server, then exercises SPA rendering, API calls, form validation, and API route behavior.
 
 ## Agent instructions and skills
 
 Read `AGENTS.md` before making changes. Skills under `.agents/skills` are the canonical sources:
+
 - `project-development`: implementation and architecture rules.
 - `testing`: unit, integration, contract, and regression tests.
 - `playwright-e2e`: browser automation and E2E workflow.
@@ -106,3 +108,13 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 - Same-origin API/static hosting avoids default CORS configuration.
 - Runtime input validation uses Zod; TypeScript types alone are not runtime validation.
 - Keep secrets in server environment only. Never expose them through Vite `VITE_*` variables.
+
+## Repository governance
+
+The repository has not yet been configured with a ruleset for `main`. Before treating it as protected, create a branch ruleset targeting `main` with these requirements:
+
+- Require pull requests before merging.
+- Require the status checks `Quality gates`, `Browser E2E`, `Analyze JavaScript and TypeScript`, and `Review dependency changes`.
+- Block force pushes and branch deletion; do not configure a bypass for routine contributors.
+
+Enable Dependabot alerts and Dependabot security updates under **Settings → Security and quality → Code security and analysis**. These are repository security settings, separate from Dependabot version updates in `.github/dependabot.yml`.
