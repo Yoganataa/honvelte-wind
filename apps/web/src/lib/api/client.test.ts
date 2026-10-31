@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  ApiClientError,
-  createApiClient,
-} from './client'
+import { ApiClientError, createApiClient } from './client'
 
 describe('typed API client', () => {
   test('validates and returns the shared health response contract', async () => {
@@ -152,11 +149,12 @@ describe('typed API client', () => {
   })
 
   test('rejects malformed JSON and invalid success payloads', async () => {
-    const malformedJsonClient = createApiClient(async () =>
-      new Response('{', {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-      }),
+    const malformedJsonClient = createApiClient(
+      async () =>
+        new Response('{', {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
     )
     const invalidPayloadClient = createApiClient(async () =>
       Response.json({ status: 'degraded', timestamp: 'not-a-date' }),
