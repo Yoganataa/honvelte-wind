@@ -11,5 +11,8 @@
     "@honvelte/contracts": "workspace:*",
     "hono": "^4.13.0",
     "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.5"
   }
 }
