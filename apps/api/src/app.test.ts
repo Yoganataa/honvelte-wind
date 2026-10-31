@@ -211,7 +211,10 @@ describe('API app', () => {
     expect(accepted.status).toBe(200)
     expect(accepted.headers.get('cache-control')).toBe('no-store')
     expect(accepted.headers.get('content-type')).toContain('text/plain')
-    expect(await accepted.text()).toContain('http_server_requests_total')
+    const output = await accepted.text()
+    expect(output).toContain('http_server_requests_total')
+    expect(output).toContain('http_server_active_requests 0')
+    expect(output).not.toContain('route=\"/api/metrics\"')
   })
 
   test('logs a route template and request ID without query strings', async () => {
