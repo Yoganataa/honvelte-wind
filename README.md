@@ -20,20 +20,21 @@ API health: http://127.0.0.1:3000/api/health
 
 ## Commands
 
-| Command                 | Description                                                             |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `bun run dev`           | Run API and Vite concurrently                                           |
-| `bun run build`         | Build contracts and SPA                                                 |
-| `bun run start`         | Serve API + static SPA with Bun                                         |
-| `bun run check`         | TypeScript and Svelte diagnostics                                       |
-| `bun run lint`          | ESLint                                                                  |
-| `bun run format:check`  | Prettier formatting check                                               |
-| `bun run audit`         | Audit locked dependencies for known advisories                          |
-| `bun run test`          | Fast API and contracts unit tests                                       |
-| `bun run test:coverage` | Run API and contracts tests with text and LCOV coverage reports         |
-| `bun run test:e2e`      | Playwright browser tests                                                |
-| `bun run verify`        | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`    | All verification including E2E                                          |
+| Command                    | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `bun run dev`              | Run API and Vite concurrently                                           |
+| `bun run build`            | Build contracts and SPA                                                 |
+| `bun run start`            | Serve API + static SPA with Bun                                         |
+| `bun run check`            | TypeScript and Svelte diagnostics                                       |
+| `bun run lint`             | ESLint                                                                  |
+| `bun run format:check`     | Prettier formatting check                                               |
+| `bun run audit`            | Audit locked dependencies for known advisories                          |
+| `bun run test`             | Fast API and contracts unit tests                                       |
+| `bun run test:coverage`    | Run API and contracts tests with text and LCOV coverage reports         |
+| `bun run test:db-examples` | Test the optional SQLite and PostgreSQL adapter examples                |
+| `bun run test:e2e`         | Playwright browser tests                                                |
+| `bun run verify`           | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
+| `bun run verify:all`       | All verification including database examples and browser E2E            |
 
 ## Architecture
 
@@ -50,6 +51,17 @@ The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
+
+## Optional database adapters
+
+The base workspace intentionally includes no database driver or ORM. Runnable examples are kept outside the Bun workspaces under `examples/databases`, so they do not add packages to the default install:
+
+- **SQLite:** Bun's built-in `bun:sqlite` driver, a local file, WAL mode for file-backed use, and synchronous repository methods.
+- **PostgreSQL:** Bun's built-in `Bun.SQL` adapter, a bounded connection pool, parameterized queries, transaction-scoped migration locking, and asynchronous repository methods. The CI integration service uses PostgreSQL 18.6.
+
+Both examples include ordered SQL migrations and a `schema_migrations` ledger. Start with `examples/databases/README.md` and the database-specific README before copying an adapter into an application. Do not edit an applied migration; add the next numbered migration instead.
+
+Run `bun run test:db-examples` to test SQLite and the optional PostgreSQL example. PostgreSQL integration tests run only when `DATABASE_URL_TEST` is configured with a disposable database whose name ends in `_test`; the test runner refuses other database names. CI provisions a fresh PostgreSQL service and runs both adapters.
 
 ## Icon system
 
@@ -71,9 +83,10 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 
 1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests with line/function coverage, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
-3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-4. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-5. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
+4. **Production delivery:** after quality, browser, and database-example jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
+5. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+6. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
@@ -126,7 +139,7 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 
 ## Design decisions
 
-- No database, ORM, auth provider, Redis, or queue is installed by default.
+- No database driver, ORM, auth provider, Redis, or queue is installed in the default workspace; optional database examples live under `examples/databases`.
 - No Docker requirement.
 - Same-origin API/static hosting avoids default CORS configuration.
 - Runtime input validation uses Zod; TypeScript types alone do not validate network payloads.

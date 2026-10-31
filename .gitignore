@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local database files from optional examples
+examples/databases/**/data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
