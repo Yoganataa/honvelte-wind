@@ -1,10 +1,12 @@
 <script lang="ts">
+  import type { HTMLInputAttributes } from 'svelte/elements'
+
   type Props = {
     id: string
     label: string
     placeholder?: string
     maxLength?: number
-    autocomplete?: string
+    autocomplete?: HTMLInputAttributes['autocomplete']
     error?: string
     disabled?: boolean
     value?: string
@@ -36,7 +38,7 @@
     {autocomplete}
     {placeholder}
     {disabled}
-    oninput={oninput}
+    {oninput}
     aria-invalid={error ? 'true' : undefined}
     aria-describedby={error ? errorId : undefined}
     class="min-h-11 min-w-0 rounded-lg border border-border bg-canvas px-4 py-3 text-foreground outline-none transition-colors placeholder:text-muted focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50"
