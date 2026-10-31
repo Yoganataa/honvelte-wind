@@ -50,7 +50,7 @@ For anonymous traffic, use a trusted source identity. On Bun, Hono's `getConnInf
 
 - Counters are local to one process and disappear on restart.
 - Separate Bun workers or replicas do not share counters.
-- The store has a configurable key cap (50,000 by default); once full it prunes expired keys, then returns 503 instead of allowing requests through.
+- The store has a configurable key cap (50,000 by default); once full it prunes expired keys at most once per second, then returns 503 instead of allowing requests through.
 - Fixed windows can permit a short burst across a window boundary. Choose a sliding-window or token-bucket algorithm when that behavior is unsuitable.
 
 For multiple processes or replicas, implement the same `RateLimitStore` contract with a shared service. A Redis/Valkey implementation should use one atomic operation or Lua script to increment the scoped key, set the expiry only on first increment, and return the count and reset time. Do not implement this with separate non-atomic GET/INCR/EXPIRE calls. The shared store's key namespace should include the application, route scope, and principal.
