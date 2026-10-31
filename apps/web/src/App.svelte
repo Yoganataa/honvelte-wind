@@ -5,6 +5,7 @@
     greetingSchema,
     type GreetingResponse,
   } from '@honvelte/contracts'
+  import SendIcon from '~icons/lucide/send'
 
   let name = $state('')
   let result = $state<GreetingResponse | null>(null)
@@ -100,7 +101,16 @@
           disabled={loading}
           class="rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-zinc-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? 'Sending…' : 'Say hello'}
+          {#if loading}
+            Sending…
+          {:else}
+            Say hello
+            <SendIcon
+              aria-hidden="true"
+              class="ml-2 inline-block size-4"
+              focusable="false"
+            />
+          {/if}
         </button>
       </form>
 
