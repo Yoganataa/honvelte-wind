@@ -94,5 +94,4 @@ A profile is eligible for inclusion when it has an owner, a maintained dependenc
 - Every new profile must pass the same baseline quality gates and include profile-specific tests.
 - Update this roadmap when work is completed, deferred, or rejected, and keep status labels factual.
 
-
 **Test strategy progress (this change):** Bun coverage is collected for the API and shared contracts packages during `bun run verify`. CI prints line/function summaries and uploads LCOV reports. Coverage thresholds are deferred until the first baseline is reviewed; the repository still needs accessibility coverage and additional critical-path/API tests.
