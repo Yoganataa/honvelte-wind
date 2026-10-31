@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { greetingSchema, type GreetingResponse } from '@honvelte/contracts'
+  import {
+    apiErrorResponseSchema,
+    greetingResponseSchema,
+    greetingSchema,
+    type GreetingResponse,
+  } from '@honvelte/contracts'
 
   let name = $state('')
   let result = $state<GreetingResponse | null>(null)
@@ -24,13 +29,27 @@
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(parsed.data),
       })
-      const payload = await response.json()
 
-      if (!response.ok) {
-        throw new Error(payload.error?.message ?? 'Request failed.')
+      let payload: unknown
+      try {
+        payload = await response.json()
+      } catch {
+        throw new Error('API returned invalid JSON.')
       }
 
-      result = payload as GreetingResponse
+      if (!response.ok) {
+        const apiError = apiErrorResponseSchema.safeParse(payload)
+        throw new Error(
+          apiError.success ? apiError.data.error.message : 'Request failed.',
+        )
+      }
+
+      const greeting = greetingResponseSchema.safeParse(payload)
+      if (!greeting.success) {
+        throw new Error('API returned an invalid response.')
+      }
+
+      result = greeting.data
     } catch (cause) {
       error =
         cause instanceof Error ? cause.message : 'Unexpected request error.'
