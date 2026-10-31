@@ -31,7 +31,6 @@ export function createApiErrorHandler(logger: Logger) {
 
     logger.error('http.server.unhandled_error', {
       requestId: c.res.headers.get('x-request-id') ?? 'unknown',
-      route: c.req.path,
       errorType: error.name || 'Error',
     })
 
