@@ -11,6 +11,25 @@ function parsePoolMax(value: string | undefined): number {
   return parsed
 }
 
+export function assertProductionPostgresTls(
+  url: URL,
+  nodeTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED,
+  configuredSslMode = process.env.PGSSLMODE,
+): void {
+  if (nodeTlsRejectUnauthorized === '0') {
+    throw new Error(
+      'Production PostgreSQL connections must not disable TLS certificate verification.',
+    )
+  }
+
+  const sslMode = url.searchParams.get('sslmode') ?? configuredSslMode
+  if (sslMode !== 'verify-full') {
+    throw new Error(
+      'Production PostgreSQL connections require sslmode=verify-full or PGSSLMODE=verify-full.',
+    )
+  }
+}
+
 export function createPostgresDatabase(
   connectionString = process.env.DATABASE_URL,
 ): SQL {
@@ -30,18 +49,7 @@ export function createPostgresDatabase(
   }
 
   if (process.env.NODE_ENV === 'production') {
-    if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
-      throw new Error(
-        'Production PostgreSQL connections must not disable TLS certificate verification.',
-      )
-    }
-
-    const sslMode = url.searchParams.get('sslmode') ?? process.env.PGSSLMODE
-    if (sslMode !== 'verify-full') {
-      throw new Error(
-        'Production PostgreSQL connections require sslmode=verify-full or PGSSLMODE=verify-full.',
-      )
-    }
+    assertProductionPostgresTls(url)
   }
 
   return new SQL(url.toString(), {
