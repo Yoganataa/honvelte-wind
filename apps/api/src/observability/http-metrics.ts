@@ -70,11 +70,16 @@ function normalizeStatus(statusCode: number): number {
 }
 
 function escapeLabel(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/"/g, '\\"')
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/"/g, '\\"')
 }
 
 function formatLabels(series: RequestSeries): string {
-  return `method="${escapeLabel(series.method)}",route="${escapeLabel(series.route)}",status_code="${series.statusCode}"`
+  const method = escapeLabel(series.method)
+  const route = escapeLabel(series.route)
+  return `method="${method}",route="${route}",status_code="${series.statusCode}"`
 }
 
 function createSeries(
@@ -89,7 +94,10 @@ function createSeries(
     count: 0,
     errorCount: 0,
     durationSumSeconds: 0,
-    bucketCounts: Array.from({ length: DURATION_BUCKETS_SECONDS.length }, () => 0),
+    bucketCounts: Array.from(
+      { length: DURATION_BUCKETS_SECONDS.length },
+      () => 0,
+    ),
   }
 }
 
@@ -136,7 +144,11 @@ export function createHttpMetrics(): HttpMetrics {
       if (statusCode >= 500) current.errorCount += 1
       current.durationSumSeconds += durationSeconds
 
-      for (let index = 0; index < DURATION_BUCKETS_SECONDS.length; index += 1) {
+      for (
+        let index = 0;
+        index < DURATION_BUCKETS_SECONDS.length;
+        index += 1
+      ) {
         if (durationSeconds <= DURATION_BUCKETS_SECONDS[index]) {
           current.bucketCounts[index] += 1
         }
