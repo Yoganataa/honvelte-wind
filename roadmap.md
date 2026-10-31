@@ -50,8 +50,6 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 | Test strategy                    | Add coverage reporting and thresholds, API integration tests, accessibility checks, and critical-path regression tests.                   | Thresholds are evidence-based; flaky tests are not hidden with retries; reports are retained in CI.                           |
 | API request safety               | Add rate limiting and request timeouts at a clearly defined boundary when exposed publicly.                                               | Limits are configurable, tested, and documented for in-memory versus distributed deployments.                                 |
 
-
-
 **Shared API contract progress (PR #10):** The greeting endpoint now has shared Zod schemas for success responses and API error envelopes. The API tests validate endpoint payloads against those schemas, and the browser validates unknown response payloads before using them. This is a partial P1 completion; a reusable typed API client is intentionally deferred until multiple endpoints justify a shared transport abstraction.
 
 **P1 exit gate:** a medium-sized application can add a feature end-to-end without putting business logic in route handlers or duplicating contracts, and critical behavior has meaningful automated coverage.
