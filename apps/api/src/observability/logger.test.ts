@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  createLogger,
-  redactLogFields,
-  type LogRecord,
-} from './logger'
+import { createLogger, redactLogFields, type LogRecord } from './logger'
 
 describe('structured logger', () => {
   test('filters records below the configured minimum level', () => {
@@ -25,7 +21,7 @@ describe('structured logger', () => {
     expect(records.every((record) => record.level !== 'debug')).toBe(true)
   })
 
-  test('redacts sensitive keys recursively and bearer credentials in strings', () => {
+  test('redacts nested sensitive fields and bearer credentials', () => {
     const safe = redactLogFields({
       authorization: 'Bearer top-level-secret',
       nested: {
