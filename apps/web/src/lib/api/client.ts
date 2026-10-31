@@ -1,5 +1,7 @@
 import {
+  API_BASE_PATH,
   apiErrorResponseSchema,
+  apiPaths,
   greetingSchema,
   greetingResponseSchema,
   healthResponseSchema,
@@ -137,7 +139,7 @@ export function createApiClient(fetcher: ApiFetcher = defaultFetcher) {
   return {
     health(options: ApiRequestOptions = {}): Promise<HealthResponse> {
       return request(
-        '/api/health',
+        API_BASE_PATH + apiPaths.health,
         {
           method: 'GET',
           ...(options.signal ? { signal: options.signal } : {}),
@@ -158,7 +160,7 @@ export function createApiClient(fetcher: ApiFetcher = defaultFetcher) {
       }
 
       return request(
-        '/api/greet',
+        API_BASE_PATH + apiPaths.greet,
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
