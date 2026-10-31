@@ -114,7 +114,7 @@ export function createHttpMetrics(): HttpMetrics {
 
       let current = series.get(key)
 
-      if (!current && series.size >= MAX_SERIES) {
+      if (!current && series.size >= MAX_SERIES - 1) {
         current = series.get(OVERFLOW_SERIES_KEY)
         if (!current) {
           current = createSeries('_OTHER', '__overflow__', 0)
