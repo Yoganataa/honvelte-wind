@@ -86,9 +86,15 @@ describe('createRateLimit', () => {
     const blocked = await app.request('/limited/reports', { headers })
 
     expect(first.status).toBe(200)
-    expect(first.headers.get('ratelimit-limit')).toBe('2')
-    expect(first.headers.get('ratelimit-remaining')).toBe('1')
-    expect(second.headers.get('ratelimit-remaining')).toBe('0')
+    expect(first.headers.get('ratelimit-policy')).toBe(
+      '"reports:read";q=2;w=10',
+    )
+    expect(first.headers.get('ratelimit')).toBe(
+      '"reports:read";r=1;t=5',
+    )
+    expect(second.headers.get('ratelimit')).toBe(
+      '"reports:read";r=0;t=5',
+    )
     expect(blocked.status).toBe(429)
     expect(blocked.headers.get('retry-after')).toBe('5')
     expect(await blocked.json()).toMatchObject({
@@ -98,7 +104,9 @@ describe('createRateLimit', () => {
     now = 15_000
     const afterReset = await app.request('/limited/reports', { headers })
     expect(afterReset.status).toBe(200)
-    expect(afterReset.headers.get('ratelimit-remaining')).toBe('1')
+    expect(afterReset.headers.get('ratelimit')).toBe(
+      '"reports:read";r=1;t=5',
+    )
   })
 
   test('fails closed with 503 when the bounded in-memory store is full', async () => {
