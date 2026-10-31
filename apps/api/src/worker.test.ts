@@ -25,9 +25,7 @@ describe('Cloudflare Workers adapter', () => {
       }),
     )
 
-    expect(response.headers.get('x-request-id')).toBe(
-      'worker-adapter-test-123',
-    )
+    expect(response.headers.get('x-request-id')).toBe('worker-adapter-test-123')
   })
 
   test('serves application routes through the Worker boundary', async () => {
