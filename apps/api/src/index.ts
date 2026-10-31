@@ -2,7 +2,10 @@ import { serveStatic } from 'hono/bun'
 import { resolve } from 'node:path'
 import { createApp } from './app'
 import { env } from './env'
-import { createHttpMetrics, createNoopHttpMetrics } from './observability/http-metrics'
+import {
+  createHttpMetrics,
+  createNoopHttpMetrics,
+} from './observability/http-metrics'
 import { createLogger } from './observability/logger'
 import { createRuntimeLifecycle } from './runtime/lifecycle'
 import { stopServerGracefully } from './runtime/shutdown'
