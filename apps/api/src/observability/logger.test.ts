@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import { createLogger, noopLogger, redactLogFields, type LogRecord } from './logger'
+import {
+  createLogger,
+  noopLogger,
+  redactLogFields,
+  type LogRecord,
+} from './logger'
 
 describe('structured logger', () => {
   test('filters records below the configured minimum level', () => {
@@ -95,10 +100,18 @@ describe('structured logger', () => {
     }
 
     try {
-      console.debug = () => { calls.debug += 1 }
-      console.info = () => { calls.info += 1 }
-      console.warn = () => { calls.warn += 1 }
-      console.error = () => { calls.error += 1 }
+      console.debug = () => {
+        calls.debug += 1
+      }
+      console.info = () => {
+        calls.info += 1
+      }
+      console.warn = () => {
+        calls.warn += 1
+      }
+      console.error = () => {
+        calls.error += 1
+      }
 
       const logger = createLogger({ level: 'debug' })
       logger.debug('console.debug')
