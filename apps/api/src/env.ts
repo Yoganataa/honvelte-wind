@@ -20,6 +20,12 @@ export const envSchema = z.object({
     .min(1024)
     .max(10_485_760)
     .default(1_048_576),
+  SHUTDOWN_READINESS_DELAY_MS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(30_000)
+    .default(1_000),
   SHUTDOWN_TIMEOUT_MS: z.coerce
     .number()
     .int()
