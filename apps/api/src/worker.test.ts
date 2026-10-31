@@ -45,20 +45,17 @@ describe('Cloudflare Workers adapter', () => {
     })
   })
 
-  test(
-    'returns the shared JSON 404 contract for unknown API routes',
-    async () => {
+  test('returns a shared 404 contract for unknown API routes', async () => {
     const response = await worker.fetch(
       new Request(`https://example.test${API_BASE_PATH}/unknown`),
     )
 
     expect(response.status).toBe(404)
     expect(response.headers.get('content-type')).toContain('application/json')
-      expect(await response.json()).toMatchObject({
-        error: { code: 'NOT_FOUND' },
-      })
-    },
-  )
+    expect(await response.json()).toMatchObject({
+      error: { code: 'NOT_FOUND' },
+    })
+  })
 
   test('does not take ownership of static routes', async () => {
     const response = await worker.fetch(new Request('https://example.test/'))
