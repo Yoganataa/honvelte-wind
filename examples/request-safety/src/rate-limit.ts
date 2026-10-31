@@ -107,7 +107,9 @@ function validateOptions(options: RateLimitOptions): void {
     options.windowMs < 1_000 ||
     options.windowMs > 86_400_000
   ) {
-    throw new RangeError('Rate-limit window must be between 1 second and 24 hours.')
+    throw new RangeError(
+      'Rate-limit window must be between 1 second and 24 hours.',
+    )
   }
 
   if (options.scope !== undefined && !options.scope.trim()) {
@@ -115,9 +117,7 @@ function validateOptions(options: RateLimitOptions): void {
   }
 }
 
-export function createRateLimit(
-  options: RateLimitOptions,
-): MiddlewareHandler {
+export function createRateLimit(options: RateLimitOptions): MiddlewareHandler {
   validateOptions(options)
   const now = options.now ?? Date.now
   const scope = options.scope ?? 'default'
