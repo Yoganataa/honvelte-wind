@@ -33,18 +33,38 @@ function createFakeTimer() {
 describe('stopServerGracefully', () => {
   test('waits for in-flight work without forcing active connections closed', async () => {
     const calls: (boolean | undefined)[] = []
+    const fakeTimer = createFakeTimer()
+    let finishStop: (() => void) | undefined
     const server = {
-      stop: async (closeActiveConnections?: boolean) => {
+      stop: (closeActiveConnections?: boolean) => {
         calls.push(closeActiveConnections)
+
+        return new Promise<void>((resolve) => {
+          finishStop = resolve
+        })
       },
     }
-    const fakeTimer = createFakeTimer()
 
-    const outcome = await stopServerGracefully(server, 15_000, fakeTimer.timer)
+    const stopping = stopServerGracefully(server, 15_000, fakeTimer.timer)
+    let settled = false
+    void stopping.then(() => {
+      settled = true
+    })
 
-    expect(outcome).toBe('graceful')
+    await Promise.resolve()
+    expect(settled).toBe(false)
     expect(calls).toEqual([undefined])
+
+    finishStop?.()
+
+    expect(await stopping).toBe('graceful')
     expect(fakeTimer.isActive()).toBe(false)
+  })
+
+  test('uses the platform timer when no timer adapter is supplied', async () => {
+    const server = { stop: async () => {} }
+
+    expect(await stopServerGracefully(server, 15_000)).toBe('graceful')
   })
 
   test('forces active connections closed when the grace period expires', async () => {
