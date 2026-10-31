@@ -20,7 +20,7 @@ const app = createApp({
   logger,
   metrics,
   metricsEnabled: env.METRICS_ENABLED,
-  metricsToken: env.METRICS_TOKEN,
+  ...(env.METRICS_TOKEN ? { metricsToken: env.METRICS_TOKEN } : {}),
 })
 const webDist = resolve(import.meta.dir, '../../web/dist')
 
