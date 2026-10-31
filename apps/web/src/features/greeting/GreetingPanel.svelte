@@ -46,9 +46,7 @@
 >
   <header>
     <h2 id="greeting-title" class="text-xl font-semibold">Test the API</h2>
-    <p class="mt-2 text-sm text-muted">
-      Send a greeting through the Hono API.
-    </p>
+    <p class="mt-2 text-sm text-muted">Send a greeting through the Hono API.</p>
   </header>
 
   <form
