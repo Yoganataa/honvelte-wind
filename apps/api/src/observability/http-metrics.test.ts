@@ -67,9 +67,7 @@ describe('HTTP metrics', () => {
       durationSeconds: 0.001,
     })
 
-    expect(metrics.renderPrometheus()).toContain(
-      'route="/quoted/\\"route\\""',
-    )
+    expect(metrics.renderPrometheus()).toContain('route="/quoted/\\"route\\""')
   })
 
   test('bounds the number of exported time series', () => {
