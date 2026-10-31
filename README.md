@@ -110,9 +110,10 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
 4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
 5. **API request safety examples:** tests fixed-window rate limits, trusted key selection, bounded-store failure, timeout responses, abort signals, and cleanup.
-6. **Production delivery:** after quality, browser, database, authentication, and request-safety jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-7. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-8. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+6. **Cloudflare Workers profile:** tests the Hono Fetch adapter and smoke-tests the static SPA and API routes in the local `workerd` runtime.
+7. **Production delivery:** after quality, browser, database, authentication, request-safety, and Worker-profile jobs pass on `main`, creates a deployable Bun server tarball containing the Hono server source, shared contracts, and built SPA.
+8. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+9. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
