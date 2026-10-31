@@ -319,7 +319,7 @@ describe('OIDC identity boundary', () => {
     )
     const second = await issueSessionForOidcIdentity(
       {
-        issuer: 'https://identity.example.test',
+        issuer: 'https://identity.example.test/',
         subject: 'subject-1',
         email: 'changed@example.test',
         emailVerified: true,
@@ -333,6 +333,47 @@ describe('OIDC identity boundary', () => {
     })
     await expect(sessions.resolve(second.cookieValue)).resolves.toMatchObject({
       userId: 'oidc-user-1',
+    })
+  })
+
+  test('keeps distinct issuer path identifiers separate', async () => {
+    const sessions = new SessionService(new MemorySessionStore())
+    const identities = new Map<string, string>()
+    let nextUserId = 0
+    const identityStore = {
+      async findOrCreateUserId(identity: { issuer: string; subject: string }) {
+        const key = identity.issuer + '|' + identity.subject
+        const existing = identities.get(key)
+        if (existing) return existing
+
+        const userId = 'tenant-user-' + ++nextUserId
+        identities.set(key, userId)
+        return userId
+      },
+    }
+
+    const tenantA = await issueSessionForOidcIdentity(
+      {
+        issuer: 'https://identity.example.test/tenant',
+        subject: 'subject-1',
+      },
+      identityStore,
+      sessions,
+    )
+    const tenantB = await issueSessionForOidcIdentity(
+      {
+        issuer: 'https://identity.example.test/tenant/',
+        subject: 'subject-1',
+      },
+      identityStore,
+      sessions,
+    )
+
+    await expect(sessions.resolve(tenantA.cookieValue)).resolves.toMatchObject({
+      userId: 'tenant-user-1',
+    })
+    await expect(sessions.resolve(tenantB.cookieValue)).resolves.toMatchObject({
+      userId: 'tenant-user-2',
     })
   })
 
