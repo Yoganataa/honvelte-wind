@@ -26,7 +26,9 @@ export async function migrateSqlite(
 
     const applyMigration = database.transaction(() => {
       const existing = database
-        .query('SELECT migration_id FROM schema_migrations WHERE migration_id = ?')
+        .query(
+          'SELECT migration_id FROM schema_migrations WHERE migration_id = ?',
+        )
         .get(filename)
 
       if (existing) return false
