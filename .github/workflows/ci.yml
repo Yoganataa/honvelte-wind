@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Temporarily inspect Prettier output
+        run: |
+          bunx prettier --write examples/databases/postgres/src/notes-repository.ts examples/databases/sqlite/src/database.ts examples/databases/sqlite/src/migrate.ts examples/databases/sqlite/tests/notes.test.ts README.md roadmap.md
+          git diff -- examples/databases/postgres/src/notes-repository.ts examples/databases/sqlite/src/database.ts examples/databases/sqlite/src/migrate.ts examples/databases/sqlite/tests/notes.test.ts README.md roadmap.md
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
