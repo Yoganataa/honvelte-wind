@@ -61,6 +61,22 @@ describe('typed API client', () => {
     expect(fetchCalled).toBe(false)
   })
 
+  test('forwards the caller AbortSignal to the same-origin request', async () => {
+    const controller = new AbortController()
+    let receivedSignal: AbortSignal | null | undefined
+    const client = createApiClient(async (_input, init) => {
+      receivedSignal = init?.signal
+      return Response.json({
+        status: 'ok',
+        timestamp: '2026-10-31T12:00:00.000Z',
+      })
+    })
+
+    await client.health({ signal: controller.signal })
+
+    expect(receivedSignal).toBe(controller.signal)
+  })
+
   test('preserves structured API errors, status, and request ID', async () => {
     const client = createApiClient(async () =>
       Response.json(
