@@ -1,3 +1,4 @@
+import { API_BASE_PATH, apiPaths } from '@honvelte/contracts'
 import { routePath } from 'hono/route'
 import type { Context, MiddlewareHandler } from 'hono'
 import type { HttpMetrics } from './http-metrics'
@@ -31,7 +32,10 @@ export function createHttpObservability(
 
   return async (context, next) => {
     const startedAt = now()
-    options.metrics.beginRequest()
+    const isMetricsScrape =
+      context.req.path === API_BASE_PATH + apiPaths.metrics
+
+    if (!isMetricsScrape) options.metrics.beginRequest()
 
     try {
       await next()
@@ -41,13 +45,15 @@ export function createHttpObservability(
       const method = context.req.method.toUpperCase()
       const route = resolveRouteTemplate(context)
 
-      options.metrics.recordRequest({
-        method,
-        route,
-        statusCode,
-        durationSeconds: durationMs / 1_000,
-      })
-      options.metrics.endRequest()
+      if (!isMetricsScrape) {
+        options.metrics.recordRequest({
+          method,
+          route,
+          statusCode,
+          durationSeconds: durationMs / 1_000,
+        })
+        options.metrics.endRequest()
+      }
 
       options.logger[resolveLogLevel(statusCode)]('http.server.request.completed', {
         requestId: context.res.headers.get('x-request-id') ?? 'unknown',
