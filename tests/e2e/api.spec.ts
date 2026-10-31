@@ -9,6 +9,15 @@ test('health endpoint returns a request-correlated response', async ({
   expect(await response.json()).toMatchObject({ status: 'ok' })
 })
 
+test('readiness endpoint reports that the service accepts requests', async ({
+  request,
+}) => {
+  const response = await request.get('/api/ready')
+
+  expect(response.status()).toBe(200)
+  expect(await response.json()).toMatchObject({ status: 'ready' })
+})
+
 test('unknown API paths return JSON 404 rather than the SPA', async ({
   request,
 }) => {
