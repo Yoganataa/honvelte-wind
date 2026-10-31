@@ -1,0 +1,1 @@
+Follow the repository instructions in `AGENTS.md`. For implementation, testing, and browser automation, also load the corresponding skill from `.agents/skills/`.

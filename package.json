@@ -1,0 +1,38 @@
+{
+  "name": "honvelte-wind",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --parallel --filter '@honvelte/*' dev",
+    "dev:web": "bun run --filter @honvelte/web dev",
+    "dev:api": "bun run --filter @honvelte/api dev",
+    "build": "bun run --filter @honvelte/contracts build && bun run --filter @honvelte/web build",
+    "start": "bun run --filter @honvelte/api start",
+    "check": "bun run --filter '*' check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "bun run --filter @honvelte/api test && bun run --filter @honvelte/contracts test",
+    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts",
+    "test:e2e:ui": "playwright test -c tests/e2e/playwright.config.ts --ui",
+    "test:e2e:debug": "playwright test -c tests/e2e/playwright.config.ts --debug",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "verify": "bun run lint && bun run format:check && bun run check && bun run test && bun run build",
+    "verify:all": "bun run verify && bun run test:e2e",
+    "agents:sync:claude": "bun run scripts/sync-agent-skills.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.56.1",
+    "eslint": "^9.39.0",
+    "eslint-plugin-svelte": "^3.13.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^3.4.0",
+    "svelte-check": "^4.3.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.0"
+  }
+}
