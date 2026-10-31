@@ -47,6 +47,20 @@ The web app calls `/api` through Vite proxy in development. In production Hono s
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
 
+## Icon system
+
+The web app uses `unplugin-icons` with Iconify collections. Lucide is the default icon style. Import icons as Svelte components with `~icons/{collection}/{icon}`; they are resolved at build time, so only the icons imported by the app are included in the bundle.
+
+```svelte
+<script lang="ts">
+  import HouseIcon from '~icons/lucide/house'
+</script>
+
+<HouseIcon class="size-5" aria-hidden="true" />
+```
+
+Keep Lucide as the default visual language. Add another Iconify JSON collection package only when the product needs icons that Lucide does not provide; avoid mixing icon styles without a clear reason.
+
 ## CI/CD
 
 GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
@@ -111,7 +125,7 @@ Agent-specific instruction files point back to `AGENTS.md`. For Claude Code, gen
 - No database, ORM, auth provider, Redis, or queue is installed by default.
 - No Docker requirement.
 - Same-origin API/static hosting avoids default CORS configuration.
-- Runtime input validation uses Zod; TypeScript types alone are not runtime validation.
+- Runtime input validation uses Zod; TypeScript types alone do not validate network payloads.
 - Keep secrets in server environment only. Never expose them through Vite `VITE_*` variables.
 
 ## Repository governance
