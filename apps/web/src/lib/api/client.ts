@@ -11,13 +11,15 @@ import {
   type HealthResponse,
 } from '@honvelte/contracts'
 
-type SafeParseResult<T> = {
-  success: true
-  data: T
-} | {
-  success: false
-  error?: unknown
-}
+type SafeParseResult<T> =
+  | {
+      success: true
+      data: T
+    }
+  | {
+      success: false
+      error?: unknown
+    }
 
 type ResponseSchema<T> = {
   safeParse(value: unknown): SafeParseResult<T>
