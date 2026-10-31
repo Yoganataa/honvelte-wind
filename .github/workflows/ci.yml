@@ -127,9 +127,29 @@ jobs:
       - name: Test session, CSRF, OIDC boundary, and RBAC examples
         run: bun run test:auth-examples
 
+  request-safety-examples:
+    name: API request safety examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test rate limiting and request deadlines
+        run: bun run test:request-safety
+
   delivery:
     name: Production delivery bundle
-    needs: [quality, e2e, database-examples, auth-examples]
+    needs:
+      [quality, e2e, database-examples, auth-examples, request-safety-examples]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 15
