@@ -1,7 +1,7 @@
 {
   "name": "honvelte-wind",
   "main": "./apps/api/src/worker.ts",
-  "compatibility_date": "2026-11-01",
+  "compatibility_date": "2026-10-31",
   "workers_dev": true,
   "upload_source_maps": true,
   "assets": {
