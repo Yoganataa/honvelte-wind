@@ -26,12 +26,22 @@ export const envSchema = z.object({
     .min(0)
     .max(30_000)
     .default(1_000),
+  METRICS_ENABLED: z.stringbool().default(false),
+  METRICS_TOKEN: z.string().min(32).optional(),
   SHUTDOWN_TIMEOUT_MS: z.coerce
     .number()
     .int()
     .min(100)
     .max(120_000)
     .default(15_000),
+}).superRefine((configuration, context) => {
+  if (configuration.METRICS_ENABLED && !configuration.METRICS_TOKEN) {
+    context.addIssue({
+      code: 'custom',
+      path: ['METRICS_TOKEN'],
+      message: 'METRICS_TOKEN is required when METRICS_ENABLED is true.',
+    })
+  }
 })
 
 export const env = envSchema.parse(process.env)
