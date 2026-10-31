@@ -27,7 +27,7 @@
     "agents:sync:claude": "bun run scripts/sync-agent-skills.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.56.1",
     "eslint": "^9.39.0",
     "eslint-plugin-svelte": "^3.13.0",
