@@ -33,9 +33,7 @@ describe('SQLite database example', () => {
       )
       .all()
 
-    expect(migrations).toEqual([
-      { migration_id: '0001_create_notes.sql' },
-    ])
+    expect(migrations).toEqual([{ migration_id: '0001_create_notes.sql' }])
   })
 
   test('stores and reads notes using bound parameters', async () => {
