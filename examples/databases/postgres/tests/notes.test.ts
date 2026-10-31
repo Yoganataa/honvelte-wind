@@ -23,8 +23,14 @@ test.skipIf(!databaseUrl)(
       const firstRun = await migratePostgres(database)
       const secondRun = await migratePostgres(database)
 
-      expect(firstRun).toEqual(['0001_create_notes.sql'])
+      expect(firstRun.length).toBeLessThanOrEqual(1)
       expect(secondRun).toEqual([])
+
+      const migrationRows = await database.unsafe(
+        'SELECT migration_id FROM schema_migrations WHERE migration_id = $1',
+        ['0001_create_notes.sql'],
+      )
+      expect(migrationRows).toHaveLength(1)
 
       const repository = createNotesRepository(database)
       const title = 'Integration note ' + crypto.randomUUID()
