@@ -16,7 +16,8 @@ bun run dev
 ```
 
 Web: http://127.0.0.1:5173  
-API health: http://127.0.0.1:3000/api/health
+API health: http://127.0.0.1:3000/api/health  
+API readiness: http://127.0.0.1:3000/api/ready
 
 ## Commands
 
