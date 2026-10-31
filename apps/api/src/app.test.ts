@@ -24,9 +24,9 @@ describe('API app', () => {
     const response = await app.request(API_BASE_PATH + apiPaths.ready)
 
     expect(response.status).toBe(200)
-    expect(
-      readinessResponseSchema.parse(await response.json()).status,
-    ).toBe('ready')
+    expect(readinessResponseSchema.parse(await response.json()).status).toBe(
+      'ready',
+    )
   })
 
   test('preserves a caller-provided request ID', async () => {
@@ -137,9 +137,9 @@ describe('API app', () => {
     const liveness = await runtimeApp.request(API_BASE_PATH + apiPaths.health)
 
     expect(readiness.status).toBe(503)
-    expect(
-      readinessResponseSchema.parse(await readiness.json()).status,
-    ).toBe('not_ready')
+    expect(readinessResponseSchema.parse(await readiness.json()).status).toBe(
+      'not_ready',
+    )
     expect(liveness.status).toBe(200)
   })
 
