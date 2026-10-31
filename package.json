@@ -21,13 +21,14 @@
     "test:coverage": "bun run --filter @honvelte/api test:coverage && bun run --filter @honvelte/contracts test:coverage",
     "test:db-examples": "bun test examples/databases",
     "test:auth-examples": "tsc --noEmit -p examples/auth/tsconfig.json && bun test examples/auth",
+    "test:request-safety": "tsc --noEmit -p examples/request-safety/tsconfig.json && bun test examples/request-safety",
     "test:e2e": "playwright test -c tests/e2e/playwright.config.ts",
     "test:e2e:ui": "playwright test -c tests/e2e/playwright.config.ts --ui",
     "test:e2e:debug": "playwright test -c tests/e2e/playwright.config.ts --debug",
     "test:e2e:report": "playwright show-report",
     "test:e2e:install": "playwright install --with-deps chromium",
     "verify": "bun run format:check && bun run audit && bun run lint && bun run check && bun run test:coverage && bun run build",
-    "verify:all": "bun run verify && bun run test:db-examples && bun run test:auth-examples && bun run test:e2e",
+    "verify:all": "bun run verify && bun run test:db-examples && bun run test:auth-examples && bun run test:request-safety && bun run test:e2e",
     "agents:sync:claude": "bun run scripts/sync-agent-skills.ts"
   },
   "devDependencies": {
