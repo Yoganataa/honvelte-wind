@@ -4,7 +4,7 @@ A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeS
 
 ## Requirements
 
-- Bun version pinned in `.bun-version`
+- Bun 1.4.4 (pinned in `.bun-version`)
 - Git
 
 ## Quick start
@@ -27,9 +27,10 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run start` | Serve API + static SPA with Bun |
 | `bun run check` | TypeScript and Svelte diagnostics |
 | `bun run lint` | ESLint |
+| `bun run audit` | Audit locked dependencies for moderate-or-higher advisories |
 | `bun run test` | API and contracts unit tests |
 | `bun run test:e2e` | Playwright browser tests |
-| `bun run verify` | Lint, typecheck, unit tests, and production build |
+| `bun run verify` | Audit, lint, typecheck, unit tests, and production build |
 | `bun run verify:all` | All verification including E2E |
 
 ## Architecture
@@ -48,19 +49,27 @@ See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criter
 
 GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
 
-1. **Quality gates:** ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
+1. **Quality gates:** Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
 3. **Production delivery:** after both jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-
-Formatting is available through `bun run format:check`, but is not currently a blocking part of `bun run verify`. This is tracked as a P0 item in the roadmap.
-
-The repository does not currently commit `bun.lock`. CI temporarily falls back to `bun install` when the lockfile is absent, so dependency resolution is not yet fully reproducible. Committing the lockfile and switching every job to frozen installs is also a P0 roadmap item.
+4. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+5. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
-Playwright reports and traces are uploaded even when E2E fails. A separate CodeQL workflow analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule. Dependabot checks Bun dependencies and GitHub Actions weekly; the workflow references are pinned to commit SHAs.
+Playwright reports and traces are uploaded even when E2E fails.
 
-See [SECURITY.md](./SECURITY.md) for vulnerability reporting instructions.
+## Dependency and supply-chain policy
+
+- Bun is pinned to 1.4.4 so local development and CI use the same runtime.
+- `bunfig.toml` enforces a three-day npm release-age cooldown. This reduces exposure to newly published malicious or compromised package versions while allowing routine updates after the cooldown.
+- The upstream `deepmerge@4.3.1` has no official patched release for GHSA-gcqx-w48m-w2h4. The Svelte Vite plugin uses it only in its build/configuration toolchain, so the repository temporarily overrides it with the reviewed `@oss-cve-patches/deepmerge@4.3.2` fork, which rejects `__proto__` keys and includes regression tests. Remove this override when the Svelte plugin ships its own replacement or the upstream package publishes a maintained fix; review the fork before every refresh.
+- `bun audit --audit-level=low` is part of `bun run verify` and blocks all known low, moderate, high, and critical advisories in the resolved dependency tree.
+- Dependabot checks Bun packages and GitHub Actions weekly. Routine minor/patch updates are grouped by toolchain; major upgrades remain separate for compatibility review.
+- GitHub Actions are pinned to full commit SHAs.
+- `bun.lock` is committed and every CI install uses `bun install --frozen-lockfile`, so audits and tests operate on the same reproducible dependency graph.
+
+GitHub's dependency graph currently does not list Bun as a supported lockfile ecosystem. The local/CI `bun audit` therefore remains the source of truth for vulnerabilities in Bun's resolved dependency tree; the dependency-review workflow is an additional check, not a replacement.
 
 ## Production
 

@@ -21,7 +21,7 @@ The repository currently provides:
 - A production tarball smoke test that exercises the extracted bundle, API health endpoint, and SPA response.
 - Agent instructions and local skills for implementation, testing, and browser E2E.
 
-The current CI run is green, but the baseline is not yet fully reproducible or production-hardened. In particular, `bun.lock` is not committed, the workflow falls back to an unlocked install, formatting is not part of the blocking `verify` command, and `main` has no required status checks configured.
+The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 6, Vite 8, Svelte Vite Plugin 7, and current stable compatible packages. A Bun 1.4.4 `bun.lock` is committed and every CI install uses `--frozen-lockfile`. CI also runs a Bun advisory audit, dependency review, and a three-day package release-age gate. Formatting is not yet a blocking check and required status checks are not yet configured on `main`.
 
 ## Priorities
 
@@ -29,11 +29,11 @@ The current CI run is green, but the baseline is not yet fully reproducible or p
 
 | Item | Current status | Completion criteria |
 | --- | --- | --- |
-| Commit `bun.lock` | Open — no lockfile in repository | Generate with the pinned Bun version, commit it, and use `bun install --frozen-lockfile` in every CI job. Remove the unlocked fallback. |
+| Commit `bun.lock` | Done in this change | Bun 1.4.4 lockfile is committed; all CI jobs use `bun install --frozen-lockfile` with no unlocked fallback. |
 | Restore formatting as a quality gate | Open — `format:check` is separate from `verify` | Run Prettier across the repository, review the formatting-only diff, add `format:check` to `verify`, and keep CI documentation aligned. |
 | Protect `main` | Open — branch protection is disabled | Require pull requests and successful Quality gates + Browser E2E checks; disable force pushes and deletion. Confirm the selected check names against a real PR. |
-| Pin GitHub Actions | Done in this change | Checkout, Bun setup, artifact upload, and CodeQL actions use verified full commit SHAs; Dependabot checks action updates weekly. |
-| Security scanning | Partially implemented | CodeQL analysis, weekly Bun/Actions Dependabot version updates, and `SECURITY.md` are in place. Still verify/enable repository dependency alerts and security updates; review CodeQL findings after the first completed scan. |
+| Pin GitHub Actions | Done in this change | Checkout v7.0.1, Bun setup v2, artifact upload v7, CodeQL v4.39.1, and Dependency Review v5 use verified full commit SHAs; Dependabot checks action updates weekly. |
+| Security scanning | Partially implemented | CodeQL, `bun audit` at low severity, three-day minimum release age, dependency review, grouped weekly Dependabot updates, and `SECURITY.md` are in place. The unfixed upstream deepmerge advisory is temporarily remediated via a reviewed fork override and must be removed after the upstream/plugin dependency is fixed. GitHub vulnerability alerts/security updates and full transitive Bun dependency graph support still require verification. |
 | API body limit | Done in this change | Enforces the 1 KiB limit against streamed bytes, with a fast `Content-Length` rejection and a regression test for requests without that header. |
 
 **P0 exit gate:** a clean checkout installs only from the committed lockfile; formatting, lint, type checks, unit tests, E2E, and production artifact smoke tests pass; protected `main` cannot accept an unverified change.
