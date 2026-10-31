@@ -65,7 +65,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 **Database adapter progress (this PR):** Added separate SQLite and PostgreSQL examples outside the Bun workspaces. SQLite uses the built-in `bun:sqlite` driver with WAL for file-backed databases; PostgreSQL uses Bun.SQL with a bounded pool, parameterized operations, and transaction-scoped advisory locking for migrations. Both use ordered SQL migration files and a schema migration ledger. CI exercises SQLite in-memory tests and PostgreSQL integration tests against a disposable PostgreSQL 18.6 service. No database driver, ORM, or database service is added to the default installation.
 
-**Shared API contract progress (PR #10):** The greeting endpoint now has shared Zod schemas for success responses and API error envelopes. The API tests validate endpoint payloads against those schemas, and the browser validates unknown response payloads before using them. This is a partial P1 completion; a reusable typed API client is intentionally deferred until multiple endpoints justify a shared transport abstraction.
+**Initial shared contract work (PR #10):** The greeting endpoint introduced shared Zod schemas for success responses and API error envelopes. This was the first step; the typed multi-endpoint browser client and health contract are completed in the follow-up workstream above.
 
 **P1 exit gate:** a medium-sized application can add a feature end-to-end without putting business logic in route handlers or duplicating contracts, and critical behavior has meaningful automated coverage.
 
