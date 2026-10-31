@@ -26,7 +26,7 @@ For remote production databases, use TLS with certificate and hostname validatio
 - Construct createNotesRepository(database) and inject it into the feature that owns note operations.
 - Close the pool during graceful shutdown.
 
-Repository operations are asynchronous. All values are passed through Bun.SQL tagged templates, not interpolated into raw SQL.
+Repository operations are asynchronous. Values are passed as positional parameters to Bun.SQL; raw migration SQL is accepted only from checked-in files. Do not construct SQL strings from user input.
 
 ## Migrations
 
