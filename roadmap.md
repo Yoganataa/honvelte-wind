@@ -69,7 +69,7 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 ### P2 — Production operations and deployment
 
-- **Runtime/deployment profiles — Open.** Document and test Bun server, static hosting, and supported serverless/edge adapters; each profile needs a reproducible build, deployment instructions, environment contract, and smoke test.
+- **Runtime/deployment profiles — Partially implemented.** The default Bun server profile and a Cloudflare Workers profile combining static SPA assets with a Hono Fetch API adapter are documented and CI-smoke-tested. Generic static hosts and other serverless/edge providers remain unverified.
 - **Delivery automation — Open.** Add opt-in deployment jobs with explicit staging/production environments, externally configured secrets, and a documented rollback procedure.
 - **Observability — Baseline implemented.** Structured JSON logs with active severity filtering and central redaction, validated request correlation, low-cardinality HTTP request counters/errors/latency histogram/active gauge, and an opt-in bearer-protected Prometheus scrape endpoint. External exporters, distributed tracing, and replaceable error-reporting adapters remain open.
 - **Runtime resilience — Baseline implemented.** Graceful SIGINT/SIGTERM shutdown, readiness propagation delay, Bun-native drain with bounded force-close, separate liveness/readiness probes, and configurable idle/body limits are implemented. Readiness reflects lifecycle until the application declares mandatory external dependencies.
@@ -77,6 +77,8 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 - **Storage — Open.** Add an optional object-storage adapter and local development strategy with server-side file size/type validation, authorization, and server-only provider credentials.
 
 **P2 exit gate:** a selected deployment profile can move through staging to production with health checks, telemetry, secrets management, and a documented rollback path.
+
+**Deployment profiles progress (this PR):** Added a Cloudflare Workers Fetch entry point and Wrangler Static Assets configuration. The Svelte build is served as an SPA while `/api/*` is routed to Hono. CI tests the adapter and starts the local `workerd` runtime to smoke-test health, greeting, and SPA fallback behavior. The Worker profile intentionally excludes Bun-specific lifecycle hooks, Bun-native database examples, the single-process in-memory rate limiter, and process-local Prometheus collection. No live Cloudflare deployment or hosting credential is configured.
 
 **Observability progress (this PR):** Added a JSON console logger with an active `LOG_LEVEL` threshold, recursive sensitive-field and bearer-token redaction, safe error serialization, and per-request completion logs using Hono route templates. Added a bounded in-process Prometheus registry for request totals, 5xx totals, duration histograms, and active requests. `GET /api/metrics` is disabled by default and requires a 32-character minimum bearer token when enabled. Metrics remain process-local; external exporters and tracing are intentionally deferred.
 
