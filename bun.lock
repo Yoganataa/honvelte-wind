@@ -48,6 +48,7 @@
     },
   },
   "overrides": {
+    "deepmerge": "npm:@oss-cve-patches/deepmerge@4.3.2",
     "minimatch": "^11.0.1",
   },
   "packages": {
@@ -235,7 +236,7 @@
 
     "deep-is": ["deep-is@0.1.4", "", {}, "sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ=="],
 
-    "deepmerge": ["deepmerge@4.3.1", "", {}, "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A=="],
+    "deepmerge": ["@oss-cve-patches/deepmerge@4.3.2", "", {}, "sha512-+bwDJSwj3aBdqYf5FetlCvGMrh4LAemnTwmTdN8QaNj4R4+EYuQostFyu2fr2wTACTqCOkYSg7Kju8xrUwxyRg=="],
 
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
