@@ -33,6 +33,7 @@ API health: http://127.0.0.1:3000/api/health
 | `bun run test:coverage`       | Run API and contracts tests with text and LCOV coverage reports         |
 | `bun run test:db-examples`    | Test the optional SQLite and PostgreSQL adapter examples                |
 | `bun run test:auth-examples`  | Test optional session, CSRF, OIDC identity, and RBAC examples           |
+| `bun run test:web-client`      | Test the typed browser API client                                       |
 | `bun run test:request-safety` | Test optional rate limiting and request deadline middleware             |
 | `bun run test:e2e`            | Playwright browser tests                                                |
 | `bun run verify`              | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
@@ -53,6 +54,12 @@ The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
+
+## Shared API client
+
+The browser uses a shared typed client under `apps/web/src/lib/api`. Its `health()` and `greet()` methods validate outgoing greeting input and parse successful responses with Zod contracts from `packages/contracts`. It normalizes structured HTTP errors into `ApiClientError` with HTTP status, shared error code, and request ID when available. The client is same-origin by default and supports `AbortSignal`; no API server implementation is imported into the browser.
+
+Run `bun run test:web-client` for the client tests. The same suite is part of `bun run verify`.
 
 ## Optional database adapters
 
