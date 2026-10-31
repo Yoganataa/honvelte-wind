@@ -1,5 +1,5 @@
 import { routePath } from 'hono/route'
-import type { MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
 import type { HttpMetrics } from './http-metrics'
 import type { Logger, LogLevel } from './logger'
 
@@ -9,7 +9,7 @@ export type HttpObservabilityOptions = {
   now?: () => number
 }
 
-function resolveRouteTemplate(context: Parameters<MiddlewareHandler>[0]): string {
+function resolveRouteTemplate(context: Context): string {
   try {
     const path = routePath(context)
     return path || 'unmatched'
