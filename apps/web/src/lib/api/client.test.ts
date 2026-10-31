@@ -107,6 +107,31 @@ describe('typed API client', () => {
     }
   })
 
+  test('preserves rate-limit unavailable and gateway-timeout error contracts', async () => {
+    for (const [status, code] of [
+      [503, 'RATE_LIMIT_UNAVAILABLE'],
+      [504, 'GATEWAY_TIMEOUT'],
+    ] as const) {
+      const client = createApiClient(async () =>
+        Response.json(
+          {
+            error: {
+              code,
+              message: 'The request could not be completed.',
+            },
+          },
+          { status },
+        ),
+      )
+
+      await expect(client.health()).rejects.toMatchObject({
+        status,
+        code,
+        message: 'The request could not be completed.',
+      })
+    }
+  })
+
   test('uses a stable fallback when an HTTP error body is not a known contract', async () => {
     const client = createApiClient(async () =>
       Response.json(
