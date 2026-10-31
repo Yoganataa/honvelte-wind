@@ -1,8 +1,21 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["bun"],
-    "noEmit": true
+    "types": [
+      "bun"
+    ],
+    "noEmit": true,
+    "paths": {
+      "hono": [
+        "../../apps/api/node_modules/hono/dist/types/index.d.ts"
+      ],
+      "hono/cookie": [
+        "../../apps/api/node_modules/hono/dist/types/helper/cookie/index.d.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }
