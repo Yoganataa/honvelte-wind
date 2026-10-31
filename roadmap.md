@@ -71,12 +71,14 @@ The dependency toolchain has been refreshed to Bun 1.4.4, ESLint 10, TypeScript 
 
 - **Runtime/deployment profiles — Open.** Document and test Bun server, static hosting, and supported serverless/edge adapters; each profile needs a reproducible build, deployment instructions, environment contract, and smoke test.
 - **Delivery automation — Open.** Add opt-in deployment jobs with explicit staging/production environments, externally configured secrets, and a documented rollback procedure.
-- **Observability — Open.** Add structured logs, configurable log levels, request correlation, metrics, tracing, and replaceable error-reporting adapters; redact sensitive data and keep telemetry optional.
+- **Observability — Baseline implemented.** Structured JSON logs with active severity filtering and central redaction, validated request correlation, low-cardinality HTTP request counters/errors/latency histogram/active gauge, and an opt-in bearer-protected Prometheus scrape endpoint. External exporters, distributed tracing, and replaceable error-reporting adapters remain open.
 - **Runtime resilience — Baseline implemented.** Graceful SIGINT/SIGTERM shutdown, readiness propagation delay, Bun-native drain with bounded force-close, separate liveness/readiness probes, and configurable idle/body limits are implemented. Readiness reflects lifecycle until the application declares mandatory external dependencies.
 - **Background work — Open.** Add an optional queue/job adapter and scheduled task pattern with idempotent jobs and bounded retries; no queue service should be required by the base starter.
 - **Storage — Open.** Add an optional object-storage adapter and local development strategy with server-side file size/type validation, authorization, and server-only provider credentials.
 
 **P2 exit gate:** a selected deployment profile can move through staging to production with health checks, telemetry, secrets management, and a documented rollback path.
+
+**Observability progress (this PR):** Added a JSON console logger with an active `LOG_LEVEL` threshold, recursive sensitive-field and bearer-token redaction, safe error serialization, and per-request completion logs using Hono route templates. Added a bounded in-process Prometheus registry for request totals, 5xx totals, duration histograms, and active requests. `GET /api/metrics` is disabled by default and requires a 32-character minimum bearer token when enabled. Metrics remain process-local; external exporters and tracing are intentionally deferred.
 
 **Runtime resilience progress (this PR):** The Bun entry point now handles `SIGINT` and `SIGTERM`, flips readiness first, waits a configurable propagation delay, lets Bun drain in-flight HTTP requests, and force-closes remaining connections after a configurable grace period. The server has validated idle-timeout and maximum-body-size settings. `/api/health` remains liveness; `/api/ready` reports lifecycle readiness. Because the default application has no mandatory external services, dependency reachability checks remain an application-specific extension rather than a false-positive readiness claim.
 
