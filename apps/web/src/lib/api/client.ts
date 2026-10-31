@@ -11,9 +11,13 @@ import {
   type HealthResponse,
 } from '@honvelte/contracts'
 
-type SafeParseResult<T> =
-  | { success: true; data: T }
-  | { success: false; error?: unknown }
+type SafeParseResult<T> = {
+  success: true
+  data: T
+} | {
+  success: false
+  error?: unknown
+}
 
 type ResponseSchema<T> = {
   safeParse(value: unknown): SafeParseResult<T>
@@ -26,10 +30,7 @@ export type ApiClientErrorOptions = {
   cause?: unknown
 }
 
-export type ApiFetcher = (
-  input: string,
-  init: RequestInit,
-) => Promise<Response>
+export type ApiFetcher = (input: string, init: RequestInit) => Promise<Response>
 
 const defaultFetcher: ApiFetcher = (input, init) => fetch(input, init)
 
