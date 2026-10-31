@@ -55,7 +55,8 @@ export function createHttpObservability(
         options.metrics.endRequest()
       }
 
-      options.logger[resolveLogLevel(statusCode)]('http.server.request.completed', {
+      const log = options.logger[resolveLogLevel(statusCode)]
+      log('http.server.request.completed', {
         requestId: context.res.headers.get('x-request-id') ?? 'unknown',
         method,
         route,
