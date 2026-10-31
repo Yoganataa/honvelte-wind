@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    greetingSchema,
-    type GreetingResponse,
-  } from '@honvelte/contracts'
+  import { greetingSchema, type GreetingResponse } from '@honvelte/contracts'
   import SendIcon from '~icons/lucide/send'
   import Button from '../../lib/components/ui/Button.svelte'
   import TextField from '../../lib/components/ui/TextField.svelte'
@@ -54,7 +51,10 @@
     </p>
   </header>
 
-  <form class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end" onsubmit={greet}>
+  <form
+    class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
+    onsubmit={greet}
+  >
     <TextField
       id="name"
       label="Your name"
