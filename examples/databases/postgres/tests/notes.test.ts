@@ -9,7 +9,7 @@ test.skipIf(!databaseUrl)(
   'PostgreSQL adapter applies migrations idempotently and persists notes',
   async () => {
     const url = new URL(databaseUrl!)
-    const databaseName = url.pathname.replace(/^\/+/, '')
+    const databaseName = decodeURIComponent(url.pathname.replace(/^\/+/, ''))
 
     if (!databaseName.endsWith('_test')) {
       throw new Error(
@@ -17,9 +17,17 @@ test.skipIf(!databaseUrl)(
       )
     }
 
-    const database = new SQL(url.toString(), { max: 2 })
+    const database = new SQL(url.toString(), {
+      max: 2,
+      database: databaseName,
+    })
 
     try {
+      const [connection] = await database.unsafe(
+        'SELECT current_database() AS database_name',
+      )
+      expect(connection?.database_name).toBe(databaseName)
+
       const firstRun = await migratePostgres(database)
       const secondRun = await migratePostgres(database)
 
