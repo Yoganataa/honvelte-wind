@@ -1,6 +1,7 @@
 import {
   apiErrorResponseSchema,
   greetingResponseSchema,
+  healthResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
 import app from './app'
@@ -12,7 +13,7 @@ describe('API app', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('x-request-id')).toBeTruthy()
-    expect(body.status).toBe('ok')
+    expect(healthResponseSchema.parse(body)).toMatchObject({ status: 'ok' })
   })
 
   test('preserves a caller-provided request ID', async () => {
