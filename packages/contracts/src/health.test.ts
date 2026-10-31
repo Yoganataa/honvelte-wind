@@ -4,7 +4,7 @@ import { healthResponseSchema } from './health'
 describe('healthResponseSchema', () => {
   test('accepts a successful API health response', () => {
     const payload = {
-      status: 'ok',
+      status: 'ok' as const,
       timestamp: '2026-10-31T12:00:00.000Z',
     }
 
