@@ -3,7 +3,6 @@ import { join, resolve } from 'node:path'
 import type { SQL } from 'bun'
 
 const MIGRATION_PATTERN = /^\d{4}_[a-z0-9_]+\.sql$'
-const MIGRATION_LOCK_ID = 7_318_220_461
 
 export async function migratePostgres(
   database: SQL,
@@ -27,7 +26,7 @@ export async function migratePostgres(
 
     const wasApplied = await database.begin(async (transaction) => {
       await transaction.unsafe(
-        'SELECT pg_advisory_xact_lock(' + MIGRATION_LOCK_ID + ')',
+        'SELECT pg_advisory_xact_lock(7318220461::bigint)',
       )
 
       const existing = await transaction.unsafe(
