@@ -1,0 +1,91 @@
+name: Rollback Cloudflare Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to roll back
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      version_id:
+        description: Exact previously deployed Cloudflare Worker version ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-deploy-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Roll back ${{ inputs.target }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: ${{ inputs.target }}
+    env:
+      TARGET_ENV: ${{ inputs.target }}
+      VERSION_ID: ${{ inputs.version_id }}
+      WORKER_BASE_URL: ${{ vars.WORKER_BASE_URL }}
+      WORKER_NAME: honvelte-wind-${{ inputs.target }}
+
+    steps:
+      - name: Checkout the selected main commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Validate rollback target and URL
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "$TARGET_ENV" in
+            staging|production) ;;
+            *)
+              echo "::error::Unsupported rollback target."
+              exit 1
+              ;;
+          esac
+
+          if [[ ! "$WORKER_BASE_URL" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]]; then
+            echo "::error::Set WORKER_BASE_URL in the selected GitHub Environment to an HTTPS origin without a path."
+            exit 1
+          fi
+
+          if [[ ! "$VERSION_ID" =~ ^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$ ]]; then
+            echo "::error::Provide an exact Cloudflare Worker version UUID."
+            exit 1
+          fi
+
+      - name: Restore the requested Worker version
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::CLOUDFLARE_API_TOKEN is missing."; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is missing."; exit 1; }
+          npx --yes wrangler@4.156.0 rollback "$VERSION_ID" --name "$WORKER_NAME" --message "Manual rollback from GitHub Actions run ${GITHUB_RUN_ID}"
+
+      - name: Verify the restored deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${WORKER_BASE_URL%/}"
+
+          curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors --connect-timeout 5 --max-time 20 "$base/api/health" --output /tmp/honvelte-rollback-health.json
+          grep -q '"status":"ok"' /tmp/honvelte-rollback-health.json
+
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-rollback-index.html
+          grep -q 'Honvelte Wind' /tmp/honvelte-rollback-index.html

@@ -110,13 +110,16 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
 4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
 5. **API request safety examples:** tests fixed-window rate limits, trusted key selection, bounded-store failure, timeout responses, abort signals, and cleanup.
-6. **Production delivery:** after quality, browser, database, authentication, and request-safety jobs pass on `main`, creates a deployable tarball containing the Hono server source, shared contracts, and built SPA.
-7. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-8. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+6. **Cloudflare Workers profile:** validates staging and production Wrangler environments with dry runs, tests the Hono Fetch adapter, and smoke-tests the static SPA and API routes in the local `workerd` runtime.
+7. **Production delivery:** after quality, browser, database, authentication, request-safety, and Worker-profile jobs pass on `main`, creates a deployable Bun server tarball containing the Hono server source, shared contracts, and built SPA.
+8. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+9. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
+
+Cloudflare staging and production deployments are separate, manual, main-only workflows. They require the GitHub Environments and Cloudflare secrets documented in [deployment profiles](examples/deployments/README.md); no live account is configured by default. The rollback workflow requires an explicit Worker version ID.
 
 Playwright reports and traces are uploaded even when E2E fails.
 
@@ -196,6 +199,12 @@ NODE_ENV=production HOST=0.0.0.0 PORT=3000 bun run start
 ```
 
 For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarded headers to trusted proxy infrastructure.
+
+## Deployment profiles
+
+The default profile runs the Hono API and built Svelte SPA in one Bun process. An optional Cloudflare Workers profile serves the SPA through Workers Static Assets and routes same-origin `/api/*` requests to a Fetch-compatible Hono entry point. See [deployment profiles](examples/deployments/README.md) for build commands, runtime boundaries, environment requirements, and CI validation.
+
+CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not deploy to a live Cloudflare account. Separate manual GitHub Actions workflows provide staging/production deployment, live smoke checks, automatic rollback after a failed deployment check, and explicit version rollback. They require the `staging` and `production` GitHub Environments and their Cloudflare secrets/URL variables to be configured. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
 
 ## Testing
 
