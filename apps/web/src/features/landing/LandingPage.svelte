@@ -611,11 +611,7 @@
               <span
                 class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
               >
-                <svelte:component
-                  this={item.icon}
-                  class="size-5"
-                  aria-hidden="true"
-                />
+                <Icon class="size-5" aria-hidden="true" />
               </span>
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
