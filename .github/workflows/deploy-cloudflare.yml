@@ -125,69 +125,35 @@ jobs:
           verify_live_assets() {
             local base="$1"
             local html_file="$2"
+            local assets
             local asset
-            local asset_path
             local metadata
             local status
             local content_type
             local size_bytes
             local js_count=0
             local css_count=0
-            local assets=()
 
-            mapfile -t assets < <(
-              grep -Eo '(src|href)="[^"]+"' "$html_file" |
-                sed -E 's/^(src|href)="([^"]+)".*$/\\2/' |
-                grep -E '^/assets/[^?#]+\\.(js|css)(\\?[^"]*)?
-            curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors --connect-timeout 5 --max-time 20 "$base/api/health" --output /tmp/honvelte-live-health.json
-            grep -q '"status":"ok"' /tmp/honvelte-live-health.json
+            assets="$(grep -Eo '(src|href)="/assets/[^"]+\\.(js|css)"' "$html_file" |
+              sed -E 's/^(src|href)="([^"]+)"$/\\2/' |
+              sort -u || true)"
 
-            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-live-index.html
-            grep -q 'Honvelte Wind' /tmp/honvelte-live-index.html
-            verify_live_assets "$base" /tmp/honvelte-live-index.html || return 1
-
-            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json' --data '{"name":"deployment-smoke-test"}' "$base/api/greet" --output /tmp/honvelte-live-greet.json
-            grep -q '"message":"Hello, deployment-smoke-test!"' /tmp/honvelte-live-greet.json
-          }
-
-          if smoke_live; then
-            echo "Live deployment smoke tests passed."
-            exit 0
-          fi
-
-          echo "::error::Live deployment smoke tests failed; attempting to restore the previous Worker version."
-          if ! npx --yes wrangler@4.156.0 rollback --name "$WORKER_NAME" --message "Automatic rollback after failed smoke test in GitHub Actions run ${GITHUB_RUN_ID}"; then
-            echo "::error::Automatic rollback failed. Use the manual Rollback Cloudflare Worker workflow."
-            exit 1
-          fi
-
-          if ! smoke_live; then
-            echo "::error::The previous Worker version was restored, but the live smoke test still fails."
-            exit 1
-          fi
-
-          echo "The previous Worker version is live again. The deployment run remains failed for investigation."
-          exit 1
- |
-                sort -u || true
-            )
-
-            if [[ "${#assets[@]}" -eq 0 ]]; then
+            if [[ -z "$assets" ]]; then
               echo "::error::The live SPA did not reference any built JavaScript or CSS assets."
               return 1
             fi
 
-            for asset in "${assets[@]}"; do
-              metadata="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 --output /dev/null --write-out '%{http_code}|%{content_type}|%{size_download}' "$base$asset")"
-              IFS='|' read -r status content_type size_bytes <<< "$metadata"
-              asset_path="${asset%%\\?*}"
+            while IFS= read -r asset; do
+              [[ -n "$asset" ]] || continue
+              metadata="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 --output /dev/null --write-out '%{http_code} %{content_type} %{size_download}' "$base$asset")"
+              read -r status content_type size_bytes <<< "$metadata"
 
               if [[ "$status" != "200" || ! "$size_bytes" =~ ^[0-9]+$ || "$size_bytes" -le 0 ]]; then
                 echo "::error::Static asset request failed: $asset (HTTP $status, bytes $size_bytes)"
                 return 1
               fi
 
-              case "$asset_path" in
+              case "$asset" in
                 *.js)
                   if [[ "$content_type" != *javascript* ]]; then
                     echo "::error::JavaScript asset has an unexpected content type: $asset ($content_type)"
@@ -203,7 +169,7 @@ jobs:
                   css_count=$((css_count + 1))
                   ;;
               esac
-            done
+            done <<< "$assets"
 
             if [[ "$js_count" -eq 0 || "$css_count" -eq 0 ]]; then
               echo "::error::Expected at least one JavaScript and one CSS asset; found JS=$js_count CSS=$css_count."
@@ -221,6 +187,7 @@ jobs:
 
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-live-index.html
             grep -q 'Honvelte Wind' /tmp/honvelte-live-index.html
+            verify_live_assets "$base" /tmp/honvelte-live-index.html || return 1
 
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json' --data '{"name":"deployment-smoke-test"}' "$base/api/greet" --output /tmp/honvelte-live-greet.json
             grep -q '"message":"Hello, deployment-smoke-test!"' /tmp/honvelte-live-greet.json
