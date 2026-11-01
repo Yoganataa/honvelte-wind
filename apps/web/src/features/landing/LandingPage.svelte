@@ -18,7 +18,7 @@
   import XIcon from '~icons/lucide/x'
   import ZapIcon from '~icons/lucide/zap'
 
-  import GreetingPanel from './greeting/GreetingPanel.svelte'
+  import GreetingPanel from '../greeting/GreetingPanel.svelte'
 
   type CopyState = 'idle' | 'copied' | 'failed'
 
@@ -514,6 +514,7 @@
 
       <div class="mt-12 grid gap-4 md:grid-cols-3">
         {#each architecture as item (item.number)}
+          {@const Icon = item.icon}
           <article
             class="group rounded-2xl border border-border bg-panel p-6 transition-colors hover:border-accent/40"
           >
@@ -522,10 +523,7 @@
               <span
                 class="flex size-10 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10"
               >
-                {@const Icon = item.icon}<Icon
-                  class="size-5"
-                  aria-hidden="true"
-                />
+                <Icon class="size-5" aria-hidden="true" />
               </span>
             </div>
             <h3 class="mt-7 text-lg font-semibold text-foreground">
@@ -606,6 +604,7 @@
 
         <div class="mt-12 grid gap-4 sm:grid-cols-2">
           {#each capabilities as item (item.title)}
+            {@const Icon = item.icon}
             <article
               class="flex gap-4 rounded-2xl border border-border bg-panel p-5 sm:p-6"
             >
