@@ -122,6 +122,67 @@ jobs:
         run: |
           set -euo pipefail
 
+          verify_live_assets() {
+            local base="$1"
+            local html_file="$2"
+            local assets
+            local asset
+            local metadata
+            local status
+            local content_type
+            local size_bytes
+            local js_count=0
+            local css_count=0
+
+            assets="$(grep -Eo '(src|href)="/assets/[^"]+"' "$html_file" |
+              sed -E 's/^(src|href)="//; s/"$//' |
+              sort -u || true)"
+
+            if [[ -z "$assets" ]]; then
+              echo "::error::The live SPA did not reference any built JavaScript or CSS assets."
+              return 1
+            fi
+
+            while IFS= read -r asset; do
+              [[ -n "$asset" ]] || continue
+              case "$asset" in
+                *.js|*.css) ;;
+                *) continue ;;
+              esac
+
+              metadata="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 --output /dev/null --write-out '%{http_code} %{content_type} %{size_download}' "$base$asset")"
+              read -r status content_type size_bytes <<< "$metadata"
+
+              if [[ "$status" != "200" || ! "$size_bytes" =~ ^[0-9]+$ || "$size_bytes" -le 0 ]]; then
+                echo "::error::Static asset request failed: $asset (HTTP $status, bytes $size_bytes)"
+                return 1
+              fi
+
+              case "$asset" in
+                *.js)
+                  if [[ "$content_type" != *javascript* ]]; then
+                    echo "::error::JavaScript asset has an unexpected content type: $asset ($content_type)"
+                    return 1
+                  fi
+                  js_count=$((js_count + 1))
+                  ;;
+                *.css)
+                  if [[ "$content_type" != text/css* ]]; then
+                    echo "::error::CSS asset has an unexpected content type: $asset ($content_type)"
+                    return 1
+                  fi
+                  css_count=$((css_count + 1))
+                  ;;
+              esac
+            done <<< "$assets"
+
+            if [[ "$js_count" -eq 0 || "$css_count" -eq 0 ]]; then
+              echo "::error::Expected at least one JavaScript and one CSS asset; found JS=$js_count CSS=$css_count."
+              return 1
+            fi
+
+            echo "Verified $js_count JavaScript and $css_count CSS assets on the live Worker."
+          }
           smoke_live() {
             local base="${WORKER_BASE_URL%/}"
 
@@ -130,6 +191,7 @@ jobs:
 
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-live-index.html
             grep -q 'Honvelte Wind' /tmp/honvelte-live-index.html
+            verify_live_assets "$base" /tmp/honvelte-live-index.html || return 1
 
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json' --data '{"name":"deployment-smoke-test"}' "$base/api/greet" --output /tmp/honvelte-live-greet.json
             grep -q '"message":"Hello, deployment-smoke-test!"' /tmp/honvelte-live-greet.json
