@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { IdempotencyStore } from './idempotency-store'
 import { JobLeaseLostError } from './idempotency-store'
-import type { JobEnvelope } from './types'
+import { JobEnvelopeSchema, type JobEnvelope } from './types'
 
 export type JobHandlerContext = {
   jobId: string
@@ -40,6 +40,8 @@ export async function processJob(
   handler: JobHandler,
   options: ProcessJobOptions,
 ): Promise<ProcessJobResult> {
+  const validatedJob = JobEnvelopeSchema.parse(job)
+
   if (!Number.isSafeInteger(options.leaseMs) || options.leaseMs < 1_000) {
     throw new RangeError('leaseMs must be a safe integer of at least 1000ms.')
   }
@@ -53,7 +55,7 @@ export async function processJob(
   }
 
   const claim = await options.store.claim({
-    key: job.id,
+    key: validatedJob.id,
     now: claimedAt,
     leaseExpiresAt,
   })
@@ -63,14 +65,14 @@ export async function processJob(
 
   try {
     await handler.run(job.payload, {
-      jobId: job.id,
-      jobType: job.type,
-      idempotencyKey: job.id,
-      createdAt: job.createdAt,
+      jobId: validatedJob.id,
+      jobType: validatedJob.type,
+      idempotencyKey: validatedJob.id,
+      createdAt: validatedJob.createdAt,
     })
   } catch (error) {
     try {
-      await options.store.release({ key: job.id, token: claim.token })
+      await options.store.release({ key: validatedJob.id, token: claim.token })
     } catch (releaseError) {
       throw new AggregateError(
         [error, releaseError],
@@ -82,7 +84,7 @@ export async function processJob(
   }
 
   const completed = await options.store.complete({
-    key: job.id,
+    key: validatedJob.id,
     token: claim.token,
     completedAt: now(),
   })

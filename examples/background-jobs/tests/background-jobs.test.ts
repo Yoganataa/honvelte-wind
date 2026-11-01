@@ -7,6 +7,7 @@ import {
   createJob,
   createScheduledJob,
   D1IdempotencyStore,
+  JobEnvelopeSchema,
   defineJobHandler,
   type D1DatabaseLike,
   type D1PreparedStatementLike,
@@ -47,16 +48,12 @@ class TestD1 implements D1DatabaseLike {
   }
 }
 
-function createStore(retentionMs = 60_000) {
+async function createStore(retentionMs = 60_000) {
   const database = new Database(':memory:')
-  database.exec(
-    'CREATE TABLE background_job_idempotency (' +
-      'idempotency_key TEXT PRIMARY KEY, ' +
-      "state TEXT NOT NULL CHECK (state IN ('processing', 'completed')), " +
-      'lease_token TEXT, lease_expires_at INTEGER, completed_at INTEGER, expires_at INTEGER, ' +
-      "CHECK ((state = 'processing' AND lease_token IS NOT NULL AND lease_expires_at IS NOT NULL AND completed_at IS NULL AND expires_at IS NULL) OR " +
-      "(state = 'completed' AND lease_token IS NULL AND lease_expires_at IS NULL AND completed_at IS NOT NULL AND expires_at IS NOT NULL)))",
-  )
+  const migration = await Bun.file(
+    new URL('../migrations/0001_idempotency.sql', import.meta.url),
+  ).text()
+  database.exec(migration)
 
   let tokenSequence = 0
   const store = new D1IdempotencyStore(new TestD1(database), {
@@ -87,10 +84,11 @@ describe('background job contracts and runner', () => {
     expect(first.createdAt).toBe('2026-12-01T00:00:00.000Z')
     expect(() => createJob({ id: 'bad id', type: 'Reports.Refresh', payload: {} })).toThrow()
     expect(() => createScheduledJob('reports.refresh', -1, {})).toThrow()
+    expect(() => JobEnvelopeSchema.parse({ id: 'missing-payload', type: 'reports.refresh', createdAt: fixedTime })).toThrow()
   })
 
   test('validates handler payloads and skips completed duplicates', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     let executions = 0
     const handler = defineJobHandler(
@@ -123,7 +121,7 @@ describe('background job contracts and runner', () => {
   })
 
   test('does not concurrently execute the same idempotency key', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     let executions = 0
     const job = createJob({
@@ -147,7 +145,7 @@ describe('background job contracts and runner', () => {
   })
 
   test('releases a failed lease so the provider can retry the job', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
       id: 'retry-1',
@@ -169,7 +167,7 @@ describe('background job contracts and runner', () => {
   })
 
   test('fences stale leases and purges expired records', async () => {
-    const { database, store } = createStore(1_000)
+    const { database, store } = await createStore(1_000)
     openDatabases.push(database)
 
     const first = await store.claim({ key: 'fenced-1', now: 100, leaseExpiresAt: 200 })
@@ -206,7 +204,7 @@ describe('background job contracts and runner', () => {
   })
 
   test('retries invalid and unknown messages; acknowledges completed jobs', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
       id: 'queue-1',
@@ -257,8 +255,54 @@ describe('background job contracts and runner', () => {
     expect(executions).toBe(1)
   })
 
+  test('bounds message concurrency within a delivered batch', async () => {
+    let active = 0
+    let peakActive = 0
+    let executions = 0
+    const acknowledgements: string[] = []
+    const store: IdempotencyStore = {
+      claim: async ({ key }) => ({ status: 'acquired', token: key }),
+      complete: async () => true,
+      release: async () => {},
+    }
+    const handler = defineJobHandler(z.object({}), async () => {
+      active += 1
+      peakActive = Math.max(peakActive, active)
+      await Promise.resolve()
+      active -= 1
+      executions += 1
+    })
+    const queue = createCloudflareQueueHandler({
+      store,
+      handlers: new Map([['reports.refresh', handler]]),
+      leaseMs: 10_000,
+      concurrency: 2,
+      now: () => 100,
+    })
+
+    await queue({
+      messages: Array.from({ length: 7 }, (_, index) => ({
+        id: 'bounded-' + String(index),
+        body: createJob({
+          id: 'bounded-' + String(index),
+          type: 'reports.refresh',
+          payload: {},
+          createdAt: fixedTime,
+        }),
+        attempts: 1,
+        ack: () => acknowledgements.push('ack'),
+        retry: () => acknowledgements.push('retry'),
+      })),
+    })
+
+    expect(peakActive).toBe(2)
+    expect(executions).toBe(7)
+    expect(acknowledgements).toHaveLength(7)
+    expect(acknowledgements.every((action) => action === 'ack')).toBe(true)
+  })
+
   test('retries busy claims and failed handlers instead of acknowledging them', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
       id: 'busy-1',
