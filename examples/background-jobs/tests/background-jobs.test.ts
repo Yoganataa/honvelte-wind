@@ -393,6 +393,95 @@ describe('background job contracts and runner', () => {
     expect(executions).toBe(1)
   })
 
+  test('creates delivery and execution spans around queue processing', async () => {
+    const { database, store } = await createStore()
+    openDatabases.push(database)
+    const job = createJob({
+      id: 'traced-queue-1',
+      type: 'reports.refresh',
+      payload: { reportId: 'r-1' },
+      createdAt: fixedTime,
+      traceContext: {
+        traceparent:
+          '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+      },
+    })
+    const spans: Array<{
+      name: string
+      parent?: string
+      attributes: Record<string, string | number | boolean>
+    }> = []
+    const tracing: Tracing = {
+      async withSpan(name, options, callback) {
+        const attributes: Record<string, string | number | boolean> = {
+          ...(options.attributes ?? {}),
+        }
+        spans.push({
+          name,
+          ...(options.parent?.traceparent
+            ? { parent: options.parent.traceparent }
+            : {}),
+          attributes,
+        })
+        const span: TraceSpan = {
+          traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+          spanId: '00f067aa0ba902b7',
+          setAttribute(key, value) {
+            attributes[key] = value
+          },
+          setAttributes(values) {
+            Object.assign(attributes, values)
+          },
+          recordError(error) {
+            attributes['exception.type'] =
+              error instanceof Error ? error.name : typeof error
+          },
+          setStatus(status) {
+            attributes['span.status'] = status
+          },
+        }
+        return callback(span)
+      },
+      inject: (carrier = {}) => ({ ...carrier }),
+    }
+    const handler = defineJobHandler(z.object({ reportId: z.string() }), async () => {})
+    const queue = createCloudflareQueueHandler({
+      store,
+      handlers: new Map([['reports.refresh', handler]]),
+      leaseMs: 10_000,
+      tracing,
+      now: () => 100,
+    })
+    const actions: string[] = []
+
+    await queue({
+      messages: [{
+        id: 'message-id-not-a-span-attribute',
+        body: job,
+        attempts: 1,
+        ack: () => actions.push('ack'),
+        retry: () => actions.push('retry'),
+      }],
+    })
+
+    expect(actions).toEqual(['ack'])
+    expect(spans.map((span) => span.name)).toEqual([
+      'background.job.delivery',
+      'background.job.execute',
+    ])
+    expect(spans[0]?.parent).toBe(job.traceContext?.traceparent)
+    expect(spans[0]?.attributes).toMatchObject({
+      'messaging.system': 'cloudflare-queues',
+      'messaging.message.delivery_attempt': 1,
+      'app.job.type': 'reports.refresh',
+    })
+    expect(spans[1]?.attributes).toMatchObject({
+      'app.job.type': 'reports.refresh',
+    })
+    expect(JSON.stringify(spans)).not.toContain('message-id-not-a-span-attribute')
+    expect(JSON.stringify(spans)).not.toContain('reportId')
+  })
+
   test('bounds message concurrency within a delivered batch', async () => {
     let active = 0
     let peakActive = 0

@@ -74,14 +74,7 @@ export function createCloudflareQueueHandler(
   const processMessage = async (
     message: CloudflareQueueMessage,
   ): Promise<void> => {
-    let job: JobEnvelope | undefined
-    let parseError: unknown
-
-    try {
-      job = JobEnvelopeSchema.parse(message.body)
-    } catch (error) {
-      parseError = error
-    }
+    const parsed = JobEnvelopeSchema.safeParse(message.body)
 
     await tracing.withSpan(
       'background.job.delivery',
@@ -89,15 +82,19 @@ export function createCloudflareQueueHandler(
         kind: 'consumer',
         attributes: {
           'messaging.system': 'cloudflare-queues',
-          'messaging.message.delivery_attempt': message.attempts,
+          'messaging.message.delivery_attempt':
+            Number.isSafeInteger(message.attempts) && message.attempts > 0
+              ? message.attempts
+              : 1,
         },
-        ...(job?.traceContext ? { parent: job.traceContext } : {}),
+        ...(parsed.success && parsed.data.traceContext
+          ? { parent: parsed.data.traceContext }
+          : {}),
       },
       async (span) => {
         try {
-          if (parseError) throw parseError
-          if (!job) throw new Error('The queue message body is invalid.')
-
+          if (!parsed.success) throw parsed.error
+          const job = parsed.data
           span.setAttribute('app.job.type', job.type)
           const handler = options.handlers.get(job.type)
           if (!handler) throw new UnknownJobTypeError(job.type)
@@ -130,7 +127,9 @@ export function createCloudflareQueueHandler(
             options.onFailure?.({
               messageId: message.id,
               attempts: message.attempts,
-              ...(job ? { jobId: job.id, jobType: job.type } : {}),
+              ...(parsed.success
+                ? { jobId: parsed.data.id, jobType: parsed.data.type }
+                : {}),
               error,
             })
           } catch {

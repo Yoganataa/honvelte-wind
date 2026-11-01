@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { TraceContextCarrier, Tracing } from '@honvelte/contracts'
+import type { TraceContextCarrier, TraceSpan, Tracing } from '@honvelte/contracts'
 import type { IdempotencyStore } from './idempotency-store'
 import { JobLeaseLostError } from './idempotency-store'
 import { JobEnvelopeSchema, type JobEnvelope } from './types'
@@ -49,7 +49,7 @@ export async function processJob(
     throw new RangeError('leaseMs must be a safe integer of at least 1000ms.')
   }
 
-  const execute = async (span?: import('@honvelte/contracts').TraceSpan): Promise<ProcessJobResult> => {
+  const execute = async (span?: TraceSpan): Promise<ProcessJobResult> => {
   const now = options.now ?? Date.now
   const claimedAt = now()
   const leaseExpiresAt = claimedAt + options.leaseMs
