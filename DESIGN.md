@@ -66,7 +66,7 @@ Do not introduce a second font family without a documented product reason and a 
 
 ## 5. Layout and spacing
 
-The current starter page uses a centered content column with a maximum width of `48rem` (`max-w-3xl`), horizontal page padding, generous vertical breathing room, and a vertical content gap.
+The marketing landing page uses a responsive shell up to `80rem` (`max-w-7xl`) for navigation and multi-column sections, with a split hero on wide screens. Individual copy blocks, cards, and interactive forms use narrower measures inside that shell. Keep horizontal page padding, generous vertical breathing room, and consistent section gaps.
 
 Guidelines:
 
