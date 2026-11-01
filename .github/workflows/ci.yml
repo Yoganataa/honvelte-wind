@@ -58,7 +58,7 @@ jobs:
           workflow = Path(".github/workflows/ci.yml")
           content = workflow.read_text()
           start = content.index("      - name: Normalize background-jobs formatting for the current review")
-          end = content.index("      - name: Lint, typecheck, dependency audit, unit tests with coverage, and build\\n", start)
+          end = content.index("      - name: Lint, typecheck, dependency audit, unit tests with coverage, and build", start)
           workflow.write_text(content[:start] + content[end:])
           PY
 
