@@ -1,5 +1,4 @@
 <script lang="ts">
-  import ArrowDownIcon from '~icons/lucide/arrow-down'
   import ArrowRightIcon from '~icons/lucide/arrow-right'
   import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
   import BoxesIcon from '~icons/lucide/boxes'
