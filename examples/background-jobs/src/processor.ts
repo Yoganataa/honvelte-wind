@@ -80,6 +80,7 @@ export async function processJob(
       throw new AggregateError(
         [error, releaseError],
         'Job execution failed and its idempotency lease could not be released.',
+        { cause: error },
       )
     }
 
