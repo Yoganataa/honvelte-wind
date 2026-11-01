@@ -1,13 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "bun"
-    ],
-    "noEmit": true
+    "types": ["bun"],
+    "noEmit": true,
+    "paths": {
+      "zod": ["../../apps/api/node_modules/zod/index.d.ts"]
+    }
   },
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts"
-  ]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

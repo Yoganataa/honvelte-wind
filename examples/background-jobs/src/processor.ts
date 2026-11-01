@@ -72,7 +72,10 @@ export async function processJob(
     })
   } catch (error) {
     try {
-      await options.store.release({ key: validatedJob.id, token: claim.token })
+      await options.store.release({
+        key: validatedJob.id,
+        token: claim.token,
+      })
     } catch (releaseError) {
       throw new AggregateError(
         [error, releaseError],

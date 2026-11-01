@@ -51,24 +51,35 @@ export function createCloudflareQueueHandler(
   }
 
   const concurrency = options.concurrency ?? 5
-  if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > 100) {
+  if (
+    !Number.isSafeInteger(concurrency) ||
+    concurrency < 1 ||
+    concurrency > 100
+  ) {
     throw new RangeError('concurrency must be between 1 and 100.')
   }
 
   const busyDelaySeconds = options.busyDelaySeconds ?? 2
-  if (!Number.isSafeInteger(busyDelaySeconds) || busyDelaySeconds < 1 || busyDelaySeconds > 86_400) {
+  if (
+    !Number.isSafeInteger(busyDelaySeconds) ||
+    busyDelaySeconds < 1 ||
+    busyDelaySeconds > 86_400
+  ) {
     throw new RangeError('busyDelaySeconds must be between 1 and 86400.')
   }
 
-  const processMessage = async (message: CloudflareQueueMessage): Promise<void> => {
+  const processMessage = async (
+    message: CloudflareQueueMessage,
+  ): Promise<void> => {
     let job: JobEnvelope | undefined
 
     try {
-      job = JobEnvelopeSchema.parse(message.body)
-      const handler = options.handlers.get(job.type)
-      if (!handler) throw new UnknownJobTypeError(job.type)
+      const parsedJob = JobEnvelopeSchema.parse(message.body)
+      job = parsedJob
+      const handler = options.handlers.get(parsedJob.type)
+      if (!handler) throw new UnknownJobTypeError(parsedJob.type)
 
-      const result = await processJob(job, handler, {
+      const result = await processJob(parsedJob, handler, {
         store: options.store,
         leaseMs: options.leaseMs,
         ...(options.now ? { now: options.now } : {}),
