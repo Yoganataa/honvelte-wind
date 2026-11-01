@@ -110,7 +110,7 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
 4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
 5. **API request safety examples:** tests fixed-window rate limits, trusted key selection, bounded-store failure, timeout responses, abort signals, and cleanup.
-6. **Cloudflare Workers profile:** tests the Hono Fetch adapter and smoke-tests the static SPA and API routes in the local `workerd` runtime.
+6. **Cloudflare Workers profile:** validates staging and production Wrangler environments with dry runs, tests the Hono Fetch adapter, and smoke-tests the static SPA and API routes in the local `workerd` runtime.
 7. **Production delivery:** after quality, browser, database, authentication, request-safety, and Worker-profile jobs pass on `main`, creates a deployable Bun server tarball containing the Hono server source, shared contracts, and built SPA.
 8. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
 9. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
