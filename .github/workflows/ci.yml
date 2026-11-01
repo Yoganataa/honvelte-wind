@@ -48,7 +48,6 @@ jobs:
 
       - name: Commit canonical formatting to the same-repository PR branch
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
@@ -58,7 +57,7 @@ jobs:
 
           workflow = Path(".github/workflows/ci.yml")
           content = workflow.read_text()
-          start = content.index("      - name: Normalize background-jobs formatting for the current review\\n")
+          start = content.index("      - name: Normalize background-jobs formatting for the current review")
           end = content.index("      - name: Lint, typecheck, dependency audit, unit tests with coverage, and build\\n", start)
           workflow.write_text(content[:start] + content[end:])
           PY
