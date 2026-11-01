@@ -98,7 +98,9 @@ describe('background job contracts and runner', () => {
     ).toThrow()
   })
 
-  test('validates handler payloads and skips completed duplicates', async () => {
+  test(
+    'validates handler payloads and skips completed duplicates',
+    async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     let executions = 0
@@ -167,7 +169,9 @@ describe('background job contracts and runner', () => {
     expect(executions).toBe(1)
   })
 
-  test('releases a failed lease so the provider can retry the job', async () => {
+  test(
+    'releases a failed lease so the provider can retry the job',
+    async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
@@ -199,6 +203,21 @@ describe('background job contracts and runner', () => {
     const { database, store } = await createStore(60_000)
     openDatabases.push(database)
 
+    const expiredOnly = await store.claim({
+      key: 'expired-only',
+      now: 100,
+      leaseExpiresAt: 200,
+    })
+    expect(expiredOnly.status).toBe('acquired')
+    if (expiredOnly.status !== 'acquired') throw new Error('Expected expiring lease')
+    expect(
+      await store.complete({
+        key: 'expired-only',
+        token: expiredOnly.token,
+        completedAt: 200,
+      }),
+    ).toBe(false)
+
     const first = await store.claim({
       key: 'fenced-1',
       now: 100,
@@ -215,6 +234,13 @@ describe('background job contracts and runner', () => {
     expect(second.status).toBe('acquired')
     if (second.status !== 'acquired') throw new Error('Expected second lease')
 
+    expect(
+      await store.complete({
+        key: 'fenced-1',
+        token: first.token,
+        completedAt: 201,
+      }),
+    ).toBe(false)
     await store.release({ key: 'fenced-1', token: first.token })
     expect(
       await store.claim({ key: 'fenced-1', now: 201, leaseExpiresAt: 301 }),
@@ -229,7 +255,7 @@ describe('background job contracts and runner', () => {
     ).toBe(true)
     expect(await store.purgeExpired({ now: 60_250 })).toBe(1)
     expect(
-      await store.claim({ key: 'fenced-1', now: 1_250, leaseExpiresAt: 1_350 }),
+      await store.claim({ key: 'fenced-1', now: 60_250, leaseExpiresAt: 60_350 }),
     ).toMatchObject({
       status: 'acquired',
     })
@@ -254,7 +280,9 @@ describe('background job contracts and runner', () => {
     expect(() => calculateRetryDelaySeconds(1, { random: () => 1 })).toThrow()
   })
 
-  test('retries invalid and unknown messages; acknowledges completed jobs', async () => {
+  test(
+    'retries invalid and unknown messages; acknowledges completed jobs',
+    async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
@@ -299,7 +327,11 @@ describe('background job contracts and runner', () => {
       messages: [
         makeMessage('valid', job),
         makeMessage('invalid', { id: 'bad', type: 'Bad Type' }),
-        makeMessage('unknown', { ...job, id: 'unknown-1', type: 'missing.handler' }),
+        makeMessage('unknown', {
+          ...job,
+          id: 'unknown-1',
+          type: 'missing.handler',
+        }),
       ],
     })
 
@@ -362,7 +394,9 @@ describe('background job contracts and runner', () => {
     expect(acknowledgements.every((action) => action === 'ack')).toBe(true)
   })
 
-  test('retries busy claims and failed handlers instead of acknowledging them', async () => {
+  test(
+    'retries busy claims and failed handlers instead of acknowledging them',
+    async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({

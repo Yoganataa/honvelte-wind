@@ -131,9 +131,10 @@ export class D1IdempotencyStore
             expires_at = ?
         WHERE idempotency_key = ?
           AND state = 'processing'
-          AND lease_token = ?`,
+          AND lease_token = ?
+          AND lease_expires_at > ?`,
       )
-      .bind(input.completedAt, expiresAt, input.key, input.token)
+      .bind(input.completedAt, expiresAt, input.key, input.token, input.completedAt)
       .run()
 
     return result.meta?.changes === 1
