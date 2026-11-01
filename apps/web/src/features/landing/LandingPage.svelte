@@ -214,12 +214,12 @@
     </button>
   </header>
 
-  {#if menuOpen}
-    <nav
-      id="mobile-navigation"
-      aria-label="Mobile navigation"
-      class="relative z-20 mx-5 mb-2 grid gap-1 rounded-xl border border-border bg-panel p-2 shadow-xl md:hidden"
-    >
+  <nav
+    id="mobile-navigation"
+    aria-label="Mobile navigation"
+    hidden={!menuOpen}
+    class="relative z-20 mx-5 mb-2 grid gap-1 rounded-xl border border-border bg-panel p-2 shadow-xl md:hidden"
+  >
       {#each navigation as item (item.href)}
         <a
           href={item.href}
@@ -246,8 +246,7 @@
         Get started
         <ArrowRightIcon class="size-4" aria-hidden="true" />
       </a>
-    </nav>
-  {/if}
+  </nav>
 
   <main id="main" tabindex="-1" class="relative z-10">
     <section class="mx-auto grid w-full max-w-7xl gap-14 px-5 pb-24 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28">
@@ -426,7 +425,7 @@
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs text-muted">{item.number}</span>
               <span class="flex size-10 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10">
-                <svelte:component this={item.icon} class="size-5" aria-hidden="true" />
+                {@const Icon = item.icon}<Icon class="size-5" aria-hidden="true" />
               </span>
             </div>
             <h3 class="mt-7 text-lg font-semibold text-foreground">{item.title}</h3>
