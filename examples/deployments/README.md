@@ -1,6 +1,6 @@
 # Deployment profiles
 
-Honvelte Wind currently has two CI-validated deployment profiles. CI validates builds and local runtime behavior; it does not deploy to a live account or prove a production rollout.
+Honvelte Wind provides two deployment profiles: a default Bun server and an optional Cloudflare Workers edge profile. Pull-request/push CI validates builds and local runtime behavior; separate manual GitHub Actions workflows perform live Cloudflare deployments. In this upstream repository, both staging and production Workers have been deployed and passed live smoke verification. A new fork must configure its own GitHub Environments, credentials, and Cloudflare resources.
 
 ## 1. Bun server: API and SPA in one process
 
@@ -72,7 +72,7 @@ The `Cloudflare Workers profile` CI job:
 
 1. Runs the Worker adapter tests against standard Fetch `Request` and `Response` objects.
 2. Starts the local `workerd` runtime through the pinned Wrangler CLI.
-3. Smoke-tests the API health route, greeting route, and SPA asset fallback.
+3. Smoke-tests the API health route, greeting route, SPA response, and `robots.txt` policy in the local Worker runtime.
 
 This verifies the local Worker bundle and routing configuration. It does not deploy a Worker, configure a custom domain, create production secrets, or validate a live account's limits and billing.
 
@@ -80,19 +80,21 @@ This verifies the local Worker bundle and routing configuration. It does not dep
 
 Two manual GitHub Actions workflows are provided:
 
-- **Deploy Cloudflare Worker** builds and verifies the repository, validates the selected local Worker environment, deploys it, and smoke-tests the live API and SPA.
-- **Rollback Cloudflare Worker** restores an explicitly selected prior Worker version and verifies the restored health route and SPA.
+- **Deploy Cloudflare Worker** runs full repository verification, validates the selected local Worker environment, deploys it, and verifies the live health endpoint, greeting API, SPA HTML, `robots.txt`, and referenced JavaScript/CSS assets.
+- **Rollback Cloudflare Worker** restores an explicitly selected prior Worker version and verifies the restored health endpoint, SPA HTML, `robots.txt`, and referenced JavaScript/CSS assets.
 
 Both workflows can run only from `main`. Select exactly one target, `staging` or `production`. They are not triggered by pull requests or ordinary pushes. The deploy workflow uses a concurrency group per environment so two deploy/rollback operations cannot intentionally run in parallel for the same target.
 
-### One-time setup
+### One-time setup for a new fork or Cloudflare account
 
-1. Create the GitHub Environments named `staging` and `production` before the first deployment. GitHub can auto-create an environment when a workflow references a missing name, but that environment has no secrets or protection rules; configuring it first avoids an unprotected deployment attempt.
+The upstream `Yoganataa/honvelte-wind` repository already has `staging` and `production` GitHub Environments configured and has completed successful deployments to both Workers. These settings and Cloudflare resources are not copied when you fork or clone the repository.
+
+1. In a new repository, create the GitHub Environments named `staging` and `production` before the first deployment. GitHub can auto-create a missing environment when a workflow references it, but that environment has no secrets or protection rules; configuring it first avoids an unprotected deployment attempt.
 2. For each GitHub Environment, add the **environment secret** `CLOUDFLARE_API_TOKEN`, using a separate token scoped to that environment's existing Worker.
 3. For each GitHub Environment, add these **environment variables**:
    - `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID containing that Worker. This is an identifier, not an authentication secret.
    - `WORKER_BASE_URL`: that Worker's public HTTPS origin, without a trailing path. For example: `https://honvelte-wind-staging.<your-workers-dev-subdomain>.workers.dev`.
-4. Restrict deployment branches to `main` in both environments. For `production`, configure Required reviewers and enable Prevent self-review. These protections are configured in GitHub repository settings, not in workflow YAML.
+4. Restrict deployment branches to `main` in both environments. For team-owned production, configure Required reviewers and enable Prevent self-review so the deployer cannot approve their own release. For a solo-maintained repository, disable Prevent self-review if the same account must trigger and approve deployments; this preserves a manual gate but is not independent approval. These protections are configured in GitHub repository settings, not in workflow YAML.
 5. Create the two Workers once in Cloudflare (or use a temporary setup token with Workers product-level Admin permission), then remove/revoke that elevated token and scope the routine CI tokens to the corresponding existing Worker. Prefer separate tokens for staging and production.
 
 The recommended Cloudflare permission is **Workers Editor** scoped to the individual existing Worker. A deployment that creates a new Worker requires broader Workers product-level Admin permission; do not keep that broader permission on a routine deployment token. No DNS route or custom domain is configured by this starter: the example profile uses each environment’s `workers.dev` URL.
@@ -105,7 +107,9 @@ The workflow runs `bun run verify:all`, the Fetch adapter tests, and a local `wo
 
 - `GET /api/health` returns `200` with `status: "ok"`.
 - `POST /api/greet` returns the expected JSON contract.
-- `/` serves the Svelte SPA.
+- `/` serves the Svelte SPA HTML.
+- `/robots.txt` returns HTTP 200 with `text/plain`, a non-empty body, and the required crawl directives; an HTML SPA fallback is rejected.
+- Every JavaScript and CSS asset referenced by the served HTML returns HTTP 200, a non-empty body, and the expected content type.
 
 When a post-deploy smoke test fails, the workflow attempts to deploy the previously active Worker version again and still marks the workflow as failed so the release requires investigation. Automatic rollback requires an earlier successful deployment; the first deployment has no previous version to restore.
 
@@ -120,11 +124,11 @@ npx --yes wrangler@4.156.0 versions list --name honvelte-wind-staging
 npx --yes wrangler@4.156.0 versions list --name honvelte-wind-production
 ```
 
-The workflow runs `wrangler rollback <VERSION_ID>` against the selected Worker and checks the public health route and SPA after rollback. A rollback is a new deployment of the selected old Worker version; it does not reverse changes to external state such as database records or object storage. Review and roll back data migrations separately.
+The workflow runs `wrangler rollback <VERSION_ID>` against the selected Worker and checks the public health route, SPA HTML, `robots.txt`, and referenced JavaScript/CSS assets after rollback. A rollback is a new deployment of the selected old Worker version; it does not reverse changes to external state such as database records or object storage. Review and roll back data migrations separately.
 
 ### Operational boundaries
 
-The deploy and rollback workflows remain inactive until the GitHub Environments, `CLOUDFLARE_API_TOKEN` secrets, and `CLOUDFLARE_ACCOUNT_ID` / `WORKER_BASE_URL` variables are configured. The selected environment URL is also attached to the GitHub deployment record. No Cloudflare account, domain, token, or production deployment is provisioned by this repository change.
+For this upstream repository, the staging and production environments and Workers are configured and live deployment verification has succeeded. A fork or independent installation must configure its own GitHub Environments, `CLOUDFLARE_API_TOKEN` secrets, `CLOUDFLARE_ACCOUNT_ID` / `WORKER_BASE_URL` variables, protection rules, and Worker resources before dispatching the workflows. The selected environment URL is attached to the GitHub deployment record. The repository does not provision a Cloudflare account, domain, token, or Worker resources automatically.
 
 ## Choosing a profile
 
