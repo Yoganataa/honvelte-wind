@@ -30,15 +30,12 @@ class TestD1Statement implements D1PreparedStatementLike {
   }
 
   async first<T>(): Promise<T | null> {
-    const row = this.database
-      .query(this.query)
-      .get(...(this.values as never[]))
+    const row = this.database.query(this.query).get(...(this.values as never[]))
     return (row ?? null) as T | null
   }
 
   async run(): Promise<{ success: boolean; meta: { changes: number } }> {
-    const result = this.database
-      .run(this.query, ...(this.values as never[]))
+    const result = this.database.run(this.query, ...(this.values as never[]))
     return { success: true, meta: { changes: result.changes } }
   }
 }
@@ -98,9 +95,7 @@ describe('background job contracts and runner', () => {
     ).toThrow()
   })
 
-  test(
-    'validates handler payloads and skips completed duplicates',
-    async () => {
+  test('validates handler payloads and skips completed duplicates', async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     let executions = 0
@@ -136,12 +131,15 @@ describe('background job contracts and runner', () => {
     expect(executions).toBe(1)
 
     await expect(
-      handler.run({ accountId: 123 }, {
-        jobId: 'bad',
-        jobType: 'account.reconcile',
-        idempotencyKey: 'bad',
-        createdAt: fixedTime,
-      }),
+      handler.run(
+        { accountId: 123 },
+        {
+          jobId: 'bad',
+          jobType: 'account.reconcile',
+          idempotencyKey: 'bad',
+          createdAt: fixedTime,
+        },
+      ),
     ).rejects.toThrow()
   })
 
@@ -169,9 +167,7 @@ describe('background job contracts and runner', () => {
     expect(executions).toBe(1)
   })
 
-  test(
-    'releases a failed lease so the provider can retry the job',
-    async () => {
+  test('releases a failed lease so the provider can retry the job', async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
@@ -270,15 +266,15 @@ describe('background job contracts and runner', () => {
   test('calculates bounded full-jitter retry delays', () => {
     expect(
       calculateRetryDelaySeconds(1, {
-      baseDelaySeconds: 5,
-      maxDelaySeconds: 20,
+        baseDelaySeconds: 5,
+        maxDelaySeconds: 20,
         random: () => 0,
       }),
     ).toBe(1)
     expect(
       calculateRetryDelaySeconds(10, {
-      baseDelaySeconds: 5,
-      maxDelaySeconds: 20,
+        baseDelaySeconds: 5,
+        maxDelaySeconds: 20,
         random: () => 0.999,
       }),
     ).toBe(20)
@@ -286,9 +282,7 @@ describe('background job contracts and runner', () => {
     expect(() => calculateRetryDelaySeconds(1, { random: () => 1 })).toThrow()
   })
 
-  test(
-    'retries invalid and unknown messages; acknowledges completed jobs',
-    async () => {
+  test('retries invalid and unknown messages; acknowledges completed jobs', async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
@@ -400,9 +394,7 @@ describe('background job contracts and runner', () => {
     expect(acknowledgements.every((action) => action === 'ack')).toBe(true)
   })
 
-  test(
-    'retries busy claims and failed handlers instead of acknowledging them',
-    async () => {
+  test('retries busy claims and failed handlers instead of acknowledging them', async () => {
     const { database, store } = await createStore()
     openDatabases.push(database)
     const job = createJob({
@@ -439,9 +431,12 @@ describe('background job contracts and runner', () => {
     const failedQueue = createCloudflareQueueHandler({
       store,
       handlers: new Map([
-        ['reports.refresh', defineJobHandler(z.object({}), async () => {
-          throw new Error('temporary')
-        })],
+        [
+          'reports.refresh',
+          defineJobHandler(z.object({}), async () => {
+            throw new Error('temporary')
+          }),
+        ],
       ]),
       leaseMs: 10_000,
       now: () => 100,

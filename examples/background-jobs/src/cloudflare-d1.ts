@@ -161,10 +161,7 @@ export class D1IdempotencyStore
       .run()
   }
 
-  async purgeExpired(input: {
-    now: number
-    limit?: number
-  }): Promise<number> {
+  async purgeExpired(input: { now: number; limit?: number }): Promise<number> {
     validateTimestamp(input.now, 'now')
     const limit = input.limit ?? 500
 
