@@ -209,7 +209,9 @@ describe('background job contracts and runner', () => {
       leaseExpiresAt: 200,
     })
     expect(expiredOnly.status).toBe('acquired')
-    if (expiredOnly.status !== 'acquired') throw new Error('Expected expiring lease')
+    if (expiredOnly.status !== 'acquired') {
+      throw new Error('Expected expiring lease')
+    }
     expect(
       await store.complete({
         key: 'expired-only',
@@ -255,7 +257,11 @@ describe('background job contracts and runner', () => {
     ).toBe(true)
     expect(await store.purgeExpired({ now: 60_250 })).toBe(1)
     expect(
-      await store.claim({ key: 'fenced-1', now: 60_250, leaseExpiresAt: 60_350 }),
+      await store.claim({
+        key: 'fenced-1',
+        now: 60_250,
+        leaseExpiresAt: 60_350,
+      }),
     ).toMatchObject({
       status: 'acquired',
     })

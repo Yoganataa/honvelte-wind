@@ -134,7 +134,13 @@ export class D1IdempotencyStore
           AND lease_token = ?
           AND lease_expires_at > ?`,
       )
-      .bind(input.completedAt, expiresAt, input.key, input.token, input.completedAt)
+      .bind(
+        input.completedAt,
+        expiresAt,
+        input.key,
+        input.token,
+        input.completedAt,
+      )
       .run()
 
     return result.meta?.changes === 1
