@@ -76,6 +76,56 @@ The `Cloudflare Workers profile` CI job:
 
 This verifies the local Worker bundle and routing configuration. It does not deploy a Worker, configure a custom domain, create production secrets, or validate a live account's limits and billing.
 
+## 3. Controlled Cloudflare delivery
+
+Two manual GitHub Actions workflows are provided:
+
+- **Deploy Cloudflare Worker** builds and verifies the repository, validates the selected local Worker environment, deploys it, and smoke-tests the live API and SPA.
+- **Rollback Cloudflare Worker** restores an explicitly selected prior Worker version and verifies the restored health route and SPA.
+
+Both workflows can run only from `main`. Select exactly one target, `staging` or `production`. They are not triggered by pull requests or ordinary pushes. The deploy workflow uses a concurrency group per environment so two deploy/rollback operations cannot intentionally run in parallel for the same target.
+
+### One-time setup
+
+1. Create the GitHub Environments named `staging` and `production`.
+2. For each GitHub Environment, add these **environment secrets**:
+   - `CLOUDFLARE_API_TOKEN`: a token scoped to that environment's Worker.
+   - `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID containing that Worker.
+3. Add the environment variable `WORKER_BASE_URL` with that Worker’s public HTTPS origin, without a trailing path. For example: `https://honvelte-wind-staging.<your-workers-dev-subdomain>.workers.dev`.
+4. Configure required reviewers and deployment protection for the `production` GitHub Environment in repository settings. The workflow references the environment, but reviewer rules are configured in GitHub settings, not in YAML.
+5. Create the two Workers once in Cloudflare (or use a temporary setup token with the required account-level creation permission), then scope the regular CI tokens to the corresponding existing Worker. Prefer separate tokens for staging and production.
+
+The recommended Cloudflare permission is **Workers Editor** scoped to the individual existing Worker. A deployment that creates a new Worker requires broader Workers product-level Admin permission; do not keep that broader permission on a routine deployment token. No DNS route or custom domain is configured by this starter: the example profile uses each environment’s `workers.dev` URL.
+
+### Deploy
+
+From the `main` branch, open **Actions → Deploy Cloudflare Worker → Run workflow**, choose `staging` first, then `production` after the staging deployment has been reviewed.
+
+The workflow runs `bun run verify:all`, the Fetch adapter tests, and a local `workerd` smoke test using the selected Wrangler environment. It then deploys with the pinned Wrangler CLI and verifies:
+
+- `GET /api/health` returns `200` with `status: "ok"`.
+- `POST /api/greet` returns the expected JSON contract.
+- `/` serves the Svelte SPA.
+
+When a post-deploy smoke test fails, the workflow attempts to deploy the previously active Worker version again and still marks the workflow as failed so the release requires investigation. Automatic rollback requires an earlier successful deployment; the first deployment has no previous version to restore.
+
+### Manual rollback
+
+Use **Actions → Rollback Cloudflare Worker** from `main`, choose the target environment, and supply the exact version UUID to restore.
+
+List recent versions for the selected Worker:
+
+```bash
+npx --yes wrangler@4.156.0 versions list --name honvelte-wind-staging
+npx --yes wrangler@4.156.0 versions list --name honvelte-wind-production
+```
+
+The workflow runs `wrangler rollback <VERSION_ID>` against the selected Worker and checks the public health route and SPA after rollback. A rollback is a new deployment of the selected old Worker version; it does not reverse changes to external state such as database records or object storage. Review and roll back data migrations separately.
+
+### Operational boundaries
+
+The deploy and rollback workflows remain inactive until the GitHub Environments, secrets, and `WORKER_BASE_URL` variables are configured. No Cloudflare account, domain, token, or production deployment is provisioned by this repository change.
+
 ## Choosing a profile
 
 Use the Bun server when the application needs the bundled Bun-specific database/auth examples, process-level lifecycle control, or the current in-process Prometheus registry. Use the Cloudflare profile for the stateless core API and static SPA when edge execution is an explicit deployment requirement. Do not combine the profiles behind the same public route without an intentional routing and session strategy.
