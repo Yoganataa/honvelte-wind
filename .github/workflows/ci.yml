@@ -52,19 +52,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          workflow = Path(".github/workflows/ci.yml")
-          content = workflow.read_text()
-          start = content.index("      - name: Normalize background-jobs formatting for the current review")
-          end = content.index("      - name: Lint, typecheck, dependency audit, unit tests with coverage, and build", start)
-          workflow.write_text(content[:start] + content[end:])
-          PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/ci.yml examples/background-jobs/src/cloudflare-d1.ts examples/background-jobs/tests/background-jobs.test.ts README.md
+          git add examples/background-jobs/src/cloudflare-d1.ts examples/background-jobs/tests/background-jobs.test.ts README.md
           if git diff --cached --quiet; then
             echo "No formatting changes to commit."
             exit 0
