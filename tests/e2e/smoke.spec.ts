@@ -29,8 +29,9 @@ test('mobile navigation opens and closes accessibly', async ({ page }) => {
     'true',
   )
 
-  await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Features' }).click()
-  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toHaveCount(0)
+  const mobileNavigation = page.getByRole('navigation', { name: 'Mobile navigation' })
+  await mobileNavigation.getByRole('link', { name: 'Features' }).click()
+  await expect(mobileNavigation).toBeHidden()
   await expect(page).toHaveURL(/#features$/)
 })
 
