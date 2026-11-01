@@ -64,7 +64,7 @@ export async function processJob(
   if (claim.status === 'busy') return 'busy'
 
   try {
-    await handler.run(job.payload, {
+    await handler.run(validatedJob.payload, {
       jobId: validatedJob.id,
       jobType: validatedJob.type,
       idempotencyKey: validatedJob.id,

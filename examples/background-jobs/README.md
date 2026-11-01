@@ -91,6 +91,7 @@ Create a Cloudflare Queues producer and consumer binding, configure a dead-lette
           handlers,
           // Set this above the bounded execution time of the slowest handler.
           leaseMs: 2 * 60 * 1000,
+          concurrency: 5,
           onFailure: ({ messageId, attempts, jobType, error }) => {
             // Forward only redacted metadata to your logger/telemetry adapter.
             logger.error('Background job delivery failed', {
@@ -156,6 +157,8 @@ Malformed envelopes and unknown job types are retried too, so they reach the DLQ
 ### Durable idempotency and lease operations
 
 The D1 claim is a single conditional UPSERT. Concurrent deliveries for one key cannot both acquire the same unexpired lease. Each acquired lease gets a unique token; completion and release must match that token, preventing an expired worker from completing or clearing a newer worker's lease.
+
+The consumer defaults to at most five concurrently processed messages per batch; set `concurrency` between 1 and 100 to fit the downstream service and database capacity. Keep it at or below the provider's batch size unless there is a deliberate reason to use fewer workers.
 
 Set `leaseMs` above the bounded execution time of the handler. This example does not implement lease heartbeats. Long-running work should be split into smaller jobs or extended with a tested lease-renewal protocol. Fencing the store does not undo an external side effect already performed by a stale worker; downstream idempotency remains required.
 

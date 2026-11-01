@@ -39,7 +39,7 @@ API readiness: http://127.0.0.1:3000/api/ready
 | `bun run test:background-jobs` | Test optional durable idempotency, queue retries, and scheduled jobs     |
 | `bun run test:e2e`            | Playwright browser tests                                                |
 | `bun run verify`              | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
-| `bun run verify:all`          | All verification including DB, auth, request safety, and browser E2E    |
+| `bun run verify:all`          | All verification including DB, auth, request safety, jobs, and browser E2E |
 
 ## Architecture
 
@@ -110,7 +110,7 @@ Keep Lucide as the default visual language. Add another Iconify JSON collection 
 
 ## CI/CD
 
-GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and manual dispatch:
+GitHub Actions runs on pushes to `main`, pull requests (including stacked feature-branch PRs), and manual dispatch:
 
 1. **Quality gates:** Prettier, Bun dependency audit, ESLint, TypeScript/Svelte diagnostics, unit tests with line/function coverage, and production build.
 2. **Browser E2E:** installs Chromium and tests the production Bun server.
