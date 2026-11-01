@@ -1,141 +1,373 @@
 <script lang="ts">
+  import ActivityIcon from '~icons/lucide/activity'
   import ArrowRightIcon from '~icons/lucide/arrow-right'
-  import ArrowUpRightIcon from '~icons/lucide/arrow-up-right'
-  import BoxesIcon from '~icons/lucide/boxes'
+  import BotIcon from '~icons/lucide/bot'
   import CheckIcon from '~icons/lucide/check'
   import CloudIcon from '~icons/lucide/cloud'
-  import CodeIcon from '~icons/lucide/code-2'
   import CopyIcon from '~icons/lucide/copy'
   import DatabaseIcon from '~icons/lucide/database'
+  import GitBranchIcon from '~icons/lucide/git-branch'
   import GithubIcon from '~icons/lucide/github'
   import LayersIcon from '~icons/lucide/layers-3'
   import MenuIcon from '~icons/lucide/menu'
-  import PackageIcon from '~icons/lucide/package'
-  import ShieldCheckIcon from '~icons/lucide/shield-check'
+  import MoonIcon from '~icons/lucide/moon'
+  import ServerIcon from '~icons/lucide/server'
+  import ShieldIcon from '~icons/lucide/shield'
+  import SunIcon from '~icons/lucide/sun'
   import TerminalIcon from '~icons/lucide/terminal'
-  import WindIcon from '~icons/lucide/wind'
-  import WorkflowIcon from '~icons/lucide/workflow'
   import XIcon from '~icons/lucide/x'
   import ZapIcon from '~icons/lucide/zap'
 
   import GreetingPanel from '../greeting/GreetingPanel.svelte'
+  import UiShowcase from './UiShowcase.svelte'
 
   type CopyState = 'idle' | 'copied' | 'failed'
+  type Locale = 'en' | 'id'
 
   let menuOpen = $state(false)
   let copyState = $state<CopyState>('idle')
+  let theme = $state<'light' | 'dark'>('light')
+  let locale = $state<Locale>('en')
+  let scrollProgress = $state(0)
+  let isNavStuck = $state(false)
+  let pointerX = $state(0)
+  let pointerY = $state(0)
+
+  const translations = {
+    en: {
+      navSekilas: 'At a glance',
+      navFeatures: 'Features',
+      navComponents: 'Components',
+      navObservability: 'Observability',
+      navPlayground: 'Playground',
+      navMulai: 'Get started',
+      heroPillTag: 'Open source',
+      heroPillText: 'Hono Svelte and Tailwind Boilerplate',
+      heroTitlePrefix: 'Build boldly.',
+      heroTitleSuffix: 'Stay in control.',
+      heroLead:
+        'Svelte 5 on the frontend, Hono on the backend, Tailwind CSS 4 for styling. Powered by Bun with shared Zod contracts, observability, and an AI-agent-friendly workflow.',
+      startNow: 'Start now',
+      exploreRepo: 'Explore the repository',
+      bunProcess: 'Bun process serving both API and SPA',
+      cardResponse: 'Response',
+      cardZod: 'Zod-validated',
+      cardWorkersDeploy: 'Workers deploy',
+      cardAssets: 'Assets',
+      cardStaticSpa: 'Static SPA',
+      cardWorkerRoute: 'Worker route',
+      cardAutomatic: 'Automatic',
+      cardManualWorkflow: 'Manual workflow via GitHub Actions',
+      cardReady: 'Ready to use',
+      cardDeployProfiles: 'Deploy profiles',
+      cardAgentSkills: 'Agent skills',
+      atGlance: 'At a glance',
+      atGlanceTitle: 'A clean foundation, no extra weight.',
+      statWorkspace: 'Workspace',
+      statWorkspaceDesc: 'Bun workspaces, apps and packages',
+      statZod: 'Zod',
+      statZodDesc: 'API contracts shared across apps',
+      statAgents: 'AGENTS.md',
+      statAgentsDesc: 'Instructions for AI agents',
+      statOptional: 'Optional',
+      statOptionalDesc: 'SQLite and PostgreSQL examples',
+      features: 'Features',
+      featuresTitle: 'Everything a real project needs.',
+      featSvelteDesc:
+        'Fine-grained runes reactivity, sub-second Vite HMR, and lean client-only browser bundles.',
+      featHonoDesc:
+        'Standards-first web routing running natively on Bun with sub-millisecond cold starts.',
+      featTailwindDesc:
+        'Centralized semantic tokens via @theme, high default contrast, and zero runtime overhead.',
+      featBunServerDesc:
+        'One single Bun process serves both the Hono API and the built SPA with graceful shutdown.',
+      featWorkersDesc:
+        'Static assets served through Workers Static Assets with API proxying to Hono using fetch.',
+      featAgentDesc:
+        'AGENTS.md and local Agent Skills for development, testing, and Playwright E2E.',
+      observability: 'Observability',
+      observabilityTitle: 'Watch every request in one place.',
+      dashStatus: 'latest status',
+      dashIllustrative: 'Illustrative view, not live data',
+      dashValidatedRequestId: 'validated request id',
+      dashPayloadValidated: 'payload validated by Zod',
+      dashStandardError: 'standardized error envelope',
+      prometheusMetrics: 'Prometheus metrics',
+      petTotal: 'Total',
+      petRequests: 'requests',
+      petErrors: 'total errors',
+      petDuration: 'Duration',
+      petHistogram: 'histogram',
+      petActive: 'Active',
+      petInFlight: 'in-flight requests',
+      prometheusNote:
+        'The /api/metrics endpoint is disabled by default and protected by a bearer token.',
+      playground: 'Playground',
+      playgroundTitle: 'Test the API live.',
+      getStarted: 'Get started',
+      getStartedTitle: 'From clone to running in minutes.',
+      copyCommand: 'Copy commands',
+      copied: 'Copied to clipboard',
+      copyFailed: 'Failed to copy',
+      reqBun: 'Requires Bun 1.4.4',
+      devTitle: 'Development',
+      devDesc: 'Vite proxies /api/* to Hono during development.',
+      prodTitle: 'Production',
+      prodDesc:
+        'Hono serves the API and the built SPA from one Bun process, same origin.',
+      releaseTitle: 'Controlled releases',
+      releaseDesc:
+        'Manual deploy workflows with smoke tests and version rollback.',
+      finalTitle: 'Ready to build your next project?',
+      finalDesc: 'Grab the starter, adapt it, and ship.',
+      openGithub: 'Open on GitHub',
+      footerBrand: 'Honvelte Wind, Hono Svelte and Tailwind Boilerplate',
+      copyright: '© 2026 Honvelte Wind by Yoganataa',
+      themeToggleLight: 'Switch to light theme',
+      themeToggleDark: 'Switch to dark theme',
+    },
+    id: {
+      navSekilas: 'Sekilas',
+      navFeatures: 'Features',
+      navComponents: 'Komponen',
+      navObservability: 'Observability',
+      navPlayground: 'Playground',
+      navMulai: 'Mulai',
+      heroPillTag: 'Open source',
+      heroPillText: 'Hono Svelte and Tailwind Boilerplate',
+      heroTitlePrefix: 'Build boldly.',
+      heroTitleSuffix: 'Stay in control.',
+      heroLead:
+        'Svelte 5 di frontend, Hono di backend, Tailwind CSS 4 untuk gaya. Dijalankan Bun dengan kontrak Zod bersama, observability, dan alur kerja yang ramah agen AI.',
+      startNow: 'Mulai sekarang',
+      exploreRepo: 'Explore the repository',
+      bunProcess: 'proses Bun melayani API sekaligus SPA',
+      cardResponse: 'Respons',
+      cardZod: 'Tervalidasi Zod',
+      cardWorkersDeploy: 'Deploy Workers',
+      cardAssets: 'Aset',
+      cardStaticSpa: 'SPA statis',
+      cardWorkerRoute: 'Rute Worker',
+      cardAutomatic: 'Otomatis',
+      cardManualWorkflow: 'Workflow manual via GitHub Actions',
+      cardReady: 'Siap pakai',
+      cardDeployProfiles: 'Profil deploy',
+      cardAgentSkills: 'Agent skills',
+      atGlance: 'Sekilas',
+      atGlanceTitle: 'Fondasi yang rapi, tanpa beban tambahan.',
+      statWorkspace: 'Workspace',
+      statWorkspaceDesc: 'Bun workspaces, apps dan packages',
+      statZod: 'Zod',
+      statZodDesc: 'Kontrak API dipakai bersama',
+      statAgents: 'AGENTS.md',
+      statAgentsDesc: 'Instruksi untuk agen AI',
+      statOptional: 'Opsional',
+      statOptionalDesc: 'Contoh SQLite dan PostgreSQL',
+      features: 'Features',
+      featuresTitle: 'Semua yang dibutuhkan proyek nyata.',
+      featSvelteDesc:
+        'Reaktivitas fine-grained runes, feedback HMR kilat, dan bundle browser client-only yang ramping.',
+      featHonoDesc:
+        'Standards-first web routing native di Bun dengan cold start sub-milidetik.',
+      featTailwindDesc:
+        'Sentralisasi token semantik via @theme, kontras tinggi default, dan zero runtime overhead.',
+      featBunServerDesc:
+        'Satu proses Bun menyajikan Hono API dan SPA hasil produksi dengan graceful shutdown.',
+      featWorkersDesc:
+        'Aset statis dilayani lewat Workers Static Assets dengan proksi API ke Hono menggunakan Fetch.',
+      featAgentDesc:
+        'AGENTS.md, skrip verifikasi otomatis, unit tests Bun, dan E2E Playwright dengan audit axe-core.',
+      observability: 'Observability',
+      observabilityTitle: 'Pantau setiap request dari satu tempat.',
+      dashStatus: 'status terbaru',
+      dashIllustrative: 'Contoh tampilan, bukan data langsung',
+      dashValidatedRequestId: 'request id tervalidasi',
+      dashPayloadValidated: 'payload divalidasi Zod',
+      dashStandardError: 'envelope error terstandar',
+      prometheusMetrics: 'Metrik Prometheus',
+      petTotal: 'Total',
+      petRequests: 'request',
+      petErrors: 'total error',
+      petDuration: 'Durasi',
+      petHistogram: 'histogram',
+      petActive: 'Aktif',
+      petInFlight: 'request berjalan',
+      prometheusNote:
+        'Endpoint /api/metrics nonaktif secara default dan dilindungi bearer token.',
+      playground: 'Playground',
+      playgroundTitle: 'Uji API secara langsung.',
+      getStarted: 'Mulai',
+      getStartedTitle: 'Dari clone sampai jalan dalam hitungan menit.',
+      copyCommand: 'Salin perintah',
+      copied: 'Disalin ke clipboard',
+      copyFailed: 'Gagal menyalin',
+      reqBun: 'Membutuhkan Bun 1.4.4',
+      devTitle: 'Pengembangan',
+      devDesc: 'Vite memproksikan /api/* ke Hono selama mode dev.',
+      prodTitle: 'Produksi',
+      prodDesc:
+        'Hono menyajikan API dan SPA hasil build dari satu proses Bun, origin yang sama.',
+      releaseTitle: 'Rilis terkontrol',
+      releaseDesc:
+        'Workflow deploy manual dengan smoke test dan rollback versi.',
+      finalTitle: 'Siap membangun yang berikutnya?',
+      finalDesc: 'Ambil starter-nya, ubah sesuai kebutuhan, lalu kirim.',
+      openGithub: 'Buka di GitHub',
+      footerBrand: 'Honvelte Wind, Hono Svelte and Tailwind Boilerplate',
+      copyright: '© 2026 Honvelte Wind oleh Yoganataa',
+      themeToggleLight: 'Ganti ke tema terang',
+      themeToggleDark: 'Ganti ke tema gelap',
+    },
+  }
+
+  const t = $derived(translations[locale])
+
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const isDark =
+        document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark'
+      theme = isDark ? 'dark' : 'light'
+
+      try {
+        const savedLocale = localStorage.getItem('hw-locale')
+        if (savedLocale === 'id' || savedLocale === 'en') {
+          locale = savedLocale
+        }
+      } catch {
+        // Ignore storage restrictions
+      }
+    }
+  })
+
+  $effect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleScroll = () => {
+      const h = document.documentElement
+      isNavStuck = h.scrollTop > 12
+      const maxScroll = h.scrollHeight - h.clientHeight
+      scrollProgress = maxScroll > 0 ? h.scrollTop / maxScroll : 0
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  })
+
+  function setLocale(newLocale: Locale) {
+    locale = newLocale
+    try {
+      localStorage.setItem('hw-locale', newLocale)
+    } catch {
+      // Ignore storage restrictions
+    }
+  }
+
+  function toggleTheme(event?: MouseEvent) {
+    const nextTheme = theme === 'light' ? 'dark' : 'light'
+    theme = nextTheme
+
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement
+      const applyTheme = () => {
+        if (nextTheme === 'dark') {
+          root.classList.add('dark')
+          root.setAttribute('data-theme', 'dark')
+        } else {
+          root.classList.remove('dark')
+          root.setAttribute('data-theme', 'light')
+        }
+        try {
+          localStorage.setItem('theme', nextTheme)
+        } catch {
+          // Ignore storage restrictions
+        }
+      }
+
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches
+
+      type TransitionDocument = Document & {
+        startViewTransition?: (updateCallback: () => void) => {
+          ready: Promise<void>
+        }
+      }
+
+      const doc = document as TransitionDocument
+      if (
+        typeof doc.startViewTransition === 'function' &&
+        !reducedMotion &&
+        event
+      ) {
+        const x = event.clientX
+        const y = event.clientY
+        const endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y),
+        )
+        const transition = doc.startViewTransition(applyTheme)
+        transition.ready
+          .then(() => {
+            root.animate(
+              {
+                clipPath: [
+                  `circle(0px at ${x}px ${y}px)`,
+                  `circle(${endRadius}px at ${x}px ${y}px)`,
+                ],
+              },
+              {
+                duration: 700,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                pseudoElement: '::view-transition-new(root)',
+              },
+            )
+          })
+          .catch(() => {
+            applyTheme()
+          })
+      } else {
+        applyTheme()
+      }
+    }
+  }
 
   const repositoryUrl = 'https://github.com/Yoganataa/honvelte-wind'
   const setupCommands = [
-    'git clone https://github.com/Yoganataa/honvelte-wind.git my-app',
-    'cd my-app',
+    'git clone https://github.com/Yoganataa/honvelte-wind',
+    'cd honvelte-wind',
     'bun install',
     'bun run dev',
   ].join('\n')
-
-  const navigation = [
-    { label: 'Architecture', href: '#architecture' },
-    { label: 'Features', href: '#features' },
-    { label: 'Runtime', href: '#runtime' },
-    { label: 'Playground', href: '#playground' },
-  ]
-
-  const stack = [
-    {
-      title: 'Svelte 5 + Vite',
-      detail: 'A responsive frontend with a fast development loop.',
-    },
-    {
-      title: 'Hono + Bun',
-      detail: 'A small, standards-based API with a native Bun runtime.',
-    },
-    {
-      title: 'Tailwind CSS 4',
-      detail: 'Utility-first styling with centralized design tokens.',
-    },
-  ]
-
-  const architecture = [
-    {
-      number: '01',
-      title: 'Frontend',
-      detail: 'Feature-owned UI, Svelte 5 runes, and a same-origin API client.',
-      path: 'apps/web',
-      icon: CodeIcon,
-    },
-    {
-      number: '02',
-      title: 'Shared contracts',
-      detail: 'Zod schemas define the boundary between browser and server.',
-      path: 'packages/contracts',
-      icon: BoxesIcon,
-    },
-    {
-      number: '03',
-      title: 'Backend',
-      detail: 'Hono routes, request middleware, and runtime adapters.',
-      path: 'apps/api',
-      icon: WorkflowIcon,
-    },
-  ]
-
-  const capabilities = [
-    {
-      title: 'Authentication & sessions',
-      detail:
-        'Opaque sessions, CSRF protection, OIDC identity boundaries, and server-side RBAC.',
-      icon: ShieldCheckIcon,
-      tag: 'Optional example',
-    },
-    {
-      title: 'Database adapters',
-      detail:
-        'Separate SQLite and PostgreSQL examples with ordered SQL migrations.',
-      icon: DatabaseIcon,
-      tag: 'Optional example',
-    },
-    {
-      title: 'Background jobs',
-      detail:
-        'Durable idempotency contracts, retries, and Cloudflare Queues + D1 adapters.',
-      icon: WorkflowIcon,
-      tag: 'Optional example',
-    },
-    {
-      title: 'Request safety',
-      detail:
-        'Bounded rate limiting, trusted principal keys, and request deadlines.',
-      icon: ZapIcon,
-      tag: 'Optional example',
-    },
-  ]
-
-  const deliverySteps = [
-    {
-      title: 'Quality gates',
-      detail: 'Format, audit, lint, types, unit tests, and build.',
-    },
-    {
-      title: 'Browser E2E',
-      detail: 'Real browser flows with accessibility scans.',
-    },
-    {
-      title: 'Runtime checks',
-      detail: 'Fetch adapter and local workerd smoke tests.',
-    },
-    {
-      title: 'Controlled release',
-      detail: 'Manual staging/production promotion and rollback.',
-    },
-  ]
 
   async function copySetupCommands() {
     try {
       await navigator.clipboard.writeText(setupCommands)
       copyState = 'copied'
+      setTimeout(() => {
+        copyState = 'idle'
+      }, 2000)
     } catch {
       copyState = 'failed'
     }
+  }
+
+  function handleHeroPointerMove(event: PointerEvent) {
+    const currentTarget = event.currentTarget as HTMLElement
+    if (!currentTarget) return
+    const rect = currentTarget.getBoundingClientRect()
+    pointerX = parseFloat(
+      (((event.clientX - rect.left) / rect.width - 0.5) * 2).toFixed(3),
+    )
+    pointerY = parseFloat(
+      (((event.clientY - rect.top) / rect.height - 0.5) * 2).toFixed(3),
+    )
+  }
+
+  function handleHeroPointerLeave() {
+    pointerX = 0
+    pointerY = 0
   }
 
   function closeMenu() {
@@ -144,21 +376,28 @@
 </script>
 
 <svelte:head>
-  <title>Honvelte Wind — A lean foundation for ambitious web apps</title>
+  <title>Honvelte Wind: Boilerplate Hono, Svelte, dan Tailwind</title>
   <meta
     name="description"
-    content="Build with Svelte 5, Hono, Tailwind CSS 4, and Bun. A modular full-stack web starter with typed contracts and a verified delivery workflow."
+    content="Starter full-stack siap produksi dengan Svelte 5, Hono, Bun, dan Tailwind CSS 4."
   />
   <meta property="og:title" content="Honvelte Wind" />
   <meta
     property="og:description"
-    content="A lean, modular full-stack foundation built with Svelte 5, Hono, Tailwind CSS 4, and Bun."
+    content="Starter full-stack siap produksi dengan Svelte 5, Hono, Bun, dan Tailwind CSS 4."
   />
   <meta property="og:type" content="website" />
 </svelte:head>
 
+<!-- Top Reading Progress Indicator -->
+<div
+  class="prog"
+  style="transform: scaleX({scrollProgress})"
+  aria-hidden="true"
+></div>
+
 <a
-  class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-3 focus:font-semibold focus:text-canvas"
+  class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-accent focus:px-5 focus:py-3 focus:font-semibold focus:text-accent-foreground"
   href="#main"
 >
   Skip to content
@@ -166,831 +405,1494 @@
 
 <div
   id="top"
-  class="relative min-h-screen overflow-hidden bg-canvas text-foreground"
+  class="shell min-h-screen p-3.5 selection:bg-brand selection:text-white"
 >
-  <div
-    aria-hidden="true"
-    class="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(ellipse_at_top,_rgba(103,232,249,0.12),_transparent_65%)]"
-  ></div>
-  <div
-    aria-hidden="true"
-    class="pointer-events-none absolute left-1/2 top-[470px] h-px w-[min(1100px,90vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-border to-transparent"
-  ></div>
+  <!-- Ambient Soft Glowing Radial Backdrop -->
+  <div class="blob" aria-hidden="true"></div>
 
-  <header
-    class="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10"
-  >
-    <a
-      href="#top"
-      aria-label="Honvelte Wind home"
-      class="group inline-flex items-center gap-3 rounded-lg focus-visible:outline-offset-4"
-      onclick={closeMenu}
-    >
-      <span
-        class="flex size-10 items-center justify-center rounded-xl border border-accent/25 bg-accent/10 text-accent transition-colors group-hover:bg-accent/15"
+  <div class="container-inner">
+    <!-- Sticky Capsule Navigation -->
+    <nav class="stitch-nav {isNavStuck ? 'stuck' : ''}">
+      <a
+        class="logo"
+        href="#top"
+        aria-label="Honvelte Wind home"
+        onclick={closeMenu}
       >
-        <WindIcon class="size-5" aria-hidden="true" />
-      </span>
-      <span class="text-base font-semibold tracking-tight text-foreground">
-        honvelte<span class="text-accent">.</span>wind
-      </span>
-    </a>
+        <img
+          class="mark"
+          src="/logo.webp"
+          width="32"
+          height="32"
+          alt="Honvelte Wind logo"
+        />
+        Honvelte Wind
+      </a>
 
-    <nav aria-label="Main navigation" class="hidden items-center gap-7 md:flex">
-      {#each navigation as item (item.href)}
-        <a
-          href={item.href}
-          class="rounded-md text-sm text-muted transition-colors hover:text-foreground focus-visible:text-foreground"
+      <div class="links">
+        <a href="#sekilas">{t.navSekilas}</a>
+        <a href="#features">{t.navFeatures}</a>
+        <a href="#components">{t.navComponents}</a>
+        <a href="#observability">{t.navObservability}</a>
+        <a href="#playground">{t.navPlayground}</a>
+        <a href="#mulai">{t.navMulai}</a>
+      </div>
+
+      <div class="right">
+        <!-- Segmented Language Switcher -->
+        <div class="seg" data-l={locale} role="group" aria-label="Language">
+          <span
+            class="thumb"
+            style="transform: translateX({locale === 'id' ? '46px' : '0'})"
+          ></span>
+          <button
+            type="button"
+            aria-pressed={locale === 'en'}
+            onclick={() => setLocale('en')}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            aria-pressed={locale === 'id'}
+            onclick={() => setLocale('id')}
+          >
+            ID
+          </button>
+        </div>
+
+        <!-- Theme Switcher -->
+        <button
+          type="button"
+          class="theme"
+          onclick={toggleTheme}
+          aria-label={theme === 'dark' ? t.themeToggleLight : t.themeToggleDark}
         >
-          {item.label}
+          {#if theme === 'dark'}
+            <SunIcon class="size-4" aria-hidden="true" />
+          {:else}
+            <MoonIcon class="size-4" aria-hidden="true" />
+          {/if}
+        </button>
+
+        <a
+          class="btn nav-cta"
+          href={repositoryUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <GithubIcon class="size-4" aria-hidden="true" />
+          GitHub
         </a>
-      {/each}
+
+        <button
+          type="button"
+          class="mobile-toggle"
+          aria-label={menuOpen
+            ? 'Close navigation menu'
+            : 'Open navigation menu'}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
+          onclick={() => (menuOpen = !menuOpen)}
+        >
+          {#if menuOpen}
+            <XIcon class="size-5" aria-hidden="true" />
+          {:else}
+            <MenuIcon class="size-5" aria-hidden="true" />
+          {/if}
+        </button>
+      </div>
     </nav>
 
-    <div class="hidden items-center gap-3 md:flex">
+    <!-- Mobile Navigation Drawer -->
+    <nav
+      id="mobile-navigation"
+      aria-label="Mobile navigation"
+      hidden={!menuOpen}
+      class="mobile-nav"
+    >
+      <a href="#sekilas" onclick={closeMenu}>{t.navSekilas}</a>
+      <a href="#features" onclick={closeMenu}>Features</a>
+      <a href="#components" onclick={closeMenu}>{t.navComponents}</a>
+      <a href="#observability" onclick={closeMenu}>{t.navObservability}</a>
+      <a href="#playground" onclick={closeMenu}>{t.navPlayground}</a>
+      <a href="#mulai" onclick={closeMenu}>{t.navMulai}</a>
       <a
         href={repositoryUrl}
         target="_blank"
         rel="noreferrer"
-        class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-foreground transition-colors hover:border-accent/50 hover:bg-panel"
-      >
-        <GithubIcon class="size-4" aria-hidden="true" />
-        GitHub
-        <ArrowUpRightIcon class="size-3.5 text-muted" aria-hidden="true" />
-      </a>
-      <a
-        href="#getting-started"
-        class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-canvas transition-colors hover:bg-accent-hover"
-      >
-        Get started
-        <ArrowRightIcon class="size-4" aria-hidden="true" />
-      </a>
-    </div>
-
-    <button
-      type="button"
-      class="inline-flex size-11 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:bg-panel md:hidden"
-      aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-      aria-expanded={menuOpen}
-      aria-controls="mobile-navigation"
-      onclick={() => (menuOpen = !menuOpen)}
-    >
-      {#if menuOpen}
-        <XIcon class="size-5" aria-hidden="true" />
-      {:else}
-        <MenuIcon class="size-5" aria-hidden="true" />
-      {/if}
-    </button>
-  </header>
-
-  <nav
-    id="mobile-navigation"
-    aria-label="Mobile navigation"
-    hidden={!menuOpen}
-    class="relative z-20 mx-5 mb-2 grid gap-1 rounded-xl border border-border bg-panel p-2 shadow-xl md:hidden"
-  >
-    {#each navigation as item (item.href)}
-      <a
-        href={item.href}
-        class="rounded-lg px-3 py-3 text-sm text-muted transition-colors hover:bg-panel-muted hover:text-foreground"
+        class="flex items-center gap-2"
         onclick={closeMenu}
       >
-        {item.label}
+        <GithubIcon class="size-4" aria-hidden="true" />
+        {t.openGithub}
       </a>
-    {/each}
-    <a
-      href={repositoryUrl}
-      target="_blank"
-      rel="noreferrer"
-      class="rounded-lg px-3 py-3 text-sm text-muted transition-colors hover:bg-panel-muted hover:text-foreground"
-      onclick={closeMenu}
-    >
-      View on GitHub
-    </a>
-    <a
-      href="#getting-started"
-      class="mt-1 flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-semibold text-canvas"
-      onclick={closeMenu}
-    >
-      Get started
-      <ArrowRightIcon class="size-4" aria-hidden="true" />
-    </a>
-  </nav>
-
-  <main id="main" tabindex="-1" class="relative z-10">
-    <section
-      class="mx-auto grid w-full max-w-7xl gap-14 px-5 pb-24 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28"
-    >
-      <div class="max-w-2xl">
+      <div
+        class="mt-2 flex items-center justify-between border-t border-line pt-3"
+      >
+        <span class="text-xs font-semibold text-mute">Language</span>
         <div
-          class="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent"
+          class="seg"
+          data-l={locale}
+          role="group"
+          aria-label="Language selection"
         >
           <span
-            class="size-1.5 rounded-full bg-success shadow-[0_0_12px_var(--color-success)]"
+            class="thumb"
+            style="transform: translateX({locale === 'id' ? '46px' : '0'})"
           ></span>
-          A lean foundation for ambitious web apps
-        </div>
-
-        <h1
-          class="mt-7 max-w-2xl text-5xl font-semibold leading-[1.08] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl"
-        >
-          Build boldly.
-          <span class="block text-accent">Stay in control.</span>
-        </h1>
-
-        <p class="mt-7 max-w-xl text-base leading-8 text-muted sm:text-lg">
-          Start with the boundaries that matter. Honvelte Wind brings Svelte 5,
-          Hono, Tailwind CSS 4, and Bun together in a modular full-stack starter
-          that stays lean until your product needs more.
-        </p>
-
-        <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-          <a
-            href="#getting-started"
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-6 text-sm font-semibold text-canvas shadow-lg shadow-accent/10 transition-colors hover:bg-accent-hover"
+          <button
+            type="button"
+            aria-pressed={locale === 'en'}
+            onclick={() => setLocale('en')}
           >
-            Start building
-            <ArrowRightIcon class="size-4" aria-hidden="true" />
-          </a>
-          <a
-            href={repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border px-6 text-sm font-semibold text-foreground transition-colors hover:border-accent/50 hover:bg-panel"
+            EN
+          </button>
+          <button
+            type="button"
+            aria-pressed={locale === 'id'}
+            onclick={() => setLocale('id')}
           >
-            <GithubIcon class="size-4" aria-hidden="true" />
-            Explore the repository
-            <ArrowUpRightIcon class="size-4 text-muted" aria-hidden="true" />
-          </a>
-        </div>
-
-        <div
-          class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted"
-        >
-          <span class="inline-flex items-center gap-2">
-            <CheckIcon class="size-3.5 text-success" aria-hidden="true" />
-            Bun 1.4.4 workspace
-          </span>
-          <span class="inline-flex items-center gap-2">
-            <CheckIcon class="size-3.5 text-success" aria-hidden="true" />
-            Shared Zod contracts
-          </span>
-          <span class="inline-flex items-center gap-2">
-            <CheckIcon class="size-3.5 text-success" aria-hidden="true" />
-            CI-verified workflows
-          </span>
+            ID
+          </button>
         </div>
       </div>
-
-      <div class="relative mx-auto w-full max-w-xl lg:ml-auto">
-        <div
-          aria-hidden="true"
-          class="absolute -inset-5 rounded-[2rem] bg-accent/5 blur-2xl"
-        ></div>
-        <div
-          class="relative overflow-hidden rounded-2xl border border-border bg-panel shadow-2xl shadow-black/40"
-        >
-          <div
-            class="flex items-center justify-between border-b border-border px-5 py-4"
-          >
-            <div class="flex items-center gap-3">
-              <div class="flex gap-1.5" aria-hidden="true">
-                <span class="size-2.5 rounded-full bg-danger/80"></span>
-                <span class="size-2.5 rounded-full bg-accent/60"></span>
-                <span class="size-2.5 rounded-full bg-success/80"></span>
-              </div>
-              <span class="text-xs font-medium text-muted"
-                >honvelte-wind / structure</span
-              >
-            </div>
-            <span
-              class="rounded-md border border-border px-2 py-1 font-mono text-[10px] text-muted"
-            >
-              MONOREPO
-            </span>
-          </div>
-
-          <div class="space-y-5 p-5 sm:p-7">
-            <div>
-              <p
-                class="font-mono text-[11px] uppercase tracking-[0.18em] text-accent"
-              >
-                Clear boundaries
-              </p>
-              <div class="mt-4 space-y-3 font-mono text-sm">
-                <div class="flex items-center gap-3">
-                  <span class="text-accent">▾</span>
-                  <span class="text-foreground">apps/</span>
-                  <span class="ml-auto text-[11px] text-muted">runtimes</span>
-                </div>
-                <div class="ml-5 flex items-center gap-3">
-                  <span class="text-muted">├─</span>
-                  <span class="text-foreground">web/</span>
-                  <span class="ml-auto text-[11px] text-muted"
-                    >Svelte 5 + Vite</span
-                  >
-                </div>
-                <div class="ml-5 flex items-center gap-3">
-                  <span class="text-muted">└─</span>
-                  <span class="text-foreground">api/</span>
-                  <span class="ml-auto text-[11px] text-muted">Hono</span>
-                </div>
-                <div class="flex items-center gap-3 pt-1">
-                  <span class="text-accent">▾</span>
-                  <span class="text-foreground">packages/</span>
-                  <span class="ml-auto text-[11px] text-muted">shared code</span
-                  >
-                </div>
-                <div class="ml-5 flex items-center gap-3">
-                  <span class="text-muted">└─</span>
-                  <span class="text-foreground">contracts/</span>
-                  <span class="ml-auto text-[11px] text-muted">Zod schemas</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-xl border border-border bg-canvas p-4">
-              <div class="flex items-center justify-between">
-                <span
-                  class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
-                >
-                  <TerminalIcon
-                    class="size-3.5 text-accent"
-                    aria-hidden="true"
-                  />
-                  One command to start
-                </span>
-                <span class="font-mono text-[10px] text-muted">BUN</span>
-              </div>
-              <div class="mt-3 space-y-2 font-mono text-xs leading-5">
-                <p><span class="text-accent">$</span> bun install</p>
-                <p><span class="text-accent">$</span> bun run dev</p>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <span
-                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
-                >Svelte 5</span
-              >
-              <span
-                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
-                >Hono</span
-              >
-              <span
-                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
-                >Tailwind 4</span
-              >
-              <span
-                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
-                >Bun</span
-              >
-            </div>
-          </div>
-        </div>
-        <div
-          class="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-xl border border-border bg-panel px-4 py-3 shadow-xl sm:flex"
-        >
-          <span
-            class="flex size-8 items-center justify-center rounded-lg bg-success-panel text-success"
-          >
-            <CheckIcon class="size-4" aria-hidden="true" />
-          </span>
-          <span>
-            <span class="block text-xs font-semibold text-foreground"
-              >Verified delivery</span
-            >
-            <span class="mt-0.5 block text-[11px] text-muted"
-              >Build · E2E · Worker smoke tests</span
-            >
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <section class="border-y border-border bg-panel/40">
-      <div
-        class="mx-auto grid max-w-7xl gap-5 px-5 py-7 sm:grid-cols-3 sm:px-8 lg:px-10"
+      <button
+        type="button"
+        onclick={toggleTheme}
+        class="mt-2 flex items-center justify-between text-left"
       >
-        {#each stack as item (item.title)}
-          <article
-            class="flex gap-4 sm:border-r sm:border-border sm:pr-5 last:border-0 last:pr-0"
-          >
-            <span
-              class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-panel text-accent"
-            >
-              <PackageIcon class="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 class="text-sm font-semibold text-foreground">
-                {item.title}
-              </h2>
-              <p class="mt-1.5 text-xs leading-5 text-muted">{item.detail}</p>
-            </div>
-          </article>
-        {/each}
-      </div>
-    </section>
+        <span>Tema: {theme === 'dark' ? 'Gelap' : 'Terang'}</span>
+        {#if theme === 'dark'}
+          <SunIcon class="size-4 text-mute" aria-hidden="true" />
+        {:else}
+          <MoonIcon class="size-4 text-mute" aria-hidden="true" />
+        {/if}
+      </button>
+    </nav>
 
-    <section
-      id="architecture"
-      class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32"
-    >
-      <div class="max-w-2xl">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Architecture
-        </p>
-        <h2
-          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-        >
-          One workspace. <span class="text-muted">Clear boundaries.</span>
-        </h2>
-        <p class="mt-4 text-base leading-7 text-muted">
-          Keep the browser, API, and shared contracts separate without making
-          everyday development feel fragmented.
-        </p>
-      </div>
-
-      <div class="mt-12 grid gap-4 md:grid-cols-3">
-        {#each architecture as item (item.number)}
-          {@const Icon = item.icon}
-          <article
-            class="group rounded-2xl border border-border bg-panel p-6 transition-colors hover:border-accent/40"
-          >
-            <div class="flex items-center justify-between">
-              <span class="font-mono text-xs text-muted">{item.number}</span>
-              <span
-                class="flex size-10 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10"
-              >
-                <Icon class="size-5" aria-hidden="true" />
-              </span>
-            </div>
-            <h3 class="mt-7 text-lg font-semibold text-foreground">
-              {item.title}
-            </h3>
-            <p class="mt-2 min-h-14 text-sm leading-6 text-muted">
-              {item.detail}
-            </p>
-            <div
-              class="mt-6 border-t border-border pt-4 font-mono text-xs text-accent"
-            >
-              {item.path}
-            </div>
-          </article>
-        {/each}
-      </div>
-
-      <div
-        class="mt-5 flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-panel-muted/60 p-5 text-center sm:flex-row sm:gap-6"
-      >
-        <span
-          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
-        >
-          <LayersIcon class="size-4 text-accent" aria-hidden="true" />
-          Browser UI
-        </span>
-        <ArrowRightIcon
-          class="hidden size-4 text-muted sm:block"
-          aria-hidden="true"
-        />
-        <span
-          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
-        >
-          <BoxesIcon class="size-4 text-accent" aria-hidden="true" />
-          Shared Zod contracts
-        </span>
-        <ArrowRightIcon
-          class="hidden size-4 text-muted sm:block"
-          aria-hidden="true"
-        />
-        <span
-          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
-        >
-          <WorkflowIcon class="size-4 text-accent" aria-hidden="true" />
-          Hono API
-        </span>
-      </div>
-    </section>
-
-    <section
-      id="features"
-      class="scroll-mt-20 border-y border-border bg-panel/35"
-    >
-      <div class="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
-        <div
-          class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end"
-        >
-          <div class="max-w-2xl">
-            <p
-              class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
-            >
-              Built to extend
-            </p>
-            <h2
-              class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-            >
-              Start lean. <span class="text-muted"
-                >Add capability with intent.</span
-              >
-            </h2>
-          </div>
-          <p class="max-w-md text-sm leading-6 text-muted">
-            Optional examples give you a tested starting point without forcing
-            every database, queue, or identity provider into the default
-            install.
-          </p>
-        </div>
-
-        <div class="mt-12 grid gap-4 sm:grid-cols-2">
-          {#each capabilities as item (item.title)}
-            {@const Icon = item.icon}
-            <article
-              class="flex gap-4 rounded-2xl border border-border bg-panel p-5 sm:p-6"
-            >
-              <span
-                class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
-              >
-                <Icon class="size-5" aria-hidden="true" />
-              </span>
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="font-semibold text-foreground">{item.title}</h3>
-                  <span
-                    class="rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted"
-                  >
-                    {item.tag}
-                  </span>
-                </div>
-                <p class="mt-2 text-sm leading-6 text-muted">{item.detail}</p>
-              </div>
-            </article>
-          {/each}
-        </div>
-      </div>
-    </section>
-
-    <section
-      id="runtime"
-      class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32"
-    >
-      <div class="max-w-2xl">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Runtime profiles
-        </p>
-        <h2
-          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-        >
-          Choose where it runs.
-          <span class="text-muted">Keep the boundaries.</span>
-        </h2>
-        <p class="mt-4 text-base leading-7 text-muted">
-          The same Hono application can run as a Bun server or through a
-          Fetch-compatible Cloudflare Worker adapter. Each runtime has explicit
-          capabilities.
-        </p>
-      </div>
-
-      <div class="mt-12 grid gap-4 lg:grid-cols-2">
-        <article class="rounded-2xl border border-border bg-panel p-6 sm:p-8">
-          <div class="flex items-center justify-between">
-            <span
-              class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
-            >
-              <TerminalIcon class="size-5" aria-hidden="true" />
-            </span>
-            <span
-              class="rounded-full border border-success-border bg-success-panel px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-success"
-            >
-              Default profile
-            </span>
-          </div>
-          <h3 class="mt-7 text-xl font-semibold text-foreground">Bun server</h3>
-          <p class="mt-2 text-sm leading-6 text-muted">
-            Run Hono and the built Svelte SPA in one process, with lifecycle
-            handling, health/readiness probes, and an optional metrics endpoint.
-          </p>
-          <ul class="mt-6 space-y-3 text-sm text-muted">
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Bun-native runtime and production bundle
-            </li>
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Graceful shutdown and readiness lifecycle
-            </li>
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Optional SQLite and PostgreSQL examples
-            </li>
-          </ul>
-          <p
-            class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted"
-          >
-            bun run build <span class="text-accent">→</span> bun run start
-          </p>
-        </article>
-
-        <article class="rounded-2xl border border-border bg-panel p-6 sm:p-8">
-          <div class="flex items-center justify-between">
-            <span
-              class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
-            >
-              <CloudIcon class="size-5" aria-hidden="true" />
-            </span>
-            <span
-              class="rounded-full border border-accent/25 bg-accent/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent"
-            >
-              Edge profile
-            </span>
-          </div>
-          <h3 class="mt-7 text-xl font-semibold text-foreground">
-            Cloudflare Workers
-          </h3>
-          <p class="mt-2 text-sm leading-6 text-muted">
-            Serve the SPA with Workers Static Assets and route same-origin API
-            requests to Hono through the standard Fetch interface.
-          </p>
-          <ul class="mt-6 space-y-3 text-sm text-muted">
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Separate staging and production environments
-            </li>
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Live health, API, SPA, and asset smoke tests
-            </li>
-            <li class="flex items-start gap-2">
-              <CheckIcon
-                class="mt-0.5 size-4 shrink-0 text-success"
-                aria-hidden="true"
-              />
-              Explicit rollback workflow
-            </li>
-          </ul>
-          <p
-            class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted"
-          >
-            wrangler deploy <span class="text-accent">→</span> verify
-            <span class="text-accent">→</span> rollback
-          </p>
-        </article>
-      </div>
-
-      <p class="mt-5 text-xs leading-5 text-muted">
-        Runtime note: Bun-specific database, session, in-memory rate-limit, and
-        process lifecycle examples are not automatically portable to Cloudflare
-        Workers. Use runtime-compatible adapters where needed.
-      </p>
-    </section>
-
-    <section class="border-y border-border bg-panel/35">
-      <div
-        class="mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-28"
-      >
+    <main id="main" tabindex="-1" class="focus:outline-none">
+      <!-- Hero Section with Pointer Parallax -->
+      <header class="hero">
         <div>
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
-          >
-            Delivery workflow
+          <span class="pill">
+            <b>{t.heroPillTag}</b>
+            {t.heroPillText}
+          </span>
+          <h1>
+            {t.heroTitlePrefix} <em class="block">{t.heroTitleSuffix}</em>
+          </h1>
+          <p class="lead">
+            {t.heroLead}
           </p>
-          <h2
-            class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-          >
-            Confidence at every step.
-          </h2>
-          <p class="mt-4 text-sm leading-7 text-muted">
-            Changes move through automated quality checks before an operator
-            promotes a release. Failed live verification has a rollback path.
-          </p>
-          <a
-            href={repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            class="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent-hover"
-          >
-            Explore CI and deployment workflows
-            <ArrowUpRightIcon class="size-4" aria-hidden="true" />
-          </a>
+          <div class="cta">
+            <a class="btn" href="#mulai">
+              {t.startNow}
+              <ArrowRightIcon class="size-4" aria-hidden="true" />
+            </a>
+            <a
+              class="btn ghost"
+              href={repositoryUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <GithubIcon class="size-4" aria-hidden="true" />
+              {t.exploreRepo}
+            </a>
+          </div>
+          <div class="chips">
+            <span class="chip">Svelte 5</span>
+            <span class="chip">Hono</span>
+            <span class="chip">Bun</span>
+            <span class="chip">Tailwind CSS 4</span>
+            <span class="chip">TypeScript strict</span>
+          </div>
+          <div class="big">
+            <strong>1</strong>
+            <span>{t.bunProcess}</span>
+          </div>
         </div>
 
-        <ol class="relative space-y-0">
-          {#each deliverySteps as item, index (item.title)}
-            <li class="relative flex gap-4 pb-7 last:pb-0">
-              <div class="relative flex flex-col items-center">
-                <span
-                  class="z-10 flex size-9 shrink-0 items-center justify-center rounded-full border border-accent/30 bg-panel text-xs font-semibold text-accent"
-                >
-                  0{index + 1}
-                </span>
-                {#if index !== deliverySteps.length - 1}
-                  <span class="absolute top-9 h-full w-px bg-border"></span>
-                {/if}
-              </div>
-              <div class="min-w-0 pt-1">
-                <h3 class="text-sm font-semibold text-foreground">
-                  {item.title}
-                </h3>
-                <p class="mt-1 text-sm leading-6 text-muted">{item.detail}</p>
-              </div>
-              {#if index === deliverySteps.length - 1}
-                <span
-                  class="ml-auto mt-1 shrink-0 rounded-md border border-accent/25 bg-accent/5 px-2 py-1 text-[10px] font-medium text-accent"
-                >
-                  Manual approval
-                </span>
-              {/if}
-            </li>
-          {/each}
-        </ol>
-      </div>
-    </section>
-
-    <section
-      id="playground"
-      class="scroll-mt-20 mx-auto grid w-full max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-32"
-    >
-      <div class="max-w-lg">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-          Try the API
-        </p>
-        <h2
-          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+        <!-- Floating Stacked Cards with Parallax Tilt -->
+        <div
+          class="stack"
+          aria-hidden="true"
+          onpointermove={handleHeroPointerMove}
+          onpointerleave={handleHeroPointerLeave}
+          style="--px: {pointerX}; --py: {pointerY};"
         >
-          Not just a pretty scaffold.
-        </h2>
-        <p class="mt-4 text-base leading-7 text-muted">
-          Send a real request through the Hono API. The browser client validates
-          payloads with shared Zod contracts and gives structured feedback.
-        </p>
-        <div class="mt-7 flex flex-wrap gap-2">
-          <span
-            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
-            >Runtime validation</span
-          >
-          <span
-            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
-            >Typed responses</span
-          >
-          <span
-            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
-            >Request IDs</span
-          >
-        </div>
-      </div>
-      <div
-        class="rounded-2xl border border-border bg-panel p-3 shadow-2xl shadow-black/20 sm:p-5"
-      >
-        <GreetingPanel />
-      </div>
-    </section>
-
-    <section
-      id="getting-started"
-      class="scroll-mt-20 px-5 pb-24 sm:px-8 lg:px-10 lg:pb-32"
-    >
-      <div
-        class="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-accent/20 bg-panel shadow-2xl shadow-accent/5"
-      >
-        <div class="grid lg:grid-cols-[1fr_0.9fr]">
-          <div class="p-7 sm:p-10 lg:p-12">
-            <p
-              class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
-            >
-              Your next commit starts here
-            </p>
-            <h2
-              class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-            >
-              Make the first move.
-            </h2>
-            <p class="mt-4 max-w-md text-sm leading-7 text-muted">
-              Clone the repository, install with the pinned Bun toolchain, and
-              start shaping the foundation around your product.
-            </p>
-            <div class="mt-8 flex flex-wrap gap-3">
-              <a
-                href={repositoryUrl}
-                target="_blank"
-                rel="noreferrer"
-                class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-5 text-sm font-semibold text-canvas transition-colors hover:bg-accent-hover"
-              >
-                Get the source
-                <ArrowUpRightIcon class="size-4" aria-hidden="true" />
-              </a>
-              <a
-                href={repositoryUrl + '#readme'}
-                target="_blank"
-                rel="noreferrer"
-                class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:bg-panel-muted"
-              >
-                Read the docs
-                <ArrowUpRightIcon class="size-4" aria-hidden="true" />
-              </a>
+          <div class="card c1">
+            <div class="row">
+              <b>
+                <ServerIcon class="size-4" aria-hidden="true" />
+                GET /api/health
+              </b>
+              <span class="tag t-g">200 OK</span>
+            </div>
+            <div class="meta">
+              <span>Runtime<b>Bun + Hono</b></span>
+              <span>{t.cardResponse}<b>{t.cardZod}</b></span>
+              <span>Request ID<b>UUID</b></span>
             </div>
           </div>
 
-          <div
-            class="border-t border-border bg-canvas/70 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-9"
-          >
-            <div class="flex items-center justify-between">
-              <span
-                class="inline-flex items-center gap-2 text-xs font-semibold text-foreground"
-              >
-                <TerminalIcon class="size-4 text-accent" aria-hidden="true" />
-                Quick start
+          <div class="card c2">
+            <div class="row">
+              <b>
+                <CloudIcon class="size-4" aria-hidden="true" />
+                {t.cardWorkersDeploy}
+              </b>
+              <span>
+                <span class="tag t-o">Staging</span>
+                <span class="tag t-y">Production</span>
               </span>
-              <button
-                type="button"
-                class="inline-flex min-h-9 items-center gap-2 rounded-lg border border-border px-3 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:text-foreground"
-                onclick={copySetupCommands}
-              >
-                {#if copyState === 'copied'}
-                  <CheckIcon class="size-3.5 text-success" aria-hidden="true" />
-                  Copied
-                {:else}
-                  <CopyIcon class="size-3.5" aria-hidden="true" />
-                  Copy commands
-                {/if}
-              </button>
             </div>
-            <pre
-              class="mt-5 overflow-x-auto whitespace-pre-wrap break-all font-mono text-xs leading-7 text-muted"><code
-                >{setupCommands
-                  .split('\n')
-                  .map((command) => '$ ' + command)
-                  .join('\n')}</code
-              ></pre>
-            <p class="mt-4 min-h-5 text-[11px] text-muted" aria-live="polite">
-              {#if copyState === 'copied'}
-                Commands copied to clipboard.
-              {:else if copyState === 'failed'}
-                Clipboard access is unavailable. Select the commands to copy.
-              {:else}
-                Requires Bun 1.4.4 · Version pinned in .bun-version
-              {/if}
+            <div class="meta">
+              <span>{t.cardAssets}<b>{t.cardStaticSpa}</b></span>
+              <span>{t.cardWorkerRoute}<b>/api/*</b></span>
+              <span>Rollback<b>{t.cardAutomatic}</b></span>
+            </div>
+            <div class="row mt-3.5">
+              <small class="text-mute">{t.cardManualWorkflow}</small>
+              <span class="ai">
+                <ZapIcon class="size-3.5" aria-hidden="true" />
+                Deploy
+              </span>
+            </div>
+          </div>
+
+          <div class="card c3">
+            <b>{t.cardReady}</b>
+            <div class="meta">
+              <span><b>2</b>{t.cardDeployProfiles}</span>
+              <span><b>3</b>{t.cardAgentSkills}</span>
+              <span><b>E2E</b>Playwright</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Sekilas Section -->
+      <section id="sekilas">
+        <span class="eyebrow">{t.atGlance}</span>
+        <h2>{t.atGlanceTitle}</h2>
+        <div class="grid4">
+          <div class="card stat">
+            <div class="badge b-o">
+              <LayersIcon class="size-5" aria-hidden="true" />
+            </div>
+            <strong>{t.statWorkspace}</strong>
+            <small>{t.statWorkspaceDesc}</small>
+          </div>
+          <div class="card stat">
+            <div class="badge b-y">
+              <ShieldIcon class="size-5" aria-hidden="true" />
+            </div>
+            <strong>{t.statZod}</strong>
+            <small>{t.statZodDesc}</small>
+          </div>
+          <div class="card stat stat-tilted">
+            <div class="badge b-g">
+              <BotIcon class="size-5" aria-hidden="true" />
+            </div>
+            <strong>{t.statAgents}</strong>
+            <small>{t.statAgentsDesc}</small>
+          </div>
+          <div class="card stat">
+            <div class="badge">
+              <DatabaseIcon class="size-5" aria-hidden="true" />
+            </div>
+            <strong>{t.statOptional}</strong>
+            <small>{t.statOptionalDesc}</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fitur Section -->
+      <section id="features">
+        <span class="eyebrow">{t.features}</span>
+        <h2>{t.featuresTitle}</h2>
+        <div class="feat">
+          <div class="card">
+            <div class="badge b-o">
+              <ShieldIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Svelte 5 + Vite</h3>
+            <p>{t.featSvelteDesc}</p>
+          </div>
+          <div class="card">
+            <div class="badge b-y">
+              <ActivityIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Hono + Bun</h3>
+            <p>{t.featHonoDesc}</p>
+          </div>
+          <div class="card">
+            <div class="badge b-g">
+              <ZapIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Tailwind CSS 4</h3>
+            <p>{t.featTailwindDesc}</p>
+          </div>
+          <div class="card">
+            <div class="badge b-o">
+              <ServerIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Bun server</h3>
+            <p>{t.featBunServerDesc}</p>
+          </div>
+          <div class="card">
+            <div class="badge b-y">
+              <CloudIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Cloudflare Workers</h3>
+            <p>{t.featWorkersDesc}</p>
+          </div>
+          <div class="card">
+            <div class="badge b-g">
+              <BotIcon class="size-5" aria-hidden="true" />
+            </div>
+            <h3>Agent-ready &amp; E2E</h3>
+            <p>{t.featAgentDesc}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Observability Section -->
+      <section id="observability">
+        <span class="eyebrow">{t.observability}</span>
+        <h2>{t.observabilityTitle}</h2>
+        <div class="card dash" aria-hidden="true">
+          <div class="side">
+            <span><ActivityIcon class="size-4" aria-hidden="true" /></span>
+            <span><ServerIcon class="size-4" aria-hidden="true" /></span>
+            <span><DatabaseIcon class="size-4" aria-hidden="true" /></span>
+            <span><TerminalIcon class="size-4" aria-hidden="true" /></span>
+          </div>
+          <div class="main-dash">
+            <div class="top">
+              <span class="live"></span>
+              <strong>200</strong>
+              <small>
+                {t.dashStatus}
+                <br />
+                {t.dashIllustrative}
+              </small>
+            </div>
+            <div class="bar"></div>
+            <div class="list">
+              <div class="li">
+                <span class="meth">GET</span>
+                <span>
+                  <code>/api/health</code>
+                  <small>{t.dashValidatedRequestId}</small>
+                </span>
+                <span class="tag t-g">200</span>
+                <CheckIcon class="size-4 text-green" aria-hidden="true" />
+              </div>
+              <div class="li">
+                <span class="meth">POST</span>
+                <span>
+                  <code>/api/greeting</code>
+                  <small>{t.dashPayloadValidated}</small>
+                </span>
+                <span class="tag t-g">200</span>
+                <CheckIcon class="size-4 text-green" aria-hidden="true" />
+              </div>
+              <div class="li">
+                <span class="meth">GET</span>
+                <span>
+                  <code>/api/unknown</code>
+                  <small>{t.dashStandardError}</small>
+                </span>
+                <span class="tag t-o">404</span>
+                <ShieldIcon class="size-4 text-red" aria-hidden="true" />
+              </div>
+            </div>
+          </div>
+          <div class="petal">
+            <b class="text-sm">{t.prometheusMetrics}</b>
+            <div class="pet">
+              <div style="background:#ffd9a0">
+                <b>{t.petTotal}</b>{t.petRequests}
+              </div>
+              <div style="background:#ffc4a0"><b>5xx</b>{t.petErrors}</div>
+              <div style="background:#ffe9b0">
+                <b>{t.petDuration}</b>{t.petHistogram}
+              </div>
+              <div style="background:#eadfd0">
+                <b>{t.petActive}</b>{t.petInFlight}
+              </div>
+            </div>
+            <p class="note">
+              {t.prometheusNote}
             </p>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <footer class="border-t border-border bg-panel/30">
-    <div
-      class="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10"
-    >
-      <a
-        href="#top"
-        class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-foreground"
-      >
-        <WindIcon class="size-4 text-accent" aria-hidden="true" />
-        honvelte.wind
-      </a>
-      <p class="text-xs text-muted">
-        A modular full-stack web starter. Built to stay lean.
-      </p>
-      <div class="flex items-center gap-5 text-xs text-muted">
-        <a
-          href={repositoryUrl}
-          target="_blank"
-          rel="noreferrer"
-          class="transition-colors hover:text-accent"
-        >
-          GitHub
-        </a>
-        <a
-          href={repositoryUrl + '/blob/main/ROADMAP.md'}
-          target="_blank"
-          rel="noreferrer"
-          class="transition-colors hover:text-accent"
-        >
-          Roadmap
-        </a>
-        <a
-          href={repositoryUrl + '/blob/main/DESIGN.md'}
-          target="_blank"
-          rel="noreferrer"
-          class="transition-colors hover:text-accent"
-        >
-          Design
+      <!-- Playground Section -->
+      <section id="playground" class="scroll-mt-20">
+        <span class="eyebrow">{t.playground}</span>
+        <h2>{t.playgroundTitle}</h2>
+        <div class="mt-6">
+          <GreetingPanel />
+        </div>
+        <div id="components" class="scroll-mt-24">
+          <UiShowcase />
+        </div>
+      </section>
+
+      <!-- Mulai Section -->
+      <section id="mulai">
+        <span class="eyebrow">{t.getStarted}</span>
+        <h2>{t.getStartedTitle}</h2>
+        <div class="start">
+          <div class="codewrap">
+            <pre class="term-box"><code
+                ><i>$</i> git clone https://github.com/Yoganataa/honvelte-wind
+<i>$</i> cd honvelte-wind
+<i>$</i> bun install
+<i>$</i> bun run dev</code
+              ></pre>
+            <button
+              type="button"
+              class="copy-btn"
+              onclick={copySetupCommands}
+              aria-label={t.copyCommand}
+            >
+              {#if copyState === 'copied'}
+                <CheckIcon class="size-4 text-green" aria-hidden="true" />
+              {:else}
+                <CopyIcon class="size-4" aria-hidden="true" />
+              {/if}
+            </button>
+          </div>
+          <div class="steps">
+            <div>
+              <span class="badge b-o">
+                <TerminalIcon class="size-5" aria-hidden="true" />
+              </span>
+              <span>
+                <h3>{t.devTitle}</h3>
+                <p>{t.devDesc}</p>
+              </span>
+            </div>
+            <div>
+              <span class="badge b-y">
+                <ServerIcon class="size-5" aria-hidden="true" />
+              </span>
+              <span>
+                <h3>{t.prodTitle}</h3>
+                <p>{t.prodDesc}</p>
+              </span>
+            </div>
+            <div>
+              <span class="badge b-g">
+                <GitBranchIcon class="size-5" aria-hidden="true" />
+              </span>
+              <span>
+                <h3>{t.releaseTitle}</h3>
+                <p>{t.releaseDesc}</p>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <div class="final">
+        <h2>{t.finalTitle}</h2>
+        <p class="mb-6 opacity-75">
+          {t.finalDesc}
+        </p>
+        <a class="btn" href={repositoryUrl} target="_blank" rel="noreferrer">
+          <GithubIcon class="size-4" aria-hidden="true" />
+          {t.openGithub}
         </a>
       </div>
-    </div>
-  </footer>
+    </main>
+
+    <!-- Footer -->
+    <footer class="stitch-foot">
+      <span class="flex items-center gap-2">
+        <img
+          class="mark"
+          src="/logo.webp"
+          width="22"
+          height="22"
+          alt=""
+          style="width:22px;height:22px"
+        />
+        {t.footerBrand}
+      </span>
+      <span>Svelte 5 · Hono · Bun · Tailwind CSS 4</span>
+      <span class="cr">{t.copyright}</span>
+    </footer>
+  </div>
 </div>
+
+<style>
+  .shell {
+    position: relative;
+    overflow: hidden;
+    overflow: clip;
+    background: linear-gradient(180deg, var(--bg2), var(--bg) 60%);
+  }
+
+  .shell > *:not(.blob) {
+    position: relative;
+  }
+
+  .container-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* Fixed Top Reading Progress Indicator */
+  .prog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    z-index: 50;
+    pointer-events: none;
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Ambient Glowing Blob */
+  .blob {
+    position: absolute;
+    top: -180px;
+    right: -160px;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 35% 35%,
+      rgba(255, 138, 40, 0.38),
+      rgba(255, 62, 0, 0.12) 55%,
+      transparent 72%
+    );
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 14s ease-in-out infinite;
+  }
+
+  @keyframes drift {
+    50% {
+      transform: translate(-50px, 40px) scale(1.08);
+    }
+  }
+
+  /* Sticky Capsule Navigation */
+  .stitch-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 20px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 12px;
+    z-index: 40;
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    transition:
+      box-shadow 0.3s ease,
+      background 0.3s ease;
+  }
+
+  .stitch-nav.stuck {
+    box-shadow: 0 14px 40px -16px rgba(60, 40, 20, 0.4);
+  }
+
+  .logo {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .mark {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 9px;
+    display: block;
+    transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .logo:hover .mark {
+    transform: rotate(-8deg) scale(1.1);
+  }
+
+  .links {
+    display: flex;
+    gap: 28px;
+    font-size: 14px;
+  }
+
+  .links a {
+    color: var(--mute);
+    text-decoration: none;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .links a:hover {
+    color: var(--ink);
+  }
+
+  .links a:hover::after {
+    transform: scaleX(1);
+  }
+
+  .right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Segmented Language Switcher */
+  .seg {
+    display: flex;
+    background: var(--bg2);
+    border-radius: 999px;
+    padding: 3px;
+    position: relative;
+    transition: background 0.5s;
+  }
+
+  .seg button {
+    border: 0;
+    background: transparent;
+    color: var(--mute);
+    font: 700 12px inherit;
+    font-family: inherit;
+    width: 46px;
+    padding: 8px 0;
+    border-radius: 999px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    transition: color 0.35s;
+  }
+
+  .seg button[aria-pressed='true'] {
+    color: var(--bg);
+  }
+
+  .seg .thumb {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: 46px;
+    border-radius: 999px;
+    background: var(--ink);
+    transition:
+      transform 0.45s cubic-bezier(0.3, 1.25, 0.5, 1),
+      background 0.5s;
+    z-index: 0;
+  }
+
+  .theme {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--bg2);
+    color: var(--ink);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition:
+      transform 0.2s,
+      background 0.3s;
+  }
+
+  .theme:hover {
+    transform: scale(1.08);
+  }
+
+  .theme:active {
+    transform: scale(0.94);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 20px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s,
+      background 0.2s;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.45);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn.ghost {
+    background: var(--bg2);
+    color: var(--ink);
+  }
+
+  .mobile-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--bg2);
+    color: var(--ink);
+    cursor: pointer;
+    place-items: center;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .mobile-nav a {
+    color: var(--mute);
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 0;
+  }
+
+  .mobile-nav a:hover {
+    color: var(--ink);
+  }
+
+  /* Hero Section */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 40px;
+    padding: 48px 0 20px;
+    align-items: center;
+  }
+
+  .pill {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .pill b {
+    background: #c2370a;
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 11px;
+  }
+
+  h1 {
+    font-size: clamp(38px, 6vw, 66px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin: 18px 0;
+    color: var(--ink);
+    font-weight: 800;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--mute);
+  }
+
+  .lead {
+    color: var(--mute);
+    max-width: 48ch;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .cta {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+
+  .chip {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    transition:
+      transform 0.2s,
+      border-color 0.2s;
+  }
+
+  .chip:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .big {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    margin-top: 34px;
+  }
+
+  .big strong {
+    font-size: 88px;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: var(--ink);
+  }
+
+  .big span {
+    color: var(--mute);
+    font-size: 13px;
+    max-width: 20ch;
+    padding-bottom: 6px;
+  }
+
+  /* Parallax Floating Stack */
+  .stack {
+    position: relative;
+    min-height: 440px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+  }
+
+  .c1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 30px;
+    translate: calc(var(--px, 0) * 8px) calc(var(--py, 0) * 8px);
+    transition: translate 0.25s ease-out;
+  }
+
+  .c2 {
+    position: absolute;
+    top: 150px;
+    left: 30px;
+    right: 0;
+    transform: rotate(-2deg);
+    translate: calc(var(--px, 0) * 16px) calc(var(--py, 0) * 16px);
+    transition: translate 0.25s ease-out;
+  }
+
+  .c3 {
+    position: absolute;
+    top: 322px;
+    left: 0;
+    right: 60px;
+    background: var(--yellow);
+    color: var(--yellow-ink);
+    border: 0;
+    translate: calc(var(--px, 0) * 24px) calc(var(--py, 0) * 24px);
+    transition: translate 0.25s ease-out;
+  }
+
+  .c3 .meta {
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #5a4400;
+  }
+
+  .c3 .meta b {
+    color: #3a2b00;
+    font-size: 22px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .t-g {
+    background: #d6f5e0;
+    color: #0e622b;
+  }
+
+  .t-y {
+    background: var(--yellow);
+    color: #3a2b00;
+  }
+
+  .t-o {
+    background: #ffe3d9;
+    color: #992603;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .row b {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    font-size: 12px;
+    color: var(--mute);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .meta b {
+    display: block;
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  .ai {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  section {
+    padding: 70px 0 0;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+
+  h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin: 10px 0 14px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .grid4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .stat {
+    transition:
+      translate 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .stat:hover {
+    translate: 0 -6px;
+    box-shadow: 0 30px 60px -22px rgba(60, 40, 20, 0.38);
+  }
+
+  .stat .badge {
+    margin-bottom: 22px;
+  }
+
+  .stat strong {
+    font-size: 34px;
+    letter-spacing: -0.03em;
+    display: block;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .stat small {
+    color: var(--mute);
+  }
+
+  .stat-tilted {
+    transform: rotate(1.5deg);
+  }
+
+  .feat {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .feat .card {
+    transition:
+      translate 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .feat .card:hover {
+    translate: 0 -6px;
+    box-shadow: 0 30px 60px -22px rgba(60, 40, 20, 0.38);
+  }
+
+  .feat h3 {
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    margin: 14px 0 6px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .feat p {
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  .badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--bg2);
+    color: var(--ink);
+    transition: transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .card:hover .badge {
+    transform: rotate(-8deg) scale(1.1);
+  }
+
+  .b-o {
+    background: #ffe3d9;
+    color: #992603;
+  }
+
+  .b-y {
+    background: var(--yellow);
+    color: #3a2b00;
+  }
+
+  .b-g {
+    background: #d6f5e0;
+    color: #0e622b;
+  }
+
+  /* Observability Dashboard */
+  .dash {
+    display: grid;
+    grid-template-columns: 70px 1fr 280px;
+    margin-top: 28px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .side {
+    border-right: 1px solid var(--line);
+    padding: 18px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .side span {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--bg2);
+    color: var(--mute);
+  }
+
+  .side span:first-child {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .main-dash {
+    padding: 22px 24px;
+  }
+
+  .main-dash .top {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .main-dash .top strong {
+    font-size: 64px;
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+    color: var(--ink);
+  }
+
+  .main-dash small {
+    color: var(--mute);
+  }
+
+  /* Pulsing live status dot */
+  .live {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    align-self: center;
+    flex: none;
+    animation: ping 1.8s ease-out infinite;
+  }
+
+  @keyframes ping {
+    0% {
+      box-shadow: 0 0 0 0 rgba(31, 157, 76, 0.55);
+    }
+    100% {
+      box-shadow: 0 0 0 12px rgba(31, 157, 76, 0);
+    }
+  }
+
+  .bar {
+    height: 34px;
+    border-radius: 12px;
+    margin-top: 16px;
+    background: linear-gradient(
+      90deg,
+      #ff8a80,
+      #ffd966 45%,
+      #8fe38f 75%,
+      var(--bg2) 75%
+    );
+  }
+
+  .list {
+    margin-top: 18px;
+  }
+
+  .li {
+    display: grid;
+    grid-template-columns: 44px 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    font-size: 13px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .li code {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+  }
+
+  .li small {
+    display: block;
+    color: var(--mute);
+  }
+
+  .meth {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: var(--bg2);
+    text-align: center;
+    color: var(--ink);
+  }
+
+  .petal {
+    border-left: 1px solid var(--line);
+    padding: 22px;
+    font-size: 12px;
+  }
+
+  .petal b {
+    color: var(--ink);
+  }
+
+  .pet {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .pet div {
+    border-radius: 16px;
+    padding: 14px 8px;
+    text-align: center;
+    color: #2b1d00;
+    font-size: 11px;
+  }
+
+  .pet b {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .note {
+    font-size: 12px;
+    color: var(--mute);
+    margin-top: 12px;
+  }
+
+  /* Get Started (Mulai) */
+  .start {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .codewrap {
+    position: relative;
+    display: flex;
+  }
+
+  .term-box {
+    flex: 1;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 18px;
+    padding: 20px;
+    overflow-x: auto;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .term-box i {
+    font-style: normal;
+    opacity: 0.5;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 0;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+  }
+
+  .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: scale(1.08);
+  }
+
+  .steps {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .steps div {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .steps h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .steps p {
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  /* Final CTA */
+  .final {
+    margin: 70px 0 40px;
+    padding: 56px 24px;
+    border-radius: 28px;
+    text-align: center;
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .final h2 {
+    color: var(--bg);
+    margin: 0 auto 14px;
+  }
+
+  .final .btn {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  /* Footer */
+  .stitch-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px 0 30px;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .cr {
+    flex-basis: 100%;
+    margin-top: 6px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 32px 0 10px;
+    }
+    .links {
+      display: none;
+    }
+    .mobile-toggle {
+      display: grid;
+    }
+    .stack {
+      min-height: 470px;
+    }
+    .grid4,
+    .feat {
+      grid-template-columns: 1fr 1fr;
+    }
+    .dash,
+    .start {
+      grid-template-columns: 1fr;
+    }
+    .side {
+      display: none;
+    }
+    .petal {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+    section {
+      padding: 56px 0 0;
+    }
+    .big strong {
+      font-size: 64px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .grid4,
+    .feat {
+      grid-template-columns: 1fr;
+    }
+    .nav-cta {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob,
+    .live,
+    .c1,
+    .c2,
+    .c3,
+    .stitch-nav {
+      animation: none !important;
+      translate: none !important;
+      transition: none !important;
+    }
+  }
+</style>

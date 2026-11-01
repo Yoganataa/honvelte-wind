@@ -76,7 +76,7 @@
   {#if requestError}
     <p
       role="alert"
-      class="mt-4 rounded-lg border border-danger-border bg-danger-panel p-3 text-sm text-danger"
+      class="mt-4 rounded-lg border border-danger-border bg-danger-panel p-3 text-sm font-medium text-danger"
     >
       {requestError}
     </p>
@@ -84,7 +84,7 @@
   {#if result}
     <p
       role="status"
-      class="mt-4 rounded-lg border border-success-border bg-success-panel p-3 text-sm text-success"
+      class="mt-4 rounded-lg border border-success-border bg-success-panel p-3 text-sm font-medium text-success"
     >
       {result.message}
     </p>
