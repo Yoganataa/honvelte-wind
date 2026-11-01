@@ -31,6 +31,22 @@ You are working in Honvelte Wind, a Svelte 5 + Vite SPA, Hono API, Tailwind CSS 
 - Treat user-provided content as untrusted; escape/render it safely.
 - Do not weaken tests, lint rules, or CI to make a change pass.
 
+## Naming and casing conventions
+
+Follow the naming convention that matches the file's role; do not normalize ecosystem-mandated filenames.
+
+- **Root governance documents:** use uppercase names with the conventional `.md` extension: `AGENTS.md`, `README.md`, `ROADMAP.md`, `DESIGN.md`, and `SECURITY.md`. Preserve tool-specific root files such as `CLAUDE.md` and `GEMINI.md`.
+- **Nested topical documentation:** use `kebab-case.md` (for example, `accessibility-manual-checklist.md` and `documentation-and-ui-platform.md`). Use `README.md` for directory entry points and `SKILL.md` for Agent Skills entry points.
+- **Directories and non-component source modules:** use lowercase `kebab-case` (for example, `request-safety/`, `http-metrics.ts`, and `error-handler.ts`).
+- **Svelte component files and component names:** use `PascalCase.svelte` (for example, `Button.svelte`, `TextField.svelte`, and `GreetingPanel.svelte`).
+- **TypeScript/JavaScript identifiers:** use `camelCase` for variables and functions; use `PascalCase` for types, interfaces, classes, and component types.
+- **Environment variables:** use `SCREAMING_SNAKE_CASE` (for example, `CLOUDFLARE_API_TOKEN`).
+- **CSS custom properties:** use the CSS-standard `--kebab-case` form.
+- **Tests:** append `.test.ts` to unit-test module names and use `.spec.ts` for Playwright test files, following the existing test tooling.
+- **Tool and ecosystem configuration:** retain the exact filename and casing required by the tool (for example, `vite.config.ts`, `wrangler.jsonc`, `components.json`, and `.prettierrc.json`).
+
+For any new root-level documentation, first decide whether it is a governance/reference document (uppercase) or a topical guide (nested kebab-case). Avoid creating lowercase root variants such as `roadmap.md`.
+
 ## Commands
 
 - Development: `bun run dev`

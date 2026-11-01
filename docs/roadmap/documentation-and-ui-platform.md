@@ -210,11 +210,11 @@ The default Worker profile does not automatically support Bun-specific modules o
 
 Before modifying the repository:
 
-1. Fetch the current `main` and read `AGENTS.md`, `roadmap.md`, this checkpoint, and the relevant package/config files.
+1. Fetch the current `main` and read `AGENTS.md`, `ROADMAP.md`, `DESIGN.md`, this checkpoint, and the relevant package/config files.
 2. Check open PRs and recent CI status. Do not assume this checkpoint branch or baseline commit is still current.
 3. Treat every phase above as planned until the current repository proves it is implemented.
 4. Resume with **Phase 0 — Compatibility and architecture preflight**, then implement only Phase 1 in its own PR.
-5. Update this checkpoint and `roadmap.md` after each completed phase with PR number, merge commit, test results, and deployment status.
+5. Update this checkpoint and `ROADMAP.md` after each completed phase with PR number, merge commit, test results, and deployment status.
 6. Never mark a phase complete based only on files existing; require its acceptance criteria and CI evidence.
 
 Suggested first task: perform Phase 0 compatibility research and report a compatibility matrix for shadcn-svelte + Svelte 5 + Vite 8 + Tailwind CSS 4, then prepare a narrowly scoped shadcn-svelte integration PR. Do not start Scalar, Histoire, Starlight, or TypeDoc in that same PR.
