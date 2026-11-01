@@ -166,6 +166,11 @@ jobs:
       - name: Build SPA assets
         run: bun run build
 
+      - name: Validate staging and production Wrangler environments
+        run: |
+          npx --yes wrangler@4.156.0 deploy --dry-run --env staging
+          npx --yes wrangler@4.156.0 deploy --dry-run --env production
+
       - name: Test the Fetch adapter
         run: bun test apps/api/src/worker.test.ts
 
