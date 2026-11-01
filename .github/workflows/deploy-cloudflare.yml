@@ -100,7 +100,7 @@ jobs:
           grep -q '"status":"ok"' /tmp/honvelte-worker-health.json
           curl --fail --silent -H 'Sec-Fetch-Mode: navigate' http://127.0.0.1:8787/ > /tmp/honvelte-worker-index.html
           grep -q 'Honvelte Wind' /tmp/honvelte-worker-index.html
-          curl --fail --silent             -H 'Content-Type: application/json'             --data '{"name":"CI"}'             http://127.0.0.1:8787/api/greet > /tmp/honvelte-worker-greet.json
+          curl --fail --silent -H 'Content-Type: application/json' --data '{"name":"CI"}' http://127.0.0.1:8787/api/greet > /tmp/honvelte-worker-greet.json
           grep -q '"message":"Hello, CI!"' /tmp/honvelte-worker-greet.json
 
       - name: Deploy to Cloudflare
@@ -124,13 +124,13 @@ jobs:
           smoke_live() {
             local base="${WORKER_BASE_URL%/}"
 
-            curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors               --connect-timeout 5 --max-time 20 "$base/api/health" > /tmp/honvelte-live-health.json
+            curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors --connect-timeout 5 --max-time 20 "$base/api/health" --output /tmp/honvelte-live-health.json
             grep -q '"status":"ok"' /tmp/honvelte-live-health.json
 
-            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors               --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate'               "$base/" > /tmp/honvelte-live-index.html
+            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-live-index.html
             grep -q 'Honvelte Wind' /tmp/honvelte-live-index.html
 
-            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors               --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json'               --data '{"name":"deployment-smoke-test"}'               "$base/api/greet" > /tmp/honvelte-live-greet.json
+            curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json' --data '{"name":"deployment-smoke-test"}' "$base/api/greet" --output /tmp/honvelte-live-greet.json
             grep -q '"message":"Hello, deployment-smoke-test!"' /tmp/honvelte-live-greet.json
           }
 
@@ -140,7 +140,7 @@ jobs:
           fi
 
           echo "::error::Live deployment smoke tests failed; attempting to restore the previous Worker version."
-          if ! npx --yes wrangler@4.156.0 rollback --name "$WORKER_NAME"             --message "Automatic rollback after failed smoke test in GitHub Actions run ${GITHUB_RUN_ID}"; then
+          if ! npx --yes wrangler@4.156.0 rollback --name "$WORKER_NAME" --message "Automatic rollback after failed smoke test in GitHub Actions run ${GITHUB_RUN_ID}"; then
             echo "::error::Automatic rollback failed. Use the manual Rollback Cloudflare Worker workflow."
             exit 1
           fi
