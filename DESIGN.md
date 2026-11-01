@@ -25,22 +25,22 @@ The current design is intentionally restrained: a centered content column, a cle
 
 The canonical tokens are declared in `apps/web/src/app.css` under Tailwind CSS 4's `@theme` block.
 
-| Token | Current value | Intended use |
-| --- | --- | --- |
-| `canvas` | `#09090b` | Application background and input surface |
-| `foreground` | `#f4f4f5` | Primary text |
-| `muted` | `#a1a1aa` | Secondary text and placeholders |
-| `panel` | `#18181b` | Cards and raised surfaces |
-| `panel-muted` | `#1c1c20` | Secondary raised surfaces |
-| `border` | `#3f3f46` | Dividers and control borders |
-| `accent` | `#67e8f9` | Primary actions and focus indication |
-| `accent-hover` | `#a5f3fc` | Hover state for primary actions |
-| `danger` | `#fca5a5` | Error text |
-| `danger-panel` | `#450a0a` | Error surface |
-| `danger-border` | `#7f1d1d` | Error boundary |
-| `success` | `#6ee7b7` | Success text and indicators |
-| `success-panel` | `#022c22` | Success surface |
-| `success-border` | `#065f46` | Success boundary |
+| Token            | Current value | Intended use                             |
+| ---------------- | ------------- | ---------------------------------------- |
+| `canvas`         | `#09090b`     | Application background and input surface |
+| `foreground`     | `#f4f4f5`     | Primary text                             |
+| `muted`          | `#a1a1aa`     | Secondary text and placeholders          |
+| `panel`          | `#18181b`     | Cards and raised surfaces                |
+| `panel-muted`    | `#1c1c20`     | Secondary raised surfaces                |
+| `border`         | `#3f3f46`     | Dividers and control borders             |
+| `accent`         | `#67e8f9`     | Primary actions and focus indication     |
+| `accent-hover`   | `#a5f3fc`     | Hover state for primary actions          |
+| `danger`         | `#fca5a5`     | Error text                               |
+| `danger-panel`   | `#450a0a`     | Error surface                            |
+| `danger-border`  | `#7f1d1d`     | Error boundary                           |
+| `success`        | `#6ee7b7`     | Success text and indicators              |
+| `success-panel`  | `#022c22`     | Success surface                          |
+| `success-border` | `#065f46`     | Success boundary                         |
 
 Use semantic utilities such as `bg-canvas`, `text-foreground`, `text-muted`, `bg-panel`, `border-border`, and `bg-accent`. If a new semantic color is needed, add a token to `app.css` and document its role here rather than inventing a feature-local palette.
 
