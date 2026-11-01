@@ -184,15 +184,15 @@ Work sequentially. Do not install all tools in one change.
 
 Use actual repository tooling and paths in documentation:
 
-| Incorrect or ambiguous description         | Repository truth                                                  |
-| ------------------------------------------ | ----------------------------------------------------------------- |
-| Vitest                                     | Bun Test (`bun test`)                                             |
-| Prometheus endpoint `/metrics`            | `/api/metrics`                                                   |
-| SvelteKit setup instructions               | Svelte + Vite setup                                                |
-| A new DTO set for OpenAPI                  | Reuse `packages/contracts` Zod schemas                            |
-| Root `docs/` as the Starlight app          | Keep root `docs/` for checklists; use `apps/docs/` workspace      |
-| Histoire plugin in production Vite plugins | Dedicated Histoire configuration                                  |
-| Cloudflare Worker handles every route      | `/api/*` runs through Worker; static assets use SPA fallback       |
+| Incorrect or ambiguous description         | Repository truth                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Vitest                                     | Bun Test (`bun test`)                                                              |
+| Prometheus endpoint `/metrics`             | `/api/metrics`                                                                     |
+| SvelteKit setup instructions               | Svelte + Vite setup                                                                |
+| A new DTO set for OpenAPI                  | Reuse `packages/contracts` Zod schemas                                             |
+| Root `docs/` as the Starlight app          | Keep root `docs/` for existing checklists; use `apps/docs/` workspace              |
+| Histoire plugin in production Vite plugins | Dedicated Histoire configuration                                                   |
+| Cloudflare Worker handles every route      | `/api/*` runs through Worker; static assets use Workers Static Assets/SPA fallback |
 
 The default Worker profile does not automatically support Bun-specific modules or process-local facilities. Clearly distinguish Bun runtime examples from Cloudflare Worker-compatible examples.
 
