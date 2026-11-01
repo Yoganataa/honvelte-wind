@@ -30,12 +30,15 @@ class TestD1Statement implements D1PreparedStatementLike {
   }
 
   async first<T>(): Promise<T | null> {
-    const row = this.database.query(this.query).get(...(this.values as never[]))
+    const row = this.database
+      .query(this.query)
+      .get(...(this.values as never[]))
     return (row ?? null) as T | null
   }
 
   async run(): Promise<{ success: boolean; meta: { changes: number } }> {
-    const result = this.database.run(this.query, ...(this.values as never[]))
+    const result = this.database
+      .run(this.query, ...(this.values as never[]))
     return { success: true, meta: { changes: result.changes } }
   }
 }
@@ -82,9 +85,17 @@ describe('background job contracts and runner', () => {
 
     expect(first.id).toBe(second.id)
     expect(first.createdAt).toBe('2026-12-01T00:00:00.000Z')
-    expect(() => createJob({ id: 'bad id', type: 'Reports.Refresh', payload: {} })).toThrow()
+    expect(() =>
+      createJob({ id: 'bad id', type: 'Reports.Refresh', payload: {} }),
+    ).toThrow()
     expect(() => createScheduledJob('reports.refresh', -1, {})).toThrow()
-    expect(() => JobEnvelopeSchema.parse({ id: 'missing-payload', type: 'reports.refresh', createdAt: fixedTime })).toThrow()
+    expect(() =>
+      JobEnvelopeSchema.parse({
+        id: 'missing-payload',
+        type: 'reports.refresh',
+        createdAt: fixedTime,
+      }),
+    ).toThrow()
   })
 
   test('validates handler payloads and skips completed duplicates', async () => {
@@ -106,8 +117,20 @@ describe('background job contracts and runner', () => {
       createdAt: fixedTime,
     })
 
-    expect(await processJob(job, handler, { store, leaseMs: 10_000, now: () => 100 })).toBe('completed')
-    expect(await processJob(job, handler, { store, leaseMs: 10_000, now: () => 200 })).toBe('duplicate')
+    expect(
+      await processJob(job, handler, {
+        store,
+        leaseMs: 10_000,
+        now: () => 100,
+      }),
+    ).toBe('completed')
+    expect(
+      await processJob(job, handler, {
+        store,
+        leaseMs: 10_000,
+        now: () => 200,
+      }),
+    ).toBe('duplicate')
     expect(executions).toBe(1)
 
     await expect(
@@ -162,7 +185,13 @@ describe('background job contracts and runner', () => {
     await expect(
       processJob(job, handler, { store, leaseMs: 10_000, now: () => 100 }),
     ).rejects.toThrow('temporary failure')
-    expect(await processJob(job, handler, { store, leaseMs: 10_000, now: () => 200 })).toBe('completed')
+    expect(
+      await processJob(job, handler, {
+        store,
+        leaseMs: 10_000,
+        now: () => 200,
+      }),
+    ).toBe('completed')
     expect(executions).toBe(2)
   })
 
@@ -181,24 +210,36 @@ describe('background job contracts and runner', () => {
     await store.release({ key: 'fenced-1', token: first.token })
     expect(await store.claim({ key: 'fenced-1', now: 201, leaseExpiresAt: 301 })).toEqual({ status: 'busy' })
 
-    expect(await store.complete({ key: 'fenced-1', token: second.token, completedAt: 250 })).toBe(true)
+    expect(
+      await store.complete({
+        key: 'fenced-1',
+        token: second.token,
+        completedAt: 250,
+      }),
+    ).toBe(true)
     expect(await store.purgeExpired({ now: 1_250 })).toBe(1)
-    expect(await store.claim({ key: 'fenced-1', now: 1_250, leaseExpiresAt: 1_350 })).toMatchObject({
+    expect(
+      await store.claim({ key: 'fenced-1', now: 1_250, leaseExpiresAt: 1_350 }),
+    ).toMatchObject({
       status: 'acquired',
     })
   })
 
   test('calculates bounded full-jitter retry delays', () => {
-    expect(calculateRetryDelaySeconds(1, {
+    expect(
+      calculateRetryDelaySeconds(1, {
       baseDelaySeconds: 5,
       maxDelaySeconds: 20,
-      random: () => 0,
-    })).toBe(1)
-    expect(calculateRetryDelaySeconds(10, {
+        random: () => 0,
+      }),
+    ).toBe(1)
+    expect(
+      calculateRetryDelaySeconds(10, {
       baseDelaySeconds: 5,
       maxDelaySeconds: 20,
-      random: () => 0.999,
-    })).toBe(20)
+        random: () => 0.999,
+      }),
+    ).toBe(20)
     expect(() => calculateRetryDelaySeconds(0)).toThrow()
     expect(() => calculateRetryDelaySeconds(1, { random: () => 1 })).toThrow()
   })
@@ -213,9 +254,12 @@ describe('background job contracts and runner', () => {
       createdAt: fixedTime,
     })
     let executions = 0
-    const handler = defineJobHandler(z.object({ reportId: z.string() }), async () => {
-      executions += 1
-    })
+    const handler = defineJobHandler(
+      z.object({ reportId: z.string() }),
+      async () => {
+        executions += 1
+      },
+    )
     const actions: string[] = []
     const makeMessage = (id: string, body: unknown, attempts = 1) => ({
       id,
@@ -246,7 +290,11 @@ describe('background job contracts and runner', () => {
       ],
     })
 
-    expect(actions).toEqual(['valid:ack', 'invalid:retry:1', 'unknown:retry:1'])
+    expect(actions).toEqual([
+      'valid:ack',
+      'invalid:retry:1',
+      'unknown:retry:1',
+    ])
     expect(executions).toBe(1)
 
     actions.length = 0
