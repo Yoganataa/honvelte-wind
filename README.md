@@ -55,7 +55,7 @@ The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI
 
 The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
 
-See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
+See [ROADMAP.md](./ROADMAP.md) for engineering priorities, acceptance criteria, and planned project profiles. See [DESIGN.md](./DESIGN.md) for UI design tokens, component conventions, and accessibility requirements.
 
 ## Search crawling policy
 
