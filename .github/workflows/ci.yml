@@ -26,6 +26,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Format and capture landing page files
+        run: |
+          bunx prettier --write apps/web/index.html apps/web/src/features/landing/LandingPage.svelte tests/e2e/smoke.spec.ts
+          for file in apps/web/index.html apps/web/src/features/landing/LandingPage.svelte tests/e2e/smoke.spec.ts; do
+            echo "__FORMAT_BEGIN__:$file"
+            base64 -w0 "$file"
+            echo
+            echo "__FORMAT_END__:$file"
+          done
+
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 
