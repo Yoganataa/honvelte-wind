@@ -19,7 +19,7 @@ This document records the design language that currently exists in the repositor
 
 The current application is dark-first. Its base surface is near-black, with raised dark panels, high-contrast foreground text, muted supporting copy, and cyan as the primary interactive accent. Success and danger use semantic green and red tones.
 
-The current design is intentionally restrained: a centered content column, a clear page heading, one primary interactive panel, and supporting feature cards. New screens should preserve this hierarchy unless a product requirement justifies a different layout.
+The public entry page is a responsive marketing landing page with a wide navigation shell, split hero, technology overview, architecture explanation, optional capability cards, runtime profiles, delivery workflow, API playground, and a closing getting-started section. It keeps the same dark palette and semantic tokens while using a wider marketing layout. Inner form and reading measures remain constrained for usability. Treat the landing page as the current page composition, not as a requirement that every feature use a marketing-page layout.
 
 ## 3. Design tokens
 
