@@ -53,7 +53,7 @@ The API composition root is `apps/api/src/app.ts`. Feature endpoints live in `ap
 
 The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI, state, and API calls in `apps/web/src/features/<feature>`. Put small primitives shared across features in `apps/web/src/lib/components/ui`; keep theme tokens and global focus/reduced-motion defaults in `app.css`. Use native HTML semantics and defer client-side routing until multiple real routes need it.
 
-The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
+The web app calls `/api` through the Vite proxy in development. In the default Bun production profile, Hono serves `apps/web/dist` and handles SPA fallback. In the Cloudflare Workers profile, Workers Static Assets serves the SPA and `/api/*` is routed to Hono's Fetch adapter. Keep API routes under `/api/*`.
 
 See [ROADMAP.md](./ROADMAP.md) for engineering priorities, acceptance criteria, and planned project profiles. See [DESIGN.md](./DESIGN.md) for UI design tokens, component conventions, and accessibility requirements.
 
