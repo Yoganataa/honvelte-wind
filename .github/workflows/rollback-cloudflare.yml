@@ -76,7 +76,7 @@ jobs:
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::CLOUDFLARE_API_TOKEN is missing."; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is missing."; exit 1; }
-          npx --yes wrangler@4.156.0 rollback "$VERSION_ID" --name "$WORKER_NAME"             --message "Manual rollback from GitHub Actions run ${GITHUB_RUN_ID}"
+          npx --yes wrangler@4.156.0 rollback "$VERSION_ID" --name "$WORKER_NAME" --message "Manual rollback from GitHub Actions run ${GITHUB_RUN_ID}"
 
       - name: Verify the restored deployment
         shell: bash
@@ -84,8 +84,8 @@ jobs:
           set -euo pipefail
           base="${WORKER_BASE_URL%/}"
 
-          curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors             --connect-timeout 5 --max-time 20 "$base/api/health" > /tmp/honvelte-rollback-health.json
+          curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors --connect-timeout 5 --max-time 20 "$base/api/health" --output /tmp/honvelte-rollback-health.json
           grep -q '"status":"ok"' /tmp/honvelte-rollback-health.json
 
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors             --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate'             "$base/" > /tmp/honvelte-rollback-index.html
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-rollback-index.html
           grep -q 'Honvelte Wind' /tmp/honvelte-rollback-index.html
