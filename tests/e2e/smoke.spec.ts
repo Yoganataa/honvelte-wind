@@ -8,9 +8,9 @@ test('renders the landing page and stack overview', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: 'Explore the repository' }),
   ).toHaveAttribute('href', 'https://github.com/Yoganataa/honvelte-wind')
-  await expect(page.getByText('Svelte 5 + Vite', { exact: true })).toBeVisible()
-  await expect(page.getByText('Hono + Bun', { exact: true })).toBeVisible()
-  await expect(page.getByText('Tailwind CSS 4', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Svelte 5 + Vite' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Hono + Bun' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tailwind CSS 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Bun server' })).toBeVisible()
   await expect(
     page.getByRole('heading', { name: 'Cloudflare Workers' }),
