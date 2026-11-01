@@ -2,6 +2,7 @@
 
 > Status snapshot: 2026-11-01  
 > Product direction: an opinionated, modular starter for production web applications—not a single repository that ships every framework, platform, and infrastructure dependency.
+> Design reference: see [DESIGN.md](./DESIGN.md) for UI tokens, component rules, and accessibility requirements.
 
 ## Product principles
 
