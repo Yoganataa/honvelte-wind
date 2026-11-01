@@ -249,7 +249,7 @@
     </nav>
   {/if}
 
-  <main id="main" class="relative z-10">
+  <main id="main" tabindex="-1" class="relative z-10">
     <section class="mx-auto grid w-full max-w-7xl gap-14 px-5 pb-24 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28">
       <div class="max-w-2xl">
         <div class="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent">
