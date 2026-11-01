@@ -87,13 +87,13 @@ Both workflows can run only from `main`. Select exactly one target, `staging` or
 
 ### One-time setup
 
-1. Create the GitHub Environments named `staging` and `production`.
-2. For each GitHub Environment, add these **environment secrets**:
-   - `CLOUDFLARE_API_TOKEN`: a token scoped to that environment's Worker.
-   - `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID containing that Worker.
-3. Add the environment variable `WORKER_BASE_URL` with that Worker’s public HTTPS origin, without a trailing path. For example: `https://honvelte-wind-staging.<your-workers-dev-subdomain>.workers.dev`.
-4. Configure required reviewers and deployment protection for the `production` GitHub Environment in repository settings. The workflow references the environment, but reviewer rules are configured in GitHub settings, not in YAML.
-5. Create the two Workers once in Cloudflare (or use a temporary setup token with the required account-level creation permission), then scope the regular CI tokens to the corresponding existing Worker. Prefer separate tokens for staging and production.
+1. Create the GitHub Environments named `staging` and `production` before the first deployment. GitHub can auto-create an environment when a workflow references a missing name, but that environment has no secrets or protection rules; configuring it first avoids an unprotected deployment attempt.
+2. For each GitHub Environment, add the **environment secret** `CLOUDFLARE_API_TOKEN`, using a separate token scoped to that environment's existing Worker.
+3. For each GitHub Environment, add these **environment variables**:
+   - `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID containing that Worker. This is an identifier, not an authentication secret.
+   - `WORKER_BASE_URL`: that Worker's public HTTPS origin, without a trailing path. For example: `https://honvelte-wind-staging.<your-workers-dev-subdomain>.workers.dev`.
+4. Restrict deployment branches to `main` in both environments. For `production`, configure Required reviewers and enable Prevent self-review. These protections are configured in GitHub repository settings, not in workflow YAML.
+5. Create the two Workers once in Cloudflare (or use a temporary setup token with Workers product-level Admin permission), then remove/revoke that elevated token and scope the routine CI tokens to the corresponding existing Worker. Prefer separate tokens for staging and production.
 
 The recommended Cloudflare permission is **Workers Editor** scoped to the individual existing Worker. A deployment that creates a new Worker requires broader Workers product-level Admin permission; do not keep that broader permission on a routine deployment token. No DNS route or custom domain is configured by this starter: the example profile uses each environment’s `workers.dev` URL.
 
@@ -124,7 +124,7 @@ The workflow runs `wrangler rollback <VERSION_ID>` against the selected Worker a
 
 ### Operational boundaries
 
-The deploy and rollback workflows remain inactive until the GitHub Environments, secrets, and `WORKER_BASE_URL` variables are configured. No Cloudflare account, domain, token, or production deployment is provisioned by this repository change.
+The deploy and rollback workflows remain inactive until the GitHub Environments, `CLOUDFLARE_API_TOKEN` secrets, and `CLOUDFLARE_ACCOUNT_ID` / `WORKER_BASE_URL` variables are configured. The selected environment URL is also attached to the GitHub deployment record. No Cloudflare account, domain, token, or production deployment is provisioned by this repository change.
 
 ## Choosing a profile
 
