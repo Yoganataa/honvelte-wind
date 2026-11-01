@@ -87,44 +87,35 @@ jobs:
           verify_live_assets() {
             local base="$1"
             local html_file="$2"
+            local assets
             local asset
-            local asset_path
             local metadata
             local status
             local content_type
             local size_bytes
             local js_count=0
             local css_count=0
-            local assets=()
 
-            mapfile -t assets < <(
-              grep -Eo '(src|href)="[^"]+"' "$html_file" |
-                sed -E 's/^(src|href)="([^"]+)".*$/\\2/' |
-                grep -E '^/assets/[^?#]+\\.(js|css)(\\?[^"]*)?          grep -q '"status":"ok"' /tmp/honvelte-rollback-health.json
+            assets="$(grep -Eo '(src|href)="/assets/[^"]+\\.(js|css)"' "$html_file" |
+              sed -E 's/^(src|href)="([^"]+)"$/\\2/' |
+              sort -u || true)"
 
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-rollback-index.html
-          grep -q 'Honvelte Wind' /tmp/honvelte-rollback-index.html
-          verify_live_assets "$base" /tmp/honvelte-rollback-index.html
- |
-                sort -u || true
-            )
-
-            if [[ "${#assets[@]}" -eq 0 ]]; then
+            if [[ -z "$assets" ]]; then
               echo "::error::The live SPA did not reference any built JavaScript or CSS assets."
               return 1
             fi
 
-            for asset in "${assets[@]}"; do
-              metadata="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 --output /dev/null --write-out '%{http_code}|%{content_type}|%{size_download}' "$base$asset")"
-              IFS='|' read -r status content_type size_bytes <<< "$metadata"
-              asset_path="${asset%%\\?*}"
+            while IFS= read -r asset; do
+              [[ -n "$asset" ]] || continue
+              metadata="$(curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 --output /dev/null --write-out '%{http_code} %{content_type} %{size_download}' "$base$asset")"
+              read -r status content_type size_bytes <<< "$metadata"
 
               if [[ "$status" != "200" || ! "$size_bytes" =~ ^[0-9]+$ || "$size_bytes" -le 0 ]]; then
                 echo "::error::Static asset request failed: $asset (HTTP $status, bytes $size_bytes)"
                 return 1
               fi
 
-              case "$asset_path" in
+              case "$asset" in
                 *.js)
                   if [[ "$content_type" != *javascript* ]]; then
                     echo "::error::JavaScript asset has an unexpected content type: $asset ($content_type)"
@@ -140,7 +131,7 @@ jobs:
                   css_count=$((css_count + 1))
                   ;;
               esac
-            done
+            done <<< "$assets"
 
             if [[ "$js_count" -eq 0 || "$css_count" -eq 0 ]]; then
               echo "::error::Expected at least one JavaScript and one CSS asset; found JS=$js_count CSS=$css_count."
@@ -157,3 +148,4 @@ jobs:
 
           curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-rollback-index.html
           grep -q 'Honvelte Wind' /tmp/honvelte-rollback-index.html
+          verify_live_assets "$base" /tmp/honvelte-rollback-index.html
