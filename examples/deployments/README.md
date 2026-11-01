@@ -63,6 +63,7 @@ The Worker profile runs the stateless core API and static SPA. It is not a drop-
 - The auth example's bundled SQLite session store is single-node and Bun-specific. Use a durable shared session/authorization store and validate the chosen identity-provider flow before enabling authentication on Workers.
 - The request-safety example's in-memory store is process-local. It is not a global rate limiter across Worker isolates or regions; inject a shared, platform-appropriate store before relying on distributed quotas.
 - Prometheus metrics in the Bun profile are held in process memory. Use platform-native Workers telemetry or a deliberately designed external metrics adapter for edge deployments.
+- The optional background-jobs example includes a Cloudflare Queues consumer and D1 idempotency adapter, but neither binding is part of the root Worker profile. Provision the queue/DLQ and D1 database, apply its migration, and deploy a dedicated consumer/scheduled Worker before using it. Queue deliveries are at-least-once; use durable idempotency keys for downstream side effects.
 
 If a Worker feature needs environment variables or secrets, declare a typed Worker binding and read it from the `env` argument. Do not import the Bun entry point or assume `process.env` exists in the Worker runtime. Keep secrets in Wrangler secrets or the platform secret manager, not in checked-in `vars`.
 

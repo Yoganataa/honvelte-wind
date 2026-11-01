@@ -29,8 +29,9 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:install": "playwright install --with-deps chromium",
     "verify": "bun run format:check && bun run audit && bun run lint && bun run check && bun run test:coverage && bun run test:web-client && bun run build",
-    "verify:all": "bun run verify && bun run test:db-examples && bun run test:auth-examples && bun run test:request-safety && bun run test:e2e",
-    "agents:sync:claude": "bun run scripts/sync-agent-skills.ts"
+    "verify:all": "bun run verify && bun run test:db-examples && bun run test:auth-examples && bun run test:request-safety && bun run test:background-jobs && bun run test:e2e",
+    "agents:sync:claude": "bun run scripts/sync-agent-skills.ts",
+    "test:background-jobs": "tsc --noEmit -p examples/background-jobs/tsconfig.json && bun test examples/background-jobs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

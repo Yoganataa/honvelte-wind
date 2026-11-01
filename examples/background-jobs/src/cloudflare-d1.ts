@@ -104,6 +104,11 @@ export class D1IdempotencyStore
     validateTimestamp(input.completedAt, 'completedAt')
     validateToken(input.token)
 
+    const expiresAt = input.completedAt + this.options.completedRetentionMs
+    if (!Number.isSafeInteger(expiresAt)) {
+      throw new RangeError('The completed idempotency expiry is invalid.')
+    }
+
     const result = await this.database
       .prepare(
         `UPDATE background_job_idempotency
@@ -118,7 +123,7 @@ export class D1IdempotencyStore
       )
       .bind(
         input.completedAt,
-        input.completedAt + this.options.completedRetentionMs,
+        expiresAt,
         input.key,
         input.token,
       )

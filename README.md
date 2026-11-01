@@ -36,6 +36,7 @@ API readiness: http://127.0.0.1:3000/api/ready
 | `bun run test:auth-examples`  | Test optional session, CSRF, OIDC identity, and RBAC examples           |
 | `bun run test:web-client`     | Test the typed browser API client                                       |
 | `bun run test:request-safety` | Test optional rate limiting and request deadline middleware             |
+| `bun run test:background-jobs` | Test optional durable idempotency, queue retries, and scheduled jobs     |
 | `bun run test:e2e`            | Playwright browser tests                                                |
 | `bun run verify`              | Formatting, audit, lint, typecheck, unit tests with coverage, and build |
 | `bun run verify:all`          | All verification including DB, auth, request safety, and browser E2E    |
@@ -87,6 +88,12 @@ The request-deadline middleware returns 504 and exposes an `AbortSignal` to down
 
 Run `bun run test:request-safety` to run its strict type check and Bun tests. No new runtime dependency or service is added to the default workspace.
 
+## Optional background jobs
+
+`examples/background-jobs` provides a provider-independent job envelope/runner, a durable idempotency-store contract, capped jittered retry backoff, deterministic scheduled-job identity, and optional Cloudflare Queues + D1 adapters. The generic code has no provider runtime dependency; the Cloudflare adapter requires an explicitly provisioned queue, D1 database, and migration. Queue retries and dead-letter routing must be configured at the provider. Jobs are at-least-once: pass the idempotency key to downstream side effects instead of assuming exactly-once execution.
+
+Run `bun run test:background-jobs` for strict type checking and tests. See [examples/background-jobs/README.md](examples/background-jobs/README.md) for queue, D1, retry, scheduled-task, and operational setup. No queue or database is required by the default workspace.
+
 ## Icon system
 
 The web app uses `unplugin-icons` with Iconify collections. Lucide is the default icon style. Import icons as Svelte components with `~icons/{collection}/{icon}`; they are resolved at build time, so only the icons imported by the app are included in the bundle.
@@ -110,10 +117,11 @@ GitHub Actions runs on pushes to `main`, pull requests targeting `main`, and man
 3. **Database examples:** runs isolated SQLite tests and PostgreSQL integration tests against a fresh PostgreSQL 18.6 service.
 4. **Authentication examples:** tests server-side sessions, CSRF checks, SQLite session persistence, OIDC identity mapping, and RBAC.
 5. **API request safety examples:** tests fixed-window rate limits, trusted key selection, bounded-store failure, timeout responses, abort signals, and cleanup.
-6. **Cloudflare Workers profile:** validates staging and production Wrangler environments with dry runs, tests the Hono Fetch adapter, and smoke-tests the static SPA and API routes in the local `workerd` runtime.
-7. **Production delivery:** after quality, browser, database, authentication, request-safety, and Worker-profile jobs pass on `main`, creates a deployable Bun server tarball containing the Hono server source, shared contracts, and built SPA.
-8. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
-9. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
+6. **Background jobs examples:** tests job contracts, typed payload validation, D1 lease claims/fencing/expiry, Cloudflare queue acknowledgement/retries, and bounded backoff.
+7. **Cloudflare Workers profile:** validates staging and production Wrangler environments with dry runs, tests the Hono Fetch adapter, and smoke-tests the static SPA and API routes in the local `workerd` runtime.
+8. **Production delivery:** after quality, browser, database, authentication, request-safety, background-jobs, and Worker-profile jobs pass on `main`, creates a deployable Bun server tarball containing the Hono server source, shared contracts, and built SPA.
+9. **Dependency review:** checks pull-request dependency changes against GitHub's advisory data.
+10. **CodeQL:** analyzes JavaScript/TypeScript on pushes, pull requests, and a weekly schedule.
 
 Coverage text summaries are printed by CI and LCOV reports are uploaded as the `unit-test-coverage-<run>` artifact. Bun enforces a per-file minimum of 80% line coverage and 90% function coverage. The first measured baseline is 96.21% lines and 100% functions for the API workspace (84.85% lines in `app.ts`), and 100% for both metrics in the contracts workspace.
 
