@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-Use this checklist to supplement the automated Playwright and axe-core checks. It covers the current starter page, especially the greeting form and its validation, success, and request-error states.
+Use this checklist to supplement the automated Playwright and axe-core checks. It covers the marketing landing page, responsive navigation, section links, and the API playground's greeting form including validation, success, and request-error states.
 
 This document is a test procedure, not evidence that a manual review has passed. Completing it for one browser and assistive-technology combination does not establish WCAG conformance for every browser, device, or user need.
 
@@ -37,7 +37,6 @@ Use the keyboard for the entire check. Do not use a mouse or touch input.
 - [ ] Submit the empty form using the keyboard. The validation message appears, the field is exposed as invalid, and focus remains visible and usable.
 - [ ] In the API playground, focus the "Your name" field, enter a valid name, and submit with Enter. The request completes without a pointer.
 - [ ] Confirm the validation message is associated with the text field and can be reached or heard without relying on its color.
-- [ ] Enter a name and submit with Enter. The form can be completed without a pointer.
 - [ ] Repeat submission using Space or Enter while the submit button is focused.
 - [ ] Confirm the success message is perceivable and keyboard focus does not jump to an unexpected location.
 - [ ] After a validation error, edit the field. The stale validation message and invalid state clear.
@@ -48,7 +47,7 @@ Use the keyboard for the entire check. Do not use a mouse or touch input.
 
 Use at least one screen reader/browser pair relevant to the intended audience. Suggested reference combinations are NVDA with Firefox or Chrome on Windows, and VoiceOver with Safari on macOS. Record the exact versions in the environment section.
 
-- [ ] The page exposes a meaningful document title, a main landmark, and a logical heading hierarchy (page heading followed by the greeting section heading).
+- [ ] The page exposes a meaningful document title, a main landmark, labelled navigation, and a logical heading hierarchy from the page heading through each section heading.
 - [ ] The greeting section has an understandable name.
 - [ ] The text field is announced with the label "Your name" and as an editable text control.
 - [ ] The submit control is announced with the name "Say hello" and as a button. The decorative send icon is not announced as a separate control.
