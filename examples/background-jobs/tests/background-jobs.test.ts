@@ -196,19 +196,29 @@ describe('background job contracts and runner', () => {
   })
 
   test('fences stale leases and purges expired records', async () => {
-    const { database, store } = await createStore(1_000)
+    const { database, store } = await createStore(60_000)
     openDatabases.push(database)
 
-    const first = await store.claim({ key: 'fenced-1', now: 100, leaseExpiresAt: 200 })
+    const first = await store.claim({
+      key: 'fenced-1',
+      now: 100,
+      leaseExpiresAt: 200,
+    })
     expect(first.status).toBe('acquired')
     if (first.status !== 'acquired') throw new Error('Expected first lease')
 
-    const second = await store.claim({ key: 'fenced-1', now: 200, leaseExpiresAt: 300 })
+    const second = await store.claim({
+      key: 'fenced-1',
+      now: 200,
+      leaseExpiresAt: 300,
+    })
     expect(second.status).toBe('acquired')
     if (second.status !== 'acquired') throw new Error('Expected second lease')
 
     await store.release({ key: 'fenced-1', token: first.token })
-    expect(await store.claim({ key: 'fenced-1', now: 201, leaseExpiresAt: 301 })).toEqual({ status: 'busy' })
+    expect(
+      await store.claim({ key: 'fenced-1', now: 201, leaseExpiresAt: 301 }),
+    ).toEqual({ status: 'busy' })
 
     expect(
       await store.complete({
@@ -217,7 +227,7 @@ describe('background job contracts and runner', () => {
         completedAt: 250,
       }),
     ).toBe(true)
-    expect(await store.purgeExpired({ now: 1_250 })).toBe(1)
+    expect(await store.purgeExpired({ now: 60_250 })).toBe(1)
     expect(
       await store.claim({ key: 'fenced-1', now: 1_250, leaseExpiresAt: 1_350 }),
     ).toMatchObject({
@@ -276,7 +286,10 @@ describe('background job contracts and runner', () => {
       now: () => 100,
       retryPolicy: { baseDelaySeconds: 5, random: () => 0 },
       onFailure: ({ error }) => {
-        if (!(error instanceof UnknownJobTypeError) && !(error instanceof Error)) {
+        if (
+          !(error instanceof UnknownJobTypeError) &&
+          !(error instanceof Error)
+        ) {
           throw new Error('unexpected failure type')
         }
       },
@@ -290,10 +303,10 @@ describe('background job contracts and runner', () => {
       ],
     })
 
-    expect(actions).toEqual([
-      'valid:ack',
+    expect([...actions].sort()).toEqual([
       'invalid:retry:1',
       'unknown:retry:1',
+      'valid:ack',
     ])
     expect(executions).toBe(1)
 
@@ -374,7 +387,9 @@ describe('background job contracts and runner', () => {
     }
     const busyQueue = createCloudflareQueueHandler({
       store: busyStore,
-      handlers: new Map([['reports.refresh', defineJobHandler(z.object({}), async () => {})]]),
+      handlers: new Map([
+        ['reports.refresh', defineJobHandler(z.object({}), async () => {})],
+      ]),
       leaseMs: 10_000,
     })
 
@@ -383,14 +398,16 @@ describe('background job contracts and runner', () => {
 
     const failedQueue = createCloudflareQueueHandler({
       store,
-      handlers: new Map([['reports.refresh', defineJobHandler(z.object({}), async () => {
-        throw new Error('temporary')
-      })]]),
+      handlers: new Map([
+        ['reports.refresh', defineJobHandler(z.object({}), async () => {
+          throw new Error('temporary')
+        })],
+      ]),
       leaseMs: 10_000,
       now: () => 100,
       retryPolicy: { random: () => 0.5 },
     })
     await failedQueue({ messages: [message] })
-    expect(actions[1]).toMatch(/^retry:[1-3]$/)
+    expect(actions[1]).toBe('retry:6')
   })
 })

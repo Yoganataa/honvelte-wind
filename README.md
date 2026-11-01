@@ -22,7 +22,7 @@ API readiness: http://127.0.0.1:3000/api/ready
 ## Commands
 
 | Command                        | Description                                                                |
-| -----------------------------  | -----------------------------------------------------------------------    |
+| ------------------------------ | -------------------------------------------------------------------------- |
 | `bun run dev`                  | Run API and Vite concurrently                                              |
 | `bun run build`                | Build contracts and SPA                                                    |
 | `bun run start`                | Serve API + static SPA with Bun                                            |

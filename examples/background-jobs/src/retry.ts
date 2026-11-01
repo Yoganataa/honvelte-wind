@@ -29,12 +29,16 @@ export function calculateRetryDelaySeconds(
     maxDelaySeconds < baseDelaySeconds ||
     maxDelaySeconds > 86_400
   ) {
-    throw new RangeError('maxDelaySeconds must be between baseDelaySeconds and 86400.')
+    throw new RangeError(
+      'maxDelaySeconds must be between baseDelaySeconds and 86400.',
+    )
   }
 
   const random = (policy.random ?? Math.random)()
   if (!Number.isFinite(random) || random < 0 || random >= 1) {
-    throw new RangeError('The retry random source must return a value in [0, 1).')
+    throw new RangeError(
+      'The retry random source must return a value in [0, 1).',
+    )
   }
 
   const exponent = Math.min(attempts - 1, 52)

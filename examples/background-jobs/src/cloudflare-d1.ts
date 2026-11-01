@@ -22,7 +22,7 @@ export type D1IdempotencyStoreOptions = {
   tokenFactory?: () => string
 }
 
-/** Durable idempotency storage for Cloudflare D1 using conditional SQL writes. */
+/** Durable D1 idempotency storage using conditional SQL writes. */
 export class D1IdempotencyStore
   implements IdempotencyStore, IdempotencyMaintenance
 {
