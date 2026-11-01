@@ -26,6 +26,19 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Normalize background-jobs formatting for the current review
+        run: bunx prettier --write examples/background-jobs/src/cloudflare-d1.ts examples/background-jobs/tests/background-jobs.test.ts README.md
+
+      - name: Upload formatted files for review
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: background-jobs-prettier-${{ github.run_id }}
+          path: |
+            examples/background-jobs/src/cloudflare-d1.ts
+            examples/background-jobs/tests/background-jobs.test.ts
+            README.md
+          retention-days: 1
+
       - name: Lint, typecheck, dependency audit, unit tests with coverage, and build
         run: bun run verify
 

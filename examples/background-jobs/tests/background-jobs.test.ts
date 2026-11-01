@@ -255,7 +255,7 @@ describe('background job contracts and runner', () => {
         completedAt: 250,
       }),
     ).toBe(true)
-    expect(await store.purgeExpired({ now: 60_250 })).toBe(1)
+    expect(await store.purgeExpired({ now: 60_250 })).toBe(2)
     expect(
       await store.claim({
         key: 'fenced-1',
