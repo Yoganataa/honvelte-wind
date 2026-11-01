@@ -218,7 +218,7 @@ For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarde
 
 The default profile runs the Hono API and built Svelte SPA in one Bun process. An optional Cloudflare Workers profile serves the SPA through Workers Static Assets and routes same-origin `/api/*` requests to a Fetch-compatible Hono entry point. See [deployment profiles](examples/deployments/README.md) for build commands, runtime boundaries, environment requirements, and CI validation.
 
-CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not deploy to a live Cloudflare account. Separate manual GitHub Actions workflows provide staging/production deployment, live smoke checks, automatic rollback after a failed deployment check, and explicit version rollback. They require the `staging` and `production` GitHub Environments and their Cloudflare secrets/URL variables to be configured. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
+CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not itself deploy to a live Cloudflare account. Separate manual GitHub Actions workflows provide staging/production deployment, live smoke checks, automatic rollback after a failed deployment check, and explicit version rollback. The upstream repository has both GitHub Environments and their Cloudflare settings configured; a new fork or independent installation must configure its own environments, secrets, URL variables, protection rules, and Worker resources. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
 
 ## Testing
 
