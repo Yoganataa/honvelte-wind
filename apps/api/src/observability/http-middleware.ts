@@ -51,6 +51,8 @@ export function createHttpObservability(
     const isMetricsScrape =
       context.req.path === API_BASE_PATH + apiPaths.metrics
 
+    const parent = inboundTraceContext(context)
+
     await tracing.withSpan(
       'http.server.request',
       {
@@ -58,9 +60,7 @@ export function createHttpObservability(
         attributes: {
           'http.request.method': context.req.method.toUpperCase(),
         },
-        ...(inboundTraceContext(context)
-          ? { parent: inboundTraceContext(context) }
-          : {}),
+        ...(parent ? { parent } : {}),
       },
       async (span) => {
         if (!isMetricsScrape) options.metrics.beginRequest()

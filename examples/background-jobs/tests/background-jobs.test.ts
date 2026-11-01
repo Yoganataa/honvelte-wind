@@ -6,12 +6,14 @@ import {
   createCloudflareQueueHandler,
   createJob,
   createScheduledJob,
+  withJobTraceContext,
   D1IdempotencyStore,
   JobEnvelopeSchema,
   defineJobHandler,
   type D1DatabaseLike,
   type D1PreparedStatementLike,
   type IdempotencyStore,
+  type Tracing,
   processJob,
   UnknownJobTypeError,
 } from '../src'
@@ -93,6 +95,49 @@ describe('background job contracts and runner', () => {
         createdAt: fixedTime,
       }),
     ).toThrow()
+  })
+
+  test('propagates only a validated W3C trace context into a job envelope', () => {
+    const job = createJob({
+      id: 'trace-job-1',
+      type: 'reports.refresh',
+      payload: { reportId: 'r-1' },
+      createdAt: fixedTime,
+    })
+    const carrier = {
+      traceparent:
+        '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+      tracestate: 'vendor=value',
+    }
+    const tracing: Tracing = {
+      async withSpan(_name, _options, callback) {
+        return callback({
+          traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+          spanId: '00f067aa0ba902b7',
+          setAttribute: () => {},
+          setAttributes: () => {},
+          recordError: () => {},
+          setStatus: () => {},
+        })
+      },
+      inject: () => carrier,
+    }
+
+    const propagated = withJobTraceContext(job, tracing)
+    expect(propagated.traceContext).toEqual(carrier)
+    expect(JobEnvelopeSchema.parse(propagated)).toEqual(propagated)
+    expect(() =>
+      JobEnvelopeSchema.parse({
+        ...job,
+        traceContext: { traceparent: 'not-a-traceparent' },
+      }),
+    ).toThrow()
+
+    const invalidTracing = {
+      ...tracing,
+      inject: () => ({ tracestate: 'orphaned=value' }),
+    }
+    expect(withJobTraceContext(job, invalidTracing).traceContext).toBeUndefined()
   })
 
   test('validates handler payloads and skips completed duplicates', async () => {

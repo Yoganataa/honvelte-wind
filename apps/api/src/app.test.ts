@@ -7,6 +7,7 @@ import {
   readinessResponseSchema,
 } from '@honvelte/contracts'
 import { describe, expect, test } from 'bun:test'
+import type { TraceSpan, TraceSpanOptions, Tracing } from '@honvelte/contracts'
 import { createHttpMetrics } from './observability/http-metrics'
 import { createLogger, type LogRecord } from './observability/logger'
 import app, { createApp } from './app'
@@ -216,6 +217,81 @@ describe('API app', () => {
     expect(output).toContain('http_server_requests_total')
     expect(output).toContain('http_server_active_requests 0')
     expect(output).not.toContain('route="/api/metrics"')
+  })
+
+  test('creates a server span from W3C context and correlates completion logs', async () => {
+    const records: LogRecord[] = []
+    const spanNames: string[] = []
+    const spanOptions: TraceSpanOptions[] = []
+    const spanAttributes: Record<string, string | number | boolean> = {}
+    const logger = createLogger({
+      level: 'debug',
+      sink: (record) => records.push(record),
+    })
+    const tracing: Tracing = {
+      async withSpan(name, options, callback) {
+        spanNames.push(name)
+        spanOptions.push(options)
+        const span: TraceSpan = {
+          traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+          spanId: '00f067aa0ba902b7',
+          setAttribute(key, value) {
+            spanAttributes[key] = value
+          },
+          setAttributes(attributes) {
+            Object.assign(spanAttributes, attributes)
+          },
+          recordError(error) {
+            spanAttributes['exception.type'] =
+              error instanceof Error ? error.name : typeof error
+          },
+          setStatus(status) {
+            spanAttributes['span.status'] = status
+          },
+        }
+        return callback(span)
+      },
+      inject(carrier = {}) {
+        return { ...carrier }
+      },
+    }
+    const metricsApp = createApp({ logger, tracing })
+    const traceparent =
+      '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01'
+
+    const response = await metricsApp.request(
+      `${API_BASE_PATH}${apiPaths.health}?private_value=must-not-be-recorded`,
+      {
+        headers: {
+          'x-request-id': 'trace-correlation-test',
+          traceparent,
+          tracestate: 'vendor=value',
+        },
+      },
+    )
+
+    expect(response.status).toBe(200)
+    expect(spanNames).toEqual(['http.server.request'])
+    expect(spanOptions[0]).toMatchObject({
+      kind: 'server',
+      parent: { traceparent, tracestate: 'vendor=value' },
+      attributes: { 'http.request.method': 'GET' },
+    })
+    expect(spanAttributes).toMatchObject({
+      'http.route': '/api/health',
+      'http.response.status_code': 200,
+    })
+
+    const requestLog = records.find(
+      (record) => record.event === 'http.server.request.completed',
+    )
+    expect(requestLog).toMatchObject({
+      requestId: 'trace-correlation-test',
+      traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+      spanId: '00f067aa0ba902b7',
+      route: '/api/health',
+    })
+    expect(JSON.stringify(records)).not.toContain('must-not-be-recorded')
   })
 
   test('logs route templates without query strings', async () => {

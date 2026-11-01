@@ -1,92 +1,117 @@
-export type TraceAttributeValue = string | number | boolean
-export type TraceAttributes = Readonly<Record<string, TraceAttributeValue>>
+import { z } from 'zod'
+import {
+  validateTraceContextCarrier,
+  type TraceContextCarrier,
+  type Tracing,
+} from '@honvelte/contracts'
 
-export type TraceContextCarrier = {
-  traceparent?: string
-  tracestate?: string
+export const JobEnvelopeSchema = z
+  .object({
+    id: z
+      .string()
+      .min(1)
+      .max(128)
+      .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/),
+    type: z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(/^[a-z][a-z0-9.-]{0,63}$/),
+    payload: z.unknown(),
+    createdAt: z.string().datetime(),
+    traceContext: z
+      .object({
+        traceparent: z.string().max(55).optional(),
+        tracestate: z.string().max(512).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .superRefine((job, context) => {
+    if (job.traceContext && !validateTraceContextCarrier(job.traceContext)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['traceContext'],
+        message: 'A valid W3C trace context is required.',
+      })
+    }
+    if (!Object.prototype.hasOwnProperty.call(job, 'payload')) {
+      context.addIssue({
+        code: 'custom',
+        path: ['payload'],
+        message: 'Job payload is required.',
+      })
+    }
+  })
+
+export type JobEnvelope<TPayload = unknown> = {
+  id: string
+  type: string
+  payload: TPayload
+  createdAt: string
+  traceContext?: TraceContextCarrier
 }
 
-export type TraceSpanKind = 'server' | 'consumer' | 'internal'
-export type TraceSpanStatus = 'ok' | 'error'
-
-export type TraceSpanOptions = {
-  kind?: TraceSpanKind
-  attributes?: TraceAttributes
-  parent?: TraceContextCarrier
+export type NewJob<TPayload> = {
+  id: string
+  type: string
+  payload: TPayload
+  createdAt?: string
+  traceContext?: TraceContextCarrier
 }
 
-export type TraceSpan = {
-  readonly traceId?: string
-  readonly spanId?: string
-  setAttribute(key: string, value: TraceAttributeValue): void
-  setAttributes(attributes: TraceAttributes): void
-  recordError(error: unknown): void
-  setStatus(status: TraceSpanStatus): void
-}
-
-/**
- * Small provider-neutral tracing boundary. Implementations own context storage,
- * propagation, sampling, span processors, and exporting.
- */
-export type Tracing = {
-  withSpan<T>(
-    name: string,
-    options: TraceSpanOptions,
-    callback: (span: TraceSpan) => Promise<T>,
-  ): Promise<T>
-  inject(carrier?: TraceContextCarrier): TraceContextCarrier
-}
-
-const noopSpan: TraceSpan = {
-  setAttribute: () => {},
-  setAttributes: () => {},
-  recordError: () => {},
-  setStatus: () => {},
-}
-
-export const noopTracing: Tracing = {
-  async withSpan(_name, _options, callback) {
-    return callback(noopSpan)
-  },
-  inject(carrier = {}) {
-    return { ...carrier }
-  },
-}
-
-const TRACEPARENT_PATTERN =
-  /^(?!ff-)[\da-f]{2}-[\da-f]{32}-[\da-f]{16}-[\da-f]{2}$/i
-
-/**
- * Accept only bounded W3C trace headers before they enter a job envelope.
- * Baggage is deliberately excluded to avoid propagating arbitrary user data.
- */
-export function validateTraceContextCarrier(
-  value: unknown,
-): TraceContextCarrier | undefined {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return undefined
+/** Create a validated envelope with a stable ID for one unit of business work. */
+export function createJob<TPayload>(
+  input: NewJob<TPayload>,
+): JobEnvelope<TPayload> {
+  const envelope = {
+    id: input.id,
+    type: input.type,
+    payload: input.payload,
+    createdAt: input.createdAt ?? new Date().toISOString(),
+    ...(input.traceContext ? { traceContext: input.traceContext } : {}),
   }
 
-  const input = value as Record<string, unknown>
-  const traceparent =
-    typeof input.traceparent === 'string' &&
-    input.traceparent.length <= 55 &&
-    TRACEPARENT_PATTERN.test(input.traceparent) &&
-    !/^0{2}-0{32}-0{16}-/i.test(input.traceparent)
-      ? input.traceparent
-      : undefined
-  const tracestate =
-    typeof input.tracestate === 'string' &&
-    input.tracestate.length > 0 &&
-    input.tracestate.length <= 512 &&
-    /^[\x20-\x7e]+$/.test(input.tracestate)
-      ? input.tracestate
-      : undefined
+  JobEnvelopeSchema.parse(envelope)
+  return envelope
+}
 
-  if (!traceparent && !tracestate) return undefined
+/** Repeated delivery of one scheduled occurrence produces the same job ID. */
+export function createScheduledJob<TPayload>(
+  type: string,
+  scheduledTime: number,
+  payload: TPayload,
+): JobEnvelope<TPayload> {
+  if (!Number.isSafeInteger(scheduledTime) || scheduledTime < 0) {
+    throw new RangeError('scheduledTime must be a non-negative safe integer.')
+  }
+
+  const date = new Date(scheduledTime)
+  if (Number.isNaN(date.getTime())) {
+    throw new RangeError('scheduledTime must be a valid timestamp.')
+  }
+
+  return createJob({
+    id: 'schedule:' + type + ':' + String(scheduledTime),
+    type,
+    payload,
+    createdAt: date.toISOString(),
+  })
+}
+
+/**
+ * Capture the active trace context when publishing work so a consumer with
+ * W3C propagation support can continue the same distributed trace.
+ */
+export function withJobTraceContext<TPayload>(
+  job: JobEnvelope<TPayload>,
+  tracing: Tracing,
+): JobEnvelope<TPayload> {
+  const traceContext = validateTraceContextCarrier(tracing.inject({}))
 
   return {
-    ...(traceparent ? { traceparent } : {}),
-    ...(tracestate ? { tracestate } : {}),
+    ...job,
+    ...(traceContext ? { traceContext } : {}),
   }
 }

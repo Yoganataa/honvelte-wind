@@ -66,7 +66,7 @@ export function createCloudflareTracing(
             nativeSpan.setAttribute(key, value)
           },
           setAttributes(attributes: TraceAttributes) {
-            nativeSpan.setAttributes(attributes)
+            nativeSpan.setAttributes({ ...attributes })
           },
           recordError(error) {
             nativeSpan.setAttribute('exception.type', errorType(error))
