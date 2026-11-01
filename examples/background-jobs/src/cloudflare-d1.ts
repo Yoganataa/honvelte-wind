@@ -32,8 +32,13 @@ export class D1IdempotencyStore
     private readonly database: D1DatabaseLike,
     private readonly options: D1IdempotencyStoreOptions,
   ) {
-    if (!Number.isSafeInteger(options.completedRetentionMs) || options.completedRetentionMs < 60_000) {
-      throw new RangeError('completedRetentionMs must be at least 60000 milliseconds.')
+    if (
+      !Number.isSafeInteger(options.completedRetentionMs) ||
+      options.completedRetentionMs < 60_000
+    ) {
+      throw new RangeError(
+        'completedRetentionMs must be at least 60000 milliseconds.',
+      )
     }
 
     this.tokenFactory = options.tokenFactory ?? (() => crypto.randomUUID())
@@ -47,7 +52,10 @@ export class D1IdempotencyStore
     validateKey(input.key)
     validateTimestamp(input.now, 'now')
 
-    if (!Number.isSafeInteger(input.leaseExpiresAt) || input.leaseExpiresAt <= input.now) {
+    if (
+      !Number.isSafeInteger(input.leaseExpiresAt) ||
+      input.leaseExpiresAt <= input.now
+    ) {
       throw new RangeError('leaseExpiresAt must be later than now.')
     }
 
@@ -83,10 +91,14 @@ export class D1IdempotencyStore
       .bind(input.key, token, input.leaseExpiresAt, input.now, input.now)
       .first<{ lease_token: string }>()
 
-    if (claimed?.lease_token === token) return { status: 'acquired', token }
+    if (claimed?.lease_token === token) {
+      return { status: 'acquired', token }
+    }
 
     const existing = await this.database
-      .prepare('SELECT state FROM background_job_idempotency WHERE idempotency_key = ?')
+      .prepare(
+        'SELECT state FROM background_job_idempotency WHERE idempotency_key = ?',
+      )
       .bind(input.key)
       .first<{ state: 'processing' | 'completed' }>()
 
@@ -121,12 +133,7 @@ export class D1IdempotencyStore
           AND state = 'processing'
           AND lease_token = ?`,
       )
-      .bind(
-        input.completedAt,
-        expiresAt,
-        input.key,
-        input.token,
-      )
+      .bind(input.completedAt, expiresAt, input.key, input.token)
       .run()
 
     return result.meta?.changes === 1
@@ -147,7 +154,10 @@ export class D1IdempotencyStore
       .run()
   }
 
-  async purgeExpired(input: { now: number; limit?: number }): Promise<number> {
+  async purgeExpired(input: {
+    now: number
+    limit?: number
+  }): Promise<number> {
     validateTimestamp(input.now, 'now')
     const limit = input.limit ?? 500
 

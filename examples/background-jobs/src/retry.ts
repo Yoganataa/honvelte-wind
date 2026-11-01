@@ -16,7 +16,11 @@ export function calculateRetryDelaySeconds(
   const baseDelaySeconds = policy.baseDelaySeconds ?? 5
   const maxDelaySeconds = policy.maxDelaySeconds ?? 300
 
-  if (!Number.isSafeInteger(baseDelaySeconds) || baseDelaySeconds < 1 || baseDelaySeconds > 86_400) {
+  if (
+    !Number.isSafeInteger(baseDelaySeconds) ||
+    baseDelaySeconds < 1 ||
+    baseDelaySeconds > 86_400
+  ) {
     throw new RangeError('baseDelaySeconds must be between 1 and 86400.')
   }
 

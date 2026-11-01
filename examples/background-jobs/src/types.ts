@@ -2,8 +2,16 @@ import { z } from 'zod'
 
 export const JobEnvelopeSchema = z
   .object({
-    id: z.string().min(1).max(128).regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/),
-    type: z.string().min(1).max(64).regex(/^[a-z][a-z0-9.-]{0,63}$/),
+    id: z
+      .string()
+      .min(1)
+      .max(128)
+      .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/),
+    type: z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(/^[a-z][a-z0-9.-]{0,63}$/),
     payload: z.unknown(),
     createdAt: z.string().datetime(),
   })
@@ -33,7 +41,9 @@ export type NewJob<TPayload> = {
 }
 
 /** Create a validated envelope with a stable ID for one unit of business work. */
-export function createJob<TPayload>(input: NewJob<TPayload>): JobEnvelope<TPayload> {
+export function createJob<TPayload>(
+  input: NewJob<TPayload>,
+): JobEnvelope<TPayload> {
   const envelope = {
     id: input.id,
     type: input.type,

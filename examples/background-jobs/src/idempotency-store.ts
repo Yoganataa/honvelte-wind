@@ -5,9 +5,19 @@ export type IdempotencyClaim =
 
 export interface IdempotencyStore {
   /** Atomically acquire an unclaimed/expired key or report its current state. */
-  claim(input: { key: string; now: number; leaseExpiresAt: number }): Promise<IdempotencyClaim>
+  claim(input: {
+    key: string
+    now: number
+    leaseExpiresAt: number
+  }): Promise<IdempotencyClaim>
+
   /** Complete only when the caller still owns the current lease token. */
-  complete(input: { key: string; token: string; completedAt: number }): Promise<boolean>
+  complete(input: {
+    key: string
+    token: string
+    completedAt: number
+  }): Promise<boolean>
+
   /** Release only the in-progress claim associated with this exact token. */
   release(input: { key: string; token: string }): Promise<void>
 }
