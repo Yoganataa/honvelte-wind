@@ -1,6 +1,6 @@
 # Honvelte Wind
 
-A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeScript, and Bun Workspaces. Production is served by one Bun process: Hono handles API routes and serves the built SPA.
+A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeScript, and Bun Workspaces. The default Bun production profile serves the API and built SPA in one process. An optional Cloudflare Workers profile serves the SPA as static assets and routes `/api/*` through Hono's Fetch adapter.
 
 ## Requirements
 
@@ -133,7 +133,7 @@ Coverage text summaries are printed by CI and LCOV reports are uploaded as the `
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
-Cloudflare staging and production deployments are separate, manual, main-only workflows. They require the GitHub Environments and Cloudflare secrets documented in [deployment profiles](examples/deployments/README.md); no live account is configured by default. The rollback workflow requires an explicit Worker version ID.
+Cloudflare staging and production deployments are separate, manual, main-only workflows. This upstream repository has configured staging and production environments, and both Workers have passed live deployment verification. A fork does not inherit GitHub Environment secrets, protection rules, or Cloudflare resources; configure those separately using [deployment profiles](examples/deployments/README.md). The rollback workflow requires an explicit Worker version ID.
 
 Playwright reports and traces are uploaded even when E2E fails.
 
