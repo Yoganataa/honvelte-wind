@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { TraceContextCarrier, Tracing } from '@honvelte/contracts'
 import type { IdempotencyStore } from './idempotency-store'
 import { JobLeaseLostError } from './idempotency-store'
 import { JobEnvelopeSchema, type JobEnvelope } from './types'
@@ -32,6 +33,8 @@ export type ProcessJobOptions = {
   store: IdempotencyStore
   leaseMs: number
   now?: () => number
+  tracing?: Tracing
+  parent?: TraceContextCarrier
 }
 
 /** Execute one job using an atomic, lease-based idempotency store. */
@@ -46,6 +49,7 @@ export async function processJob(
     throw new RangeError('leaseMs must be a safe integer of at least 1000ms.')
   }
 
+  const execute = async (span?: import('@honvelte/contracts').TraceSpan): Promise<ProcessJobResult> => {
   const now = options.now ?? Date.now
   const claimedAt = now()
   const leaseExpiresAt = claimedAt + options.leaseMs
@@ -62,6 +66,7 @@ export async function processJob(
 
   if (claim.status === 'completed') return 'duplicate'
   if (claim.status === 'busy') return 'busy'
+  span?.setAttribute('app.job.type', validatedJob.type)
 
   try {
     await handler.run(validatedJob.payload, {
@@ -95,4 +100,17 @@ export async function processJob(
 
   if (!completed) throw new JobLeaseLostError()
   return 'completed'
+  }
+
+  if (!options.tracing) return execute()
+
+  return options.tracing.withSpan(
+    'background.job.execute',
+    {
+      kind: 'consumer',
+      attributes: { 'app.job.type': validatedJob.type },
+      ...(options.parent ? { parent: options.parent } : {}),
+    },
+    (span) => execute(span),
+  )
 }
