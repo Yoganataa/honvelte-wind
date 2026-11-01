@@ -119,6 +119,8 @@ Coverage text summaries are printed by CI and LCOV reports are uploaded as the `
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
+Cloudflare staging and production deployments are separate, manual, main-only workflows. They require the GitHub Environments and Cloudflare secrets documented in [deployment profiles](examples/deployments/README.md); no live account is configured by default. The rollback workflow requires an explicit Worker version ID.
+
 Playwright reports and traces are uploaded even when E2E fails.
 
 ## Dependency and supply-chain policy
