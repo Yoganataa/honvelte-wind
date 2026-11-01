@@ -5,15 +5,16 @@ test('renders the landing page and stack overview', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Build boldly. Stay in control.' }),
   ).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Explore the repository' })).toHaveAttribute(
-    'href',
-    'https://github.com/Yoganataa/honvelte-wind',
-  )
+  await expect(
+    page.getByRole('link', { name: 'Explore the repository' }),
+  ).toHaveAttribute('href', 'https://github.com/Yoganataa/honvelte-wind')
   await expect(page.getByText('Svelte 5 + Vite', { exact: true })).toBeVisible()
   await expect(page.getByText('Hono + Bun', { exact: true })).toBeVisible()
   await expect(page.getByText('Tailwind CSS 4', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Bun server' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Cloudflare Workers' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Cloudflare Workers' }),
+  ).toBeVisible()
 })
 
 test('mobile navigation opens and closes accessibly', async ({ page }) => {
@@ -23,13 +24,16 @@ test('mobile navigation opens and closes accessibly', async ({ page }) => {
   const menuButton = page.getByRole('button', { name: 'Open navigation menu' })
   await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
   await menuButton.click()
-  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Close navigation menu' })).toHaveAttribute(
-    'aria-expanded',
-    'true',
-  )
+  await expect(
+    page.getByRole('navigation', { name: 'Mobile navigation' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Close navigation menu' }),
+  ).toHaveAttribute('aria-expanded', 'true')
 
-  const mobileNavigation = page.getByRole('navigation', { name: 'Mobile navigation' })
+  const mobileNavigation = page.getByRole('navigation', {
+    name: 'Mobile navigation',
+  })
   await mobileNavigation.getByRole('link', { name: 'Features' }).click()
   await expect(mobileNavigation).toBeHidden()
   await expect(page).toHaveURL(/#features$/)
@@ -96,9 +100,13 @@ test('provides a skip link and keyboard-operable navigation', async ({
 }) => {
   await page.goto('/')
   await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused()
+  await expect(
+    page.getByRole('link', { name: 'Skip to content' }),
+  ).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: 'Honvelte Wind home' })).toBeFocused()
+  await expect(
+    page.getByRole('link', { name: 'Honvelte Wind home' }),
+  ).toBeFocused()
 })
 
 test('supports keyboard submission in the API playground', async ({ page }) => {
