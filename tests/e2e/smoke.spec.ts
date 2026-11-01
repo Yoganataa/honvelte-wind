@@ -1,13 +1,58 @@
 import { expect, test } from '@playwright/test'
 
-test('renders the starter and feature cards', async ({ page }) => {
+test('renders the landing page and stack overview', async ({ page }) => {
   await page.goto('/')
   await expect(
-    page.getByRole('heading', { name: 'Honvelte Wind' }),
+    page.getByRole('heading', { name: 'Build boldly. Stay in control.' }),
   ).toBeVisible()
-  await expect(page.getByText('Svelte 5 + Vite', { exact: true })).toBeVisible()
-  await expect(page.getByText('Hono + Bun', { exact: true })).toBeVisible()
-  await expect(page.getByText('Tailwind CSS 4', { exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: 'Explore the repository' }),
+  ).toHaveAttribute('href', 'https://github.com/Yoganataa/honvelte-wind')
+  await expect(
+    page.getByRole('heading', { name: 'Svelte 5 + Vite' }),
+  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Hono + Bun' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Tailwind CSS 4' }),
+  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bun server' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Cloudflare Workers' }),
+  ).toBeVisible()
+})
+
+test('mobile navigation opens and closes accessibly', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+
+  const menuButton = page.getByRole('button', { name: 'Open navigation menu' })
+  await expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+  await menuButton.click()
+  await expect(
+    page.getByRole('navigation', { name: 'Mobile navigation' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Close navigation menu' }),
+  ).toHaveAttribute('aria-expanded', 'true')
+
+  const mobileNavigation = page.getByRole('navigation', {
+    name: 'Mobile navigation',
+  })
+  await mobileNavigation.getByRole('link', { name: 'Features' }).click()
+  await expect(mobileNavigation).toBeHidden()
+  await expect(page).toHaveURL(/#features$/)
+})
+
+test('landing page stays within a narrow mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 780 })
+  await page.goto('/')
+
+  const dimensions = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    content: document.documentElement.scrollWidth,
+  }))
+
+  expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
 })
 
 test('serves a valid robots.txt instead of the SPA fallback', async ({
@@ -54,14 +99,27 @@ test('shows and clears accessible client-side validation feedback', async ({
   await expect(validationMessage).toHaveCount(0)
 })
 
-test('supports keyboard navigation through the greeting form', async ({
+test('provides a skip link and keyboard-operable navigation', async ({
   page,
 }) => {
   await page.goto('/')
   await page.keyboard.press('Tab')
-  await expect(page.getByLabel('Your name')).toBeFocused()
+  await expect(
+    page.getByRole('link', { name: 'Skip to content' }),
+  ).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(page.getByRole('button', { name: 'Say hello' })).toBeFocused()
+  await expect(
+    page.getByRole('link', { name: 'Honvelte Wind home' }),
+  ).toBeFocused()
+})
+
+test('supports keyboard submission in the API playground', async ({ page }) => {
+  await page.goto('/')
+  const nameField = page.getByLabel('Your name')
+  await nameField.focus()
+  await nameField.fill('Nata')
+  await nameField.press('Enter')
+  await expect(page.getByRole('status')).toHaveText('Hello, Nata!')
 })
 
 test('shows API errors without exposing unexpected response details', async ({

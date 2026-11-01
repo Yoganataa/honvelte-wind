@@ -1,3 +1,4 @@
+import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import Icons from 'unplugin-icons/vite'
@@ -11,6 +12,11 @@ export default defineConfig({
       compiler: 'svelte',
     }),
   ],
+  resolve: {
+    alias: {
+      $lib: path.resolve(import.meta.dirname, './src/lib'),
+    },
+  },
   server: {
     host: '127.0.0.1',
     port: 5173,

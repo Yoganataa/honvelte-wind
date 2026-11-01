@@ -3,9 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
     <meta name="theme-color" content="#09090b" />
-    <meta name="description" content="Honvelte Wind full-stack starter" />
-    <title>Honvelte Wind</title>
+    <meta
+      name="description"
+      content="Build with Svelte 5, Hono, Tailwind CSS 4, and Bun. A modular full-stack web starter with typed contracts and a verified delivery workflow."
+    />
+    <meta
+      property="og:title"
+      content="Honvelte Wind: A lean foundation for ambitious web apps"
+    />
+    <meta
+      property="og:description"
+      content="A lean, modular full-stack foundation built with Svelte 5, Hono, Tailwind CSS 4, and Bun."
+    />
+    <meta property="og:type" content="website" />
+    <title>Honvelte Wind: A lean foundation for ambitious web apps</title>
+    <script>
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="app"></div>

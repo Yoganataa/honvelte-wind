@@ -10,14 +10,30 @@
   },
   "dependencies": {
     "@honvelte/contracts": "workspace:*",
-    "svelte": "^5.57.1"
+    "bits-ui": "2.20.2",
+    "clsx": "2.1.1",
+    "svelte": "^5.57.1",
+    "tailwind-merge": "3.7.0",
+    "tailwind-variants": "3.3.1"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.145",
+    "@internationalized/date": "3.12.4",
+    "@lucide/svelte": "1.64.0",
+    "@shadcn-svelte/primitives": "0.0.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
+    "embla-carousel-svelte": "8.6.0",
+    "formsnap": "2.1.0",
+    "layerchart": "2.9.1",
+    "mode-watcher": "1.1.0",
+    "paneforge": "1.0.2",
+    "shiki": "3.23.0",
+    "svelte-sonner": "1.2.2",
+    "sveltekit-superforms": "3.1.0",
     "tailwindcss": "^4.3.3",
     "unplugin-icons": "^24.0.0",
+    "vaul-svelte": "1.0.0-next.7",
     "vite": "^8.3.5"
   }
 }

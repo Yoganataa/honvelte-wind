@@ -1,9 +1,9 @@
 # Design System
 
-> Status: **Current baseline documented; component-library integration is planned**
+> Status: **Warm Studio & Organic Clay baseline with shadcn-svelte component platform**
 > Scope: Svelte 5 + Vite + Tailwind CSS 4 application in `apps/web`.
 
-This document records the design language that currently exists in the repository and the rules for extending it. It is the source of truth for design decisions; implementation remains in `apps/web/src/app.css` and the shared UI components.
+This document records the design language that exists in the repository and the rules for extending it. It is the source of truth for design decisions; implementation resides in `apps/web/src/app.css`, `apps/web/src/lib/components/ui`, and feature components.
 
 ## 1. Design principles
 
@@ -15,36 +15,66 @@ This document records the design language that currently exists in the repositor
 6. **Feature ownership.** Feature-specific presentation belongs with its feature; reusable primitives belong in `src/lib/components/ui`.
 7. **Small, composable UI.** Add shared primitives when more than one feature needs them or when a consistent interaction contract is valuable.
 
-## 2. Current visual direction
+## 2. Visual direction and design patterns
 
-The current application is dark-first. Its base surface is near-black, with raised dark panels, high-contrast foreground text, muted supporting copy, and cyan as the primary interactive accent. Success and danger use semantic green and red tones.
+The visual language follows the **Warm Studio & Organic Clay** design architecture, matching Google Stitch and modern craft UI patterns:
 
-The current design is intentionally restrained: a centered content column, a clear page heading, one primary interactive panel, and supporting feature cards. New screens should preserve this hierarchy unless a product requirement justifies a different layout.
+- **Brand Mark & Iconography:** A custom coral-to-flame squircle badge (`/logo.webp`) displaying a modern white "H" letterform interconnected with an organic golden ribbon wave. The mark features micro-tilt interaction on hover (`rotate(-8deg) scale(1.1)`).
+- **Primary Light Baseline (Warm Linen & Espresso):** A warm, tactile, premium environment featuring a warm linen canvas (`#f4efe9`), subtle secondary clay surfaces (`#e9dfd5`), elevated pure white card panels (`#ffffff`), warm hairline borders (`#e8e1d9`), and rich espresso ink typography (`#14110f`).
+- **Signature Brand Accent:** Svelte flame orange (`#ff3e00` for highlights, `#c2370a` for accessible text/button contrast >= 4.5:1 against white).
+- **Sticky Capsule Navigation:** An elevated capsule navigation bar (`.stitch-nav`) with dynamic scroll pinning (`.stuck`), 16 px backdrop blur with color-mix saturation, and high-contrast pill actions.
+- **Top Reading Progress:** A lightweight, non-blocking 3 px progress indicator (`.prog`) fixed to the viewport top tracking scroll depth.
+- **Ambient Glowing Backdrop:** A soft, breathing radial gradient glow (`.blob`) floating subtly behind the hero section with reduced-motion safety.
+- **Card Geometry & Radius System:** Generous, soft organic radii with a 32 px outer container (`rounded-3xl`), 24 px card containers (`rounded-2xl`), and 999 px capsule pill controls (`rounded-full`).
+- **Interactive 3D Parallax Tilt:** The hero stacked cards (`.c1`, `.c2`, `.c3`) calculate relative pointer coordinates (`--px`, `--py`) on `pointermove` to provide smooth, layered 3D depth.
+- **Segmented Bilingual Switcher:** A smooth segmented control (`.seg`) with sliding thumb indicator allowing seamless switching between English and Indonesian locales.
+- **Secondary Dark Baseline (Espresso Night):** A deep espresso black canvas (`#14110f`) paired with dark roasted panels (`#211c19`), muted cream typography (`#f5f0ea`), and deep warm hairline borders (`#332c27`).
+- **View-Transition Theme Toggle:** An interactive theme switcher using modern circular reveal view transitions where supported, with seamless CSS fallback.
+- **Live Observability Status:** A pulsing emerald status dot (`.live` with `ping` keyframe animation), gradient status distribution bar, and Prometheus petal metrics grid.
 
 ## 3. Design tokens
 
-The canonical tokens are declared in `apps/web/src/app.css` under Tailwind CSS 4's `@theme` block.
+The canonical tokens are declared in `apps/web/src/app.css` under Tailwind CSS 4's `@theme` block. They provide 1:1 compatibility with shadcn-svelte's standard semantic design system while maintaining convenience aliases for feature code.
 
-| Token            | Current value | Intended use                             |
-| ---------------- | ------------- | ---------------------------------------- |
-| `canvas`         | `#09090b`     | Application background and input surface |
-| `foreground`     | `#f4f4f5`     | Primary text                             |
-| `muted`          | `#a1a1aa`     | Secondary text and placeholders          |
-| `panel`          | `#18181b`     | Cards and raised surfaces                |
-| `panel-muted`    | `#1c1c20`     | Secondary raised surfaces                |
-| `border`         | `#3f3f46`     | Dividers and control borders             |
-| `accent`         | `#67e8f9`     | Primary actions and focus indication     |
-| `accent-hover`   | `#a5f3fc`     | Hover state for primary actions          |
-| `danger`         | `#fca5a5`     | Error text                               |
-| `danger-panel`   | `#450a0a`     | Error surface                            |
-| `danger-border`  | `#7f1d1d`     | Error boundary                           |
-| `success`        | `#6ee7b7`     | Success text and indicators              |
-| `success-panel`  | `#022c22`     | Success surface                          |
-| `success-border` | `#065f46`     | Success boundary                         |
+### 3.1 Light theme (Warm Linen baseline)
 
-Use semantic utilities such as `bg-canvas`, `text-foreground`, `text-muted`, `bg-panel`, `border-border`, and `bg-accent`. If a new semantic color is needed, add a token to `app.css` and document its role here rather than inventing a feature-local palette.
+| Token (Theme)   | Stitch Variable | Value     | Role / Intended use                        |
+| --------------- | --------------- | --------- | ------------------------------------------ |
+| `canvas`        | `--bg`          | `#f4efe9` | Warm linen canvas background               |
+| `canvas-subtle` | `--bg2`         | `#e9dfd5` | Warm beige / clay secondary background     |
+| `panel`         | `--surface`     | `#ffffff` | Elevated pure white card surfaces          |
+| `foreground`    | `--ink`         | `#14110f` | Deep espresso primary text (14:1+ ratio)   |
+| `muted`         | `--mute`        | `#665e57` | Balanced warm stone text (5:1+ WCAG AA)    |
+| `border`        | `--line`        | `#e8e1d9` | Hairline container dividers and borders    |
+| `accent`        | `--ink`         | `#14110f` | Solid espresso pill primary CTA buttons    |
+| `brand`         | `--accent`      | `#c2370a` | Accessible flame brand mark and buttons    |
+| `yellow`        | `--yellow`      | `#ffd25e` | Warm golden yellow accent tag              |
+| `yellow-ink`    | `--yellow-ink`  | `#3a2b00` | High-contrast text on yellow (8.5:1 ratio) |
+| `green`         | `--green`       | `#1f9d4c` | Fresh emerald status text and checks       |
+| `green-bg`      | `--green-bg`    | `#d6f5e0` | Soft emerald background tint               |
+| `danger`        | `--red`         | `#e5484d` | Crisp red error text                       |
+| `danger-panel`  | `--red-bg`      | `#ffe3d9` | Soft warm red wash                         |
 
-The current theme declares `color-scheme: dark`. Do not imply that a light theme exists until it has been designed and tested.
+### 3.2 Dark theme (Espresso Night baseline)
+
+| Token (Theme)   | Stitch Variable | Value                       | Role / Intended use                  |
+| --------------- | --------------- | --------------------------- | ------------------------------------ |
+| `canvas`        | `--bg`          | `#14110f`                   | Primary deep espresso background     |
+| `canvas-subtle` | `--bg2`         | `#1d1815`                   | Deep dark clay secondary background  |
+| `panel`         | `--surface`     | `#211c19`                   | Elevated dark roast card panels      |
+| `foreground`    | `--ink`         | `#f5f0ea`                   | Warm cream primary text              |
+| `muted`         | `--mute`        | `#a79d94`                   | Muted warm cream secondary text      |
+| `border`        | `--line`        | `#332c27`                   | Dark hairline dividers and borders   |
+| `accent`        | `--ink`         | `#f5f0ea`                   | Solid light pill primary CTA buttons |
+| `brand`         | `--accent`      | `#ff3e00`                   | Svelte flame orange brand mark       |
+| `danger`        | `--red`         | `#f87171`                   | Crisp error text                     |
+| `danger-panel`  | `--red-bg`      | `rgba(248, 113, 113, 0.15)` | Soft translucent error wash          |
+| `success`       | `--green`       | `#34d399`                   | Crisp success text                   |
+| `success-panel` | `--green-bg`    | `rgba(52, 211, 153, 0.15)`  | Soft translucent success wash        |
+
+Use semantic utilities such as `bg-canvas`, `text-foreground`, `text-muted`, `bg-panel`, `border-border`, and `bg-accent`. Standard shadcn-svelte utility aliases (`bg-background`, `bg-card`, `text-primary`, `border-input`, `ring`) are mapped via `@theme` in `app.css`.
+
+The default baseline is light (`color-scheme: light`), with an active theme switcher activating `.dark` (`color-scheme: dark`).
 
 ## 4. Typography
 
@@ -54,107 +84,97 @@ The root font stack is:
 Inter, ui-sans-serif, system-ui, sans-serif
 ```
 
-The current root styles disable synthetic font faces, enable text antialiasing, and use optimized text rendering. Use a clear hierarchy:
+The root styles disable synthetic font faces, enable text antialiasing, and use optimized text rendering:
 
-- Page title: strong, compact, and responsive.
+- Page title: strong, compact, and responsive with tight tracking (`tracking-tight`).
 - Section title: distinguishable from body copy without excessive size.
 - Supporting copy: use the muted semantic color.
 - Labels: remain visible and associated with their input; do not rely on placeholder text as a label.
 - Error and status text: be concise and programmatically associated with the affected control or live region.
 
-Do not introduce a second font family without a documented product reason and a performance/accessibility review.
-
 ## 5. Layout and spacing
 
-The current starter page uses a centered content column with a maximum width of `48rem` (`max-w-3xl`), horizontal page padding, generous vertical breathing room, and a vertical content gap.
+The application uses a responsive shell up to `80rem` (`max-w-7xl`) for navigation and multi-column sections, with a split hero on wide screens. Individual copy blocks, cards, and interactive forms use narrower measures inside that shell.
 
 Guidelines:
 
-- Prefer a centered, readable content measure for forms and explanatory content.
-- Use responsive Tailwind utilities rather than viewport-specific fixed dimensions.
-- Keep interactive controls at least 44 px high where practical; the current Button and TextField use Tailwind's `min-h-11`.
-- Preserve a minimum supported viewport width of 320 px.
-- Use panel surfaces to establish grouping; do not add nested cards without a clear information hierarchy.
-- Keep form labels, fields, actions, and feedback visually grouped.
+- Centered, readable content measure for forms and explanatory content.
+- Responsive Tailwind utilities rather than viewport-specific fixed dimensions.
+- Interactive controls at least 44 px high where practical (`min-h-11`).
+- Preserves a minimum supported viewport width of 320 px without horizontal overflow.
+- Panel surfaces establish grouping; no unnecessary card nesting.
 
-The values above document the current implementation, not a requirement that every future screen use the exact same page layout.
+## 6. Shared UI components (shadcn-svelte)
 
-## 6. Shared UI components
-
-The canonical shared component directory is:
+The repository provides a complete, source-owned component suite in `apps/web/src/lib/components/ui/`:
 
 ```text
 apps/web/src/lib/components/ui/
-├── Button.svelte
-└── TextField.svelte
-```
+├── alert/
+│   ├── alert.svelte
+│   ├── alert-title.svelte
+│   ├── alert-description.svelte
+│   └── index.ts
+├── badge/
+│   ├── badge.svelte
+│   └── index.ts
+├── button/
+│   ├── button.svelte
+│   └── index.ts
+├── card/
+│   ├── card.svelte
+│   ├── card-header.svelte
+│   ├── card-title.svelte
+│   ├── card-description.svelte
+│   ├── card-content.svelte
+│   ├── card-footer.svelte
+│   └── index.ts
+├── dialog/
+│   ├── dialog.svelte
+│   ├── dialog-trigger.svelte
+│   ├── dialog-content.svelte
+│   ├── dialog-header.svelte
+│   ├── dialog-title.svelte
+│   ├── dialog-description.svelte
+│   ├── dialog-footer.svelte
+│   ├── dialog-close.svelte
+│   └── index.ts
+├── input/
+│   ├── input.svelte
+│   └── index.ts
+├── separator/
+│   ├── separator.svelte
+│   └── index.ts
+├── tabs/
+│   ├── tabs.svelte
+│   ├── tabs-list.svelte
+│   ├── tabs-trigger.svelte
+│   ├── tabs-content.svelte
+│   └── index.ts
+### Full Component Inventory
 
-### Button
+The project provides the complete official suite of shadcn-svelte components in `apps/web/src/lib/components/ui/`:
 
-Current contract:
+1. **Display and Layout:** `aspect-ratio`, `badge`, `breadcrumb`, `card`, `carousel`, `chart`, `empty`, `item`, `kbd`, `marker`, `progress`, `resizable`, `scroll-area`, `separator`, `skeleton`, `table`.
+2. **Forms and Input:** `button`, `button-group`, `checkbox`, `field`, `form`, `input`, `input-group`, `input-otp`, `label`, `native-select`, `radio-group`, `select`, `slider`, `switch`, `textarea`, `toggle`, `toggle-group`.
+3. **Overlays and Modals:** `alert`, `alert-dialog`, `dialog`, `drawer`, `dropdown-menu`, `hover-card`, `popover`, `sheet`, `sonner`, `tooltip`.
+4. **Navigation and Menus:** `accordion`, `collapsible`, `context-menu`, `menubar`, `navigation-menu`, `pagination`, `sidebar`, `tabs`.
+5. **Data, AI and Interactive:** `attachment`, `bubble`, `calendar`, `code-block`, `command`, `message`, `message-scroller`, `questionnaire`, `range-calendar`, `spinner`, `trace`.
+6. **Backward Compatibility:** `Button.svelte`, `TextField.svelte`, and `index.ts` central barrel.
 
-- Accepts a Svelte 5 `Snippet` as children.
-- Supports `button`, `submit`, and `reset` types.
-- Supports `disabled` and `busy` states.
-- A busy button is disabled and exposes `aria-busy="true"`.
-- Uses the accent token, dark foreground text, rounded corners, and visible focus styling.
-
-### TextField
-
-Current contract:
-
-- Requires a stable `id` and visible `label`.
-- Supports placeholder, max length, autocomplete, disabled, bindable value, and an error message.
-- Associates the label through `for`/input `id`.
-- Associates the error through `aria-describedby` and exposes invalid state through `aria-invalid`.
-- Keeps error feedback adjacent to the relevant input.
-
-New shared components must document their public props, state behavior, semantics, keyboard interaction, and accessibility requirements. Avoid moving feature-only markup into the shared UI directory prematurely.
+All components are implemented with Svelte 5 runes (`$props()`, `$state()`, `$derived()`, `$bindable()`), Bits UI primitives, and `tailwind-variants`.
 
 ## 7. Interaction and accessibility requirements
 
 - Use semantic HTML elements before custom roles.
-- Every form field needs a persistent visible label.
-- Keyboard users must have a visible `:focus-visible` indicator. The current global indicator is a 2 px accent outline with a 2 px offset.
-- Disabled, busy, invalid, success, and error states must be perceivable without relying on color alone.
-- Error text must be associated with its control; asynchronous success/error feedback should use an appropriate status or alert region.
-- Preserve native keyboard behavior for buttons, inputs, dialogs, menus, and other interactive patterns.
-- Honor the global `prefers-reduced-motion: reduce` rule.
-- Run Playwright and axe-core checks for meaningful states, then complete the manual checklist in `docs/testing/accessibility-manual-checklist.md` before claiming manual accessibility verification.
-
-Automated axe-core checks do not prove full WCAG conformance; manual keyboard, screen-reader, zoom/reflow, and contrast review remains required.
+- Every form field requires a persistent, visible label.
+- Keyboard users have a visible `:focus-visible` indicator (2 px outline with 2 px offset).
+- Disabled, busy, invalid, success, and error states are perceivable without relying on color alone.
+- Error text is linked via `aria-describedby` and `role="alert"`; status messages use `role="status"`.
+- Honor global `prefers-reduced-motion: reduce`. All parallax, drift animations, and scaling transitions turn off automatically when reduced motion is preferred.
+- Run Playwright and axe-core audits to verify zero WCAG A/AA violations across all states.
 
 ## 8. Icons
 
-The current application uses `unplugin-icons` with the Lucide Iconify collection. Keep icon style consistent and use icons as supporting visual cues, not as the only label for an important action.
-
-The proposed shadcn-svelte integration must make an explicit decision about whether to retain this icon pipeline or migrate to another Lucide package. Do not install a second icon system implicitly.
-
-## 9. Planned shadcn-svelte integration
-
-shadcn-svelte is a **planned** source-owned component foundation; it is not part of the current dependency set at this checkpoint.
-
-When that phase begins:
-
-- Preserve `apps/web/src/lib/components/ui` as the canonical component location.
-- Align generated CSS variables with the tokens in this document.
-- Migrate the existing Button and TextField rather than keeping duplicate primitives.
-- Use its Svelte + Vite + Tailwind CSS 4 installation path; do not copy SvelteKit-only configuration into this Vite application.
-- Add components selectively and keep source code owned by the repository.
-- Retain accessibility and keyboard guarantees already present in the current components.
-- Update this document only after implementation and tests demonstrate the actual behavior.
-
-See `docs/roadmap/documentation-and-ui-platform.md` for the phased UI and documentation platform plan.
-
-## 10. Change process
-
-For a visual or interaction change:
-
-1. Identify the affected token, primitive, feature, or page.
-2. Prefer semantic tokens and existing shared components.
-3. Add or update tests for interaction and accessibility regressions.
-4. Check narrow viewport behavior and reduced-motion behavior.
-5. Run the relevant Playwright/axe-core checks and `bun run verify`.
-6. Update this document when a shared design rule or token changes.
-
-A design change is not complete merely because it looks correct in one screenshot; it must also preserve the component contract, keyboard operation, responsive behavior, and accessible state communication.
+The application uses `unplugin-icons` with the Lucide Iconify collection. Icons are imported on demand at build time, keeping browser bundles minimal.
+```

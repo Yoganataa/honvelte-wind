@@ -41,7 +41,7 @@
     {oninput}
     aria-invalid={error ? 'true' : undefined}
     aria-describedby={error ? errorId : undefined}
-    class="min-h-11 min-w-0 rounded-lg border border-border bg-canvas px-4 py-3 text-foreground outline-none transition-colors placeholder:text-muted focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50"
+    class="min-h-11 min-w-0 rounded-xl border border-border bg-panel px-4 py-3 text-foreground outline-none transition-colors placeholder:text-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
   />
   {#if error}
     <p id={errorId} role="alert" class="text-sm text-danger">{error}</p>
