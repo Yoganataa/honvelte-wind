@@ -192,7 +192,6 @@ jobs:
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Sec-Fetch-Mode: navigate' "$base/" --output /tmp/honvelte-live-index.html
             grep -q 'Honvelte Wind' /tmp/honvelte-live-index.html
             verify_live_assets "$base" /tmp/honvelte-live-index.html || return 1
-            verify_live_assets "$base" /tmp/honvelte-live-index.html || return 1
 
             curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 5 --max-time 20 -H 'Content-Type: application/json' --data '{"name":"deployment-smoke-test"}' "$base/api/greet" --output /tmp/honvelte-live-greet.json
             grep -q '"message":"Hello, deployment-smoke-test!"' /tmp/honvelte-live-greet.json
