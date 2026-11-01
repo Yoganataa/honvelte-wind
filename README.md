@@ -57,6 +57,12 @@ The web app calls `/api` through Vite proxy in development. In production Hono s
 
 See [roadmap.md](./roadmap.md) for the engineering priorities, acceptance criteria, and planned project profiles.
 
+## Search crawling policy
+
+Static public files belong under `apps/web/public`; Vite copies them unchanged to the production asset directory. The starter includes `robots.txt`, which allows public pages to be crawled and excludes `/api/` from search indexing. This is a crawler hint, not access control: protect private routes and API operations with application authorization.
+
+Playwright checks the Bun production server, while the shared deployment verifier checks the Cloudflare Worker response for HTTP 200, a `text/plain` content type, and the expected directives. Update the policy when an application adds private, staging-only, or other non-public paths.
+
 ## Shared API client
 
 The browser uses a shared typed client under `apps/web/src/lib/api`. Its `health()` and `greet()` methods validate outgoing greeting input and parse successful responses with Zod contracts from `packages/contracts`. It normalizes structured HTTP errors into `ApiClientError` with HTTP status, shared error code, and request ID when available. The client is same-origin by default and supports `AbortSignal`; no API server implementation is imported into the browser.

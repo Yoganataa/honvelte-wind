@@ -220,6 +220,7 @@ jobs:
 
           grep -q '"status":"ok"' /tmp/honvelte-worker-health.json
           curl --fail --silent -H 'Sec-Fetch-Mode: navigate' http://127.0.0.1:8787/ | grep -q 'Honvelte Wind'
+          bash scripts/verify-robots-txt.sh http://127.0.0.1:8787
           curl --fail --silent \
             -H 'Content-Type: application/json' \
             --data '{"name":"CI"}' \

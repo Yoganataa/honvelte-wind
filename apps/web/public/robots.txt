@@ -1,0 +1,5 @@
+# Public pages may be crawled by search engines.
+# robots.txt is a crawl policy, not an access-control mechanism.
+User-agent: *
+Allow: /
+Disallow: /api/

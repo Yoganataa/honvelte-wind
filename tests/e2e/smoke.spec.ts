@@ -10,6 +10,21 @@ test('renders the starter and feature cards', async ({ page }) => {
   await expect(page.getByText('Tailwind CSS 4', { exact: true })).toBeVisible()
 })
 
+test('serves a valid robots.txt instead of the SPA fallback', async ({
+  request,
+}) => {
+  const response = await request.get('/robots.txt')
+
+  expect(response.status()).toBe(200)
+  expect(response.headers()['content-type']).toMatch(/^text\/plain\b/i)
+
+  const body = await response.text()
+  expect(body).toContain('User-agent: *')
+  expect(body).toContain('Allow: /')
+  expect(body).toContain('Disallow: /api/')
+  expect(body).not.toMatch(/<!doctype html|<html/i)
+})
+
 test('submits a greeting through the API', async ({ page }) => {
   await page.goto('/')
   await page.getByLabel('Your name').fill('Nata')
