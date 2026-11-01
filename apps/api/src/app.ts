@@ -1,4 +1,4 @@
-import { API_BASE_PATH, apiPaths } from '@honvelte/contracts'
+import { API_BASE_PATH, apiPaths, noopTracing, type Tracing } from '@honvelte/contracts'
 import { Hono } from 'hono'
 import { secureHeaders } from 'hono/secure-headers'
 import { createApiErrorHandler } from './http/error-handler'
@@ -23,6 +23,7 @@ export type CreateAppOptions = {
   metrics?: HttpMetrics
   metricsEnabled?: boolean
   metricsToken?: string
+  tracing?: Tracing
 }
 
 export function createApp(options: CreateAppOptions = {}) {
@@ -30,6 +31,7 @@ export function createApp(options: CreateAppOptions = {}) {
   const logger = options.logger ?? noopLogger
   const metrics = options.metrics ?? createNoopHttpMetrics()
   const metricsEnabled = options.metricsEnabled ?? false
+  const tracing = options.tracing ?? noopTracing
 
   if (
     metricsEnabled &&
@@ -46,7 +48,7 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.use('*', secureHeaders())
   app.use('*', requestId)
-  app.use('*', createHttpObservability({ logger, metrics }))
+  app.use('*', createHttpObservability({ logger, metrics, tracing }))
   app.use('*', async (c, next) => {
     const healthPath = API_BASE_PATH + apiPaths.health
     const readinessPath = API_BASE_PATH + apiPaths.ready
