@@ -41,9 +41,18 @@
   ]
 
   const stack = [
-    { title: 'Svelte 5 + Vite', detail: 'A responsive frontend with a fast development loop.' },
-    { title: 'Hono + Bun', detail: 'A small, standards-based API with a native Bun runtime.' },
-    { title: 'Tailwind CSS 4', detail: 'Utility-first styling with centralized design tokens.' },
+    {
+      title: 'Svelte 5 + Vite',
+      detail: 'A responsive frontend with a fast development loop.',
+    },
+    {
+      title: 'Hono + Bun',
+      detail: 'A small, standards-based API with a native Bun runtime.',
+    },
+    {
+      title: 'Tailwind CSS 4',
+      detail: 'Utility-first styling with centralized design tokens.',
+    },
   ]
 
   const architecture = [
@@ -73,35 +82,51 @@
   const capabilities = [
     {
       title: 'Authentication & sessions',
-      detail: 'Opaque sessions, CSRF protection, OIDC identity boundaries, and server-side RBAC.',
+      detail:
+        'Opaque sessions, CSRF protection, OIDC identity boundaries, and server-side RBAC.',
       icon: ShieldCheckIcon,
       tag: 'Optional example',
     },
     {
       title: 'Database adapters',
-      detail: 'Separate SQLite and PostgreSQL examples with ordered SQL migrations.',
+      detail:
+        'Separate SQLite and PostgreSQL examples with ordered SQL migrations.',
       icon: DatabaseIcon,
       tag: 'Optional example',
     },
     {
       title: 'Background jobs',
-      detail: 'Durable idempotency contracts, retries, and Cloudflare Queues + D1 adapters.',
+      detail:
+        'Durable idempotency contracts, retries, and Cloudflare Queues + D1 adapters.',
       icon: WorkflowIcon,
       tag: 'Optional example',
     },
     {
       title: 'Request safety',
-      detail: 'Bounded rate limiting, trusted principal keys, and request deadlines.',
+      detail:
+        'Bounded rate limiting, trusted principal keys, and request deadlines.',
       icon: ZapIcon,
       tag: 'Optional example',
     },
   ]
 
   const deliverySteps = [
-    { title: 'Quality gates', detail: 'Format, audit, lint, types, unit tests, and build.' },
-    { title: 'Browser E2E', detail: 'Real browser flows with accessibility scans.' },
-    { title: 'Runtime checks', detail: 'Fetch adapter and local workerd smoke tests.' },
-    { title: 'Controlled release', detail: 'Manual staging/production promotion and rollback.' },
+    {
+      title: 'Quality gates',
+      detail: 'Format, audit, lint, types, unit tests, and build.',
+    },
+    {
+      title: 'Browser E2E',
+      detail: 'Real browser flows with accessibility scans.',
+    },
+    {
+      title: 'Runtime checks',
+      detail: 'Fetch adapter and local workerd smoke tests.',
+    },
+    {
+      title: 'Controlled release',
+      detail: 'Manual staging/production promotion and rollback.',
+    },
   ]
 
   async function copySetupCommands() {
@@ -139,7 +164,10 @@
   Skip to content
 </a>
 
-<div id="top" class="relative min-h-screen overflow-hidden bg-canvas text-foreground">
+<div
+  id="top"
+  class="relative min-h-screen overflow-hidden bg-canvas text-foreground"
+>
   <div
     aria-hidden="true"
     class="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(ellipse_at_top,_rgba(103,232,249,0.12),_transparent_65%)]"
@@ -149,7 +177,9 @@
     class="pointer-events-none absolute left-1/2 top-[470px] h-px w-[min(1100px,90vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-border to-transparent"
   ></div>
 
-  <header class="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
+  <header
+    class="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10"
+  >
     <a
       href="#top"
       aria-label="Honvelte Wind home"
@@ -219,43 +249,51 @@
     hidden={!menuOpen}
     class="relative z-20 mx-5 mb-2 grid gap-1 rounded-xl border border-border bg-panel p-2 shadow-xl md:hidden"
   >
-      {#each navigation as item (item.href)}
-        <a
-          href={item.href}
-          class="rounded-lg px-3 py-3 text-sm text-muted transition-colors hover:bg-panel-muted hover:text-foreground"
-          onclick={closeMenu}
-        >
-          {item.label}
-        </a>
-      {/each}
+    {#each navigation as item (item.href)}
       <a
-        href={repositoryUrl}
-        target="_blank"
-        rel="noreferrer"
+        href={item.href}
         class="rounded-lg px-3 py-3 text-sm text-muted transition-colors hover:bg-panel-muted hover:text-foreground"
         onclick={closeMenu}
       >
-        View on GitHub
+        {item.label}
       </a>
-      <a
-        href="#getting-started"
-        class="mt-1 flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-semibold text-canvas"
-        onclick={closeMenu}
-      >
-        Get started
-        <ArrowRightIcon class="size-4" aria-hidden="true" />
-      </a>
+    {/each}
+    <a
+      href={repositoryUrl}
+      target="_blank"
+      rel="noreferrer"
+      class="rounded-lg px-3 py-3 text-sm text-muted transition-colors hover:bg-panel-muted hover:text-foreground"
+      onclick={closeMenu}
+    >
+      View on GitHub
+    </a>
+    <a
+      href="#getting-started"
+      class="mt-1 flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent px-3 text-sm font-semibold text-canvas"
+      onclick={closeMenu}
+    >
+      Get started
+      <ArrowRightIcon class="size-4" aria-hidden="true" />
+    </a>
   </nav>
 
   <main id="main" tabindex="-1" class="relative z-10">
-    <section class="mx-auto grid w-full max-w-7xl gap-14 px-5 pb-24 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28">
+    <section
+      class="mx-auto grid w-full max-w-7xl gap-14 px-5 pb-24 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28"
+    >
       <div class="max-w-2xl">
-        <div class="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent">
-          <span class="size-1.5 rounded-full bg-success shadow-[0_0_12px_var(--color-success)]"></span>
+        <div
+          class="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent"
+        >
+          <span
+            class="size-1.5 rounded-full bg-success shadow-[0_0_12px_var(--color-success)]"
+          ></span>
           A lean foundation for ambitious web apps
         </div>
 
-        <h1 class="mt-7 max-w-2xl text-5xl font-semibold leading-[1.08] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl">
+        <h1
+          class="mt-7 max-w-2xl text-5xl font-semibold leading-[1.08] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl"
+        >
           Build boldly.
           <span class="block text-accent">Stay in control.</span>
         </h1>
@@ -286,7 +324,9 @@
           </a>
         </div>
 
-        <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
+        <div
+          class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted"
+        >
           <span class="inline-flex items-center gap-2">
             <CheckIcon class="size-3.5 text-success" aria-hidden="true" />
             Bun 1.4.4 workspace
@@ -307,24 +347,34 @@
           aria-hidden="true"
           class="absolute -inset-5 rounded-[2rem] bg-accent/5 blur-2xl"
         ></div>
-        <div class="relative overflow-hidden rounded-2xl border border-border bg-panel shadow-2xl shadow-black/40">
-          <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <div
+          class="relative overflow-hidden rounded-2xl border border-border bg-panel shadow-2xl shadow-black/40"
+        >
+          <div
+            class="flex items-center justify-between border-b border-border px-5 py-4"
+          >
             <div class="flex items-center gap-3">
               <div class="flex gap-1.5" aria-hidden="true">
                 <span class="size-2.5 rounded-full bg-danger/80"></span>
                 <span class="size-2.5 rounded-full bg-accent/60"></span>
                 <span class="size-2.5 rounded-full bg-success/80"></span>
               </div>
-              <span class="text-xs font-medium text-muted">honvelte-wind / structure</span>
+              <span class="text-xs font-medium text-muted"
+                >honvelte-wind / structure</span
+              >
             </div>
-            <span class="rounded-md border border-border px-2 py-1 font-mono text-[10px] text-muted">
+            <span
+              class="rounded-md border border-border px-2 py-1 font-mono text-[10px] text-muted"
+            >
               MONOREPO
             </span>
           </div>
 
           <div class="space-y-5 p-5 sm:p-7">
             <div>
-              <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
+              <p
+                class="font-mono text-[11px] uppercase tracking-[0.18em] text-accent"
+              >
                 Clear boundaries
               </p>
               <div class="mt-4 space-y-3 font-mono text-sm">
@@ -336,7 +386,9 @@
                 <div class="ml-5 flex items-center gap-3">
                   <span class="text-muted">├─</span>
                   <span class="text-foreground">web/</span>
-                  <span class="ml-auto text-[11px] text-muted">Svelte 5 + Vite</span>
+                  <span class="ml-auto text-[11px] text-muted"
+                    >Svelte 5 + Vite</span
+                  >
                 </div>
                 <div class="ml-5 flex items-center gap-3">
                   <span class="text-muted">└─</span>
@@ -346,20 +398,27 @@
                 <div class="flex items-center gap-3 pt-1">
                   <span class="text-accent">▾</span>
                   <span class="text-foreground">packages/</span>
-                  <span class="ml-auto text-[11px] text-muted">shared code</span>
+                  <span class="ml-auto text-[11px] text-muted">shared code</span
+                  >
                 </div>
                 <div class="ml-5 flex items-center gap-3">
                   <span class="text-muted">└─</span>
                   <span class="text-foreground">contracts/</span>
-                  <span class="ml-auto text-[11px] text-muted">Zod schemas</span>
+                  <span class="ml-auto text-[11px] text-muted">Zod schemas</span
+                  >
                 </div>
               </div>
             </div>
 
             <div class="rounded-xl border border-border bg-canvas p-4">
               <div class="flex items-center justify-between">
-                <span class="inline-flex items-center gap-2 text-xs font-medium text-foreground">
-                  <TerminalIcon class="size-3.5 text-accent" aria-hidden="true" />
+                <span
+                  class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
+                >
+                  <TerminalIcon
+                    class="size-3.5 text-accent"
+                    aria-hidden="true"
+                  />
                   One command to start
                 </span>
                 <span class="font-mono text-[10px] text-muted">BUN</span>
@@ -371,34 +430,62 @@
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <span class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted">Svelte 5</span>
-              <span class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted">Hono</span>
-              <span class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted">Tailwind 4</span>
-              <span class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted">Bun</span>
+              <span
+                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
+                >Svelte 5</span
+              >
+              <span
+                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
+                >Hono</span
+              >
+              <span
+                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
+                >Tailwind 4</span
+              >
+              <span
+                class="rounded-md bg-panel-muted px-2.5 py-1.5 text-[11px] text-muted"
+                >Bun</span
+              >
             </div>
           </div>
         </div>
-        <div class="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-xl border border-border bg-panel px-4 py-3 shadow-xl sm:flex">
-          <span class="flex size-8 items-center justify-center rounded-lg bg-success-panel text-success">
+        <div
+          class="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-xl border border-border bg-panel px-4 py-3 shadow-xl sm:flex"
+        >
+          <span
+            class="flex size-8 items-center justify-center rounded-lg bg-success-panel text-success"
+          >
             <CheckIcon class="size-4" aria-hidden="true" />
           </span>
           <span>
-            <span class="block text-xs font-semibold text-foreground">Verified delivery</span>
-            <span class="mt-0.5 block text-[11px] text-muted">Build · E2E · Worker smoke tests</span>
+            <span class="block text-xs font-semibold text-foreground"
+              >Verified delivery</span
+            >
+            <span class="mt-0.5 block text-[11px] text-muted"
+              >Build · E2E · Worker smoke tests</span
+            >
           </span>
         </div>
       </div>
     </section>
 
     <section class="border-y border-border bg-panel/40">
-      <div class="mx-auto grid max-w-7xl gap-5 px-5 py-7 sm:grid-cols-3 sm:px-8 lg:px-10">
+      <div
+        class="mx-auto grid max-w-7xl gap-5 px-5 py-7 sm:grid-cols-3 sm:px-8 lg:px-10"
+      >
         {#each stack as item (item.title)}
-          <article class="flex gap-4 sm:border-r sm:border-border sm:pr-5 last:border-0 last:pr-0">
-            <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-panel text-accent">
+          <article
+            class="flex gap-4 sm:border-r sm:border-border sm:pr-5 last:border-0 last:pr-0"
+          >
+            <span
+              class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-panel text-accent"
+            >
               <PackageIcon class="size-4" aria-hidden="true" />
             </span>
             <div>
-              <h2 class="text-sm font-semibold text-foreground">{item.title}</h2>
+              <h2 class="text-sm font-semibold text-foreground">
+                {item.title}
+              </h2>
               <p class="mt-1.5 text-xs leading-5 text-muted">{item.detail}</p>
             </div>
           </article>
@@ -406,10 +493,17 @@
       </div>
     </section>
 
-    <section id="architecture" class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
+    <section
+      id="architecture"
+      class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32"
+    >
       <div class="max-w-2xl">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Architecture</p>
-        <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+          Architecture
+        </p>
+        <h2
+          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+        >
           One workspace. <span class="text-muted">Clear boundaries.</span>
         </h2>
         <p class="mt-4 text-base leading-7 text-muted">
@@ -420,65 +514,116 @@
 
       <div class="mt-12 grid gap-4 md:grid-cols-3">
         {#each architecture as item (item.number)}
-          <article class="group rounded-2xl border border-border bg-panel p-6 transition-colors hover:border-accent/40">
+          <article
+            class="group rounded-2xl border border-border bg-panel p-6 transition-colors hover:border-accent/40"
+          >
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs text-muted">{item.number}</span>
-              <span class="flex size-10 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10">
-                {@const Icon = item.icon}<Icon class="size-5" aria-hidden="true" />
+              <span
+                class="flex size-10 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/10"
+              >
+                {@const Icon = item.icon}<Icon
+                  class="size-5"
+                  aria-hidden="true"
+                />
               </span>
             </div>
-            <h3 class="mt-7 text-lg font-semibold text-foreground">{item.title}</h3>
-            <p class="mt-2 min-h-14 text-sm leading-6 text-muted">{item.detail}</p>
-            <div class="mt-6 border-t border-border pt-4 font-mono text-xs text-accent">
+            <h3 class="mt-7 text-lg font-semibold text-foreground">
+              {item.title}
+            </h3>
+            <p class="mt-2 min-h-14 text-sm leading-6 text-muted">
+              {item.detail}
+            </p>
+            <div
+              class="mt-6 border-t border-border pt-4 font-mono text-xs text-accent"
+            >
               {item.path}
             </div>
           </article>
         {/each}
       </div>
 
-      <div class="mt-5 flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-panel-muted/60 p-5 text-center sm:flex-row sm:gap-6">
-        <span class="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+      <div
+        class="mt-5 flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-panel-muted/60 p-5 text-center sm:flex-row sm:gap-6"
+      >
+        <span
+          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
+        >
           <LayersIcon class="size-4 text-accent" aria-hidden="true" />
           Browser UI
         </span>
-        <ArrowRightIcon class="hidden size-4 text-muted sm:block" aria-hidden="true" />
-        <span class="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+        <ArrowRightIcon
+          class="hidden size-4 text-muted sm:block"
+          aria-hidden="true"
+        />
+        <span
+          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
+        >
           <BoxesIcon class="size-4 text-accent" aria-hidden="true" />
           Shared Zod contracts
         </span>
-        <ArrowRightIcon class="hidden size-4 text-muted sm:block" aria-hidden="true" />
-        <span class="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+        <ArrowRightIcon
+          class="hidden size-4 text-muted sm:block"
+          aria-hidden="true"
+        />
+        <span
+          class="inline-flex items-center gap-2 text-xs font-medium text-foreground"
+        >
           <WorkflowIcon class="size-4 text-accent" aria-hidden="true" />
           Hono API
         </span>
       </div>
     </section>
 
-    <section id="features" class="scroll-mt-20 border-y border-border bg-panel/35">
+    <section
+      id="features"
+      class="scroll-mt-20 border-y border-border bg-panel/35"
+    >
       <div class="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
-        <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+        <div
+          class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end"
+        >
           <div class="max-w-2xl">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Built to extend</p>
-            <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Start lean. <span class="text-muted">Add capability with intent.</span>
+            <p
+              class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
+            >
+              Built to extend
+            </p>
+            <h2
+              class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+            >
+              Start lean. <span class="text-muted"
+                >Add capability with intent.</span
+              >
             </h2>
           </div>
           <p class="max-w-md text-sm leading-6 text-muted">
             Optional examples give you a tested starting point without forcing
-            every database, queue, or identity provider into the default install.
+            every database, queue, or identity provider into the default
+            install.
           </p>
         </div>
 
         <div class="mt-12 grid gap-4 sm:grid-cols-2">
           {#each capabilities as item (item.title)}
-            <article class="flex gap-4 rounded-2xl border border-border bg-panel p-5 sm:p-6">
-              <span class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent">
-                <svelte:component this={item.icon} class="size-5" aria-hidden="true" />
+            <article
+              class="flex gap-4 rounded-2xl border border-border bg-panel p-5 sm:p-6"
+            >
+              <span
+                class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
+              >
+                <svelte:component
+                  this={item.icon}
+                  class="size-5"
+                  aria-hidden="true"
+                />
               </span>
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                   <h3 class="font-semibold text-foreground">{item.title}</h3>
-                  <span class="rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted">
+                  <span
+                    class="rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted"
+                  >
                     {item.tag}
                   </span>
                 </div>
@@ -490,26 +635,38 @@
       </div>
     </section>
 
-    <section id="runtime" class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
+    <section
+      id="runtime"
+      class="scroll-mt-20 mx-auto w-full max-w-7xl px-5 py-24 sm:px-8 lg:px-10 lg:py-32"
+    >
       <div class="max-w-2xl">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Runtime profiles</p>
-        <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+          Runtime profiles
+        </p>
+        <h2
+          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+        >
           Choose where it runs.
           <span class="text-muted">Keep the boundaries.</span>
         </h2>
         <p class="mt-4 text-base leading-7 text-muted">
           The same Hono application can run as a Bun server or through a
-          Fetch-compatible Cloudflare Worker adapter. Each runtime has explicit capabilities.
+          Fetch-compatible Cloudflare Worker adapter. Each runtime has explicit
+          capabilities.
         </p>
       </div>
 
       <div class="mt-12 grid gap-4 lg:grid-cols-2">
         <article class="rounded-2xl border border-border bg-panel p-6 sm:p-8">
           <div class="flex items-center justify-between">
-            <span class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent">
+            <span
+              class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
+            >
               <TerminalIcon class="size-5" aria-hidden="true" />
             </span>
-            <span class="rounded-full border border-success-border bg-success-panel px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-success">
+            <span
+              class="rounded-full border border-success-border bg-success-panel px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-success"
+            >
               Default profile
             </span>
           </div>
@@ -520,68 +677,106 @@
           </p>
           <ul class="mt-6 space-y-3 text-sm text-muted">
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Bun-native runtime and production bundle
             </li>
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Graceful shutdown and readiness lifecycle
             </li>
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Optional SQLite and PostgreSQL examples
             </li>
           </ul>
-          <p class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted">
+          <p
+            class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted"
+          >
             bun run build <span class="text-accent">→</span> bun run start
           </p>
         </article>
 
         <article class="rounded-2xl border border-border bg-panel p-6 sm:p-8">
           <div class="flex items-center justify-between">
-            <span class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent">
+            <span
+              class="flex size-11 items-center justify-center rounded-xl border border-border bg-panel-muted text-accent"
+            >
               <CloudIcon class="size-5" aria-hidden="true" />
             </span>
-            <span class="rounded-full border border-accent/25 bg-accent/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent">
+            <span
+              class="rounded-full border border-accent/25 bg-accent/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent"
+            >
               Edge profile
             </span>
           </div>
-          <h3 class="mt-7 text-xl font-semibold text-foreground">Cloudflare Workers</h3>
+          <h3 class="mt-7 text-xl font-semibold text-foreground">
+            Cloudflare Workers
+          </h3>
           <p class="mt-2 text-sm leading-6 text-muted">
             Serve the SPA with Workers Static Assets and route same-origin API
             requests to Hono through the standard Fetch interface.
           </p>
           <ul class="mt-6 space-y-3 text-sm text-muted">
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Separate staging and production environments
             </li>
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Live health, API, SPA, and asset smoke tests
             </li>
             <li class="flex items-start gap-2">
-              <CheckIcon class="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+              <CheckIcon
+                class="mt-0.5 size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
               Explicit rollback workflow
             </li>
           </ul>
-          <p class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted">
-            wrangler deploy <span class="text-accent">→</span> verify <span class="text-accent">→</span> rollback
+          <p
+            class="mt-7 border-t border-border pt-4 font-mono text-xs text-muted"
+          >
+            wrangler deploy <span class="text-accent">→</span> verify
+            <span class="text-accent">→</span> rollback
           </p>
         </article>
       </div>
 
       <p class="mt-5 text-xs leading-5 text-muted">
-        Runtime note: Bun-specific database, session, in-memory rate-limit, and process lifecycle examples
-        are not automatically portable to Cloudflare Workers. Use runtime-compatible adapters where needed.
+        Runtime note: Bun-specific database, session, in-memory rate-limit, and
+        process lifecycle examples are not automatically portable to Cloudflare
+        Workers. Use runtime-compatible adapters where needed.
       </p>
     </section>
 
     <section class="border-y border-border bg-panel/35">
-      <div class="mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-28">
+      <div
+        class="mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-28"
+      >
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Delivery workflow</p>
-          <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <p
+            class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
+          >
+            Delivery workflow
+          </p>
+          <h2
+            class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+          >
             Confidence at every step.
           </h2>
           <p class="mt-4 text-sm leading-7 text-muted">
@@ -603,7 +798,9 @@
           {#each deliverySteps as item, index (item.title)}
             <li class="relative flex gap-4 pb-7 last:pb-0">
               <div class="relative flex flex-col items-center">
-                <span class="z-10 flex size-9 shrink-0 items-center justify-center rounded-full border border-accent/30 bg-panel text-xs font-semibold text-accent">
+                <span
+                  class="z-10 flex size-9 shrink-0 items-center justify-center rounded-full border border-accent/30 bg-panel text-xs font-semibold text-accent"
+                >
                   0{index + 1}
                 </span>
                 {#if index !== deliverySteps.length - 1}
@@ -611,11 +808,15 @@
                 {/if}
               </div>
               <div class="min-w-0 pt-1">
-                <h3 class="text-sm font-semibold text-foreground">{item.title}</h3>
+                <h3 class="text-sm font-semibold text-foreground">
+                  {item.title}
+                </h3>
                 <p class="mt-1 text-sm leading-6 text-muted">{item.detail}</p>
               </div>
               {#if index === deliverySteps.length - 1}
-                <span class="ml-auto mt-1 shrink-0 rounded-md border border-accent/25 bg-accent/5 px-2 py-1 text-[10px] font-medium text-accent">
+                <span
+                  class="ml-auto mt-1 shrink-0 rounded-md border border-accent/25 bg-accent/5 px-2 py-1 text-[10px] font-medium text-accent"
+                >
                   Manual approval
                 </span>
               {/if}
@@ -625,10 +826,17 @@
       </div>
     </section>
 
-    <section id="playground" class="scroll-mt-20 mx-auto grid w-full max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-32">
+    <section
+      id="playground"
+      class="scroll-mt-20 mx-auto grid w-full max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-10 lg:py-32"
+    >
       <div class="max-w-lg">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Try the API</p>
-        <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+          Try the API
+        </p>
+        <h2
+          class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+        >
           Not just a pretty scaffold.
         </h2>
         <p class="mt-4 text-base leading-7 text-muted">
@@ -636,22 +844,44 @@
           payloads with shared Zod contracts and gives structured feedback.
         </p>
         <div class="mt-7 flex flex-wrap gap-2">
-          <span class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted">Runtime validation</span>
-          <span class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted">Typed responses</span>
-          <span class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted">Request IDs</span>
+          <span
+            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
+            >Runtime validation</span
+          >
+          <span
+            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
+            >Typed responses</span
+          >
+          <span
+            class="rounded-md border border-border bg-panel px-3 py-2 text-xs text-muted"
+            >Request IDs</span
+          >
         </div>
       </div>
-      <div class="rounded-2xl border border-border bg-panel p-3 shadow-2xl shadow-black/20 sm:p-5">
+      <div
+        class="rounded-2xl border border-border bg-panel p-3 shadow-2xl shadow-black/20 sm:p-5"
+      >
         <GreetingPanel />
       </div>
     </section>
 
-    <section id="getting-started" class="scroll-mt-20 px-5 pb-24 sm:px-8 lg:px-10 lg:pb-32">
-      <div class="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-accent/20 bg-panel shadow-2xl shadow-accent/5">
+    <section
+      id="getting-started"
+      class="scroll-mt-20 px-5 pb-24 sm:px-8 lg:px-10 lg:pb-32"
+    >
+      <div
+        class="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-accent/20 bg-panel shadow-2xl shadow-accent/5"
+      >
         <div class="grid lg:grid-cols-[1fr_0.9fr]">
           <div class="p-7 sm:p-10 lg:p-12">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Your next commit starts here</p>
-            <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <p
+              class="text-xs font-semibold uppercase tracking-[0.2em] text-accent"
+            >
+              Your next commit starts here
+            </p>
+            <h2
+              class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+            >
               Make the first move.
             </h2>
             <p class="mt-4 max-w-md text-sm leading-7 text-muted">
@@ -680,9 +910,13 @@
             </div>
           </div>
 
-          <div class="border-t border-border bg-canvas/70 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-9">
+          <div
+            class="border-t border-border bg-canvas/70 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-9"
+          >
             <div class="flex items-center justify-between">
-              <span class="inline-flex items-center gap-2 text-xs font-semibold text-foreground">
+              <span
+                class="inline-flex items-center gap-2 text-xs font-semibold text-foreground"
+              >
                 <TerminalIcon class="size-4 text-accent" aria-hidden="true" />
                 Quick start
               </span>
@@ -700,7 +934,13 @@
                 {/if}
               </button>
             </div>
-            <pre class="mt-5 overflow-x-auto whitespace-pre-wrap break-all font-mono text-xs leading-7 text-muted"><code>{setupCommands.split('\n').map((command) => '$ ' + command).join('\n')}</code></pre>
+            <pre
+              class="mt-5 overflow-x-auto whitespace-pre-wrap break-all font-mono text-xs leading-7 text-muted"><code
+                >{setupCommands
+                  .split('\n')
+                  .map((command) => '$ ' + command)
+                  .join('\n')}</code
+              ></pre>
             <p class="mt-4 min-h-5 text-[11px] text-muted" aria-live="polite">
               {#if copyState === 'copied'}
                 Commands copied to clipboard.
@@ -717,8 +957,13 @@
   </main>
 
   <footer class="border-t border-border bg-panel/30">
-    <div class="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
-      <a href="#top" class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-foreground">
+    <div
+      class="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10"
+    >
+      <a
+        href="#top"
+        class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-foreground"
+      >
         <WindIcon class="size-4 text-accent" aria-hidden="true" />
         honvelte.wind
       </a>
@@ -726,13 +971,28 @@
         A modular full-stack web starter. Built to stay lean.
       </p>
       <div class="flex items-center gap-5 text-xs text-muted">
-        <a href={repositoryUrl} target="_blank" rel="noreferrer" class="transition-colors hover:text-accent">
+        <a
+          href={repositoryUrl}
+          target="_blank"
+          rel="noreferrer"
+          class="transition-colors hover:text-accent"
+        >
           GitHub
         </a>
-        <a href={repositoryUrl + '/blob/main/ROADMAP.md'} target="_blank" rel="noreferrer" class="transition-colors hover:text-accent">
+        <a
+          href={repositoryUrl + '/blob/main/ROADMAP.md'}
+          target="_blank"
+          rel="noreferrer"
+          class="transition-colors hover:text-accent"
+        >
           Roadmap
         </a>
-        <a href={repositoryUrl + '/blob/main/DESIGN.md'} target="_blank" rel="noreferrer" class="transition-colors hover:text-accent">
+        <a
+          href={repositoryUrl + '/blob/main/DESIGN.md'}
+          target="_blank"
+          rel="noreferrer"
+          class="transition-colors hover:text-accent"
+        >
           Design
         </a>
       </div>
