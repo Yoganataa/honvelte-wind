@@ -1,6 +1,6 @@
 # Honvelte Wind
 
-A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeScript, and Bun Workspaces. Production is served by one Bun process: Hono handles API routes and serves the built SPA.
+A full-stack starter built with Svelte 5 + Vite SPA, Hono, Tailwind CSS 4, TypeScript, and Bun Workspaces. The default Bun production profile serves the API and built SPA in one process. An optional Cloudflare Workers profile serves the SPA as static assets and routes `/api/*` through Hono's Fetch adapter.
 
 ## Requirements
 
@@ -53,7 +53,7 @@ The API composition root is `apps/api/src/app.ts`. Feature endpoints live in `ap
 
 The web app composition root is `apps/web/src/App.svelte`. Keep feature-owned UI, state, and API calls in `apps/web/src/features/<feature>`. Put small primitives shared across features in `apps/web/src/lib/components/ui`; keep theme tokens and global focus/reduced-motion defaults in `app.css`. Use native HTML semantics and defer client-side routing until multiple real routes need it.
 
-The web app calls `/api` through Vite proxy in development. In production Hono serves `apps/web/dist` and handles SPA fallback. Keep API routes under `/api/*`.
+The web app calls `/api` through the Vite proxy in development. In the default Bun production profile, Hono serves `apps/web/dist` and handles SPA fallback. In the Cloudflare Workers profile, Workers Static Assets serves the SPA and `/api/*` is routed to Hono's Fetch adapter. Keep API routes under `/api/*`.
 
 See [ROADMAP.md](./ROADMAP.md) for engineering priorities, acceptance criteria, and planned project profiles. See [DESIGN.md](./DESIGN.md) for UI design tokens, component conventions, and accessibility requirements.
 
@@ -133,7 +133,7 @@ Coverage text summaries are printed by CI and LCOV reports are uploaded as the `
 
 Download the `honvelte-wind-production-<commit>` artifact from the successful workflow run. The archive includes deployment instructions. This is a delivery artifact; an actual hosting deployment needs a configured hosting target and credentials.
 
-Cloudflare staging and production deployments are separate, manual, main-only workflows. They require the GitHub Environments and Cloudflare secrets documented in [deployment profiles](examples/deployments/README.md); no live account is configured by default. The rollback workflow requires an explicit Worker version ID.
+Cloudflare staging and production deployments are separate, manual, main-only workflows. This upstream repository has configured staging and production environments, and both Workers have passed live deployment verification. A fork does not inherit GitHub Environment secrets, protection rules, or Cloudflare resources; configure those separately using [deployment profiles](examples/deployments/README.md). The rollback workflow requires an explicit Worker version ID.
 
 Playwright reports and traces are uploaded even when E2E fails.
 
@@ -218,7 +218,7 @@ For a reverse-proxy deployment, terminate TLS at the proxy and restrict forwarde
 
 The default profile runs the Hono API and built Svelte SPA in one Bun process. An optional Cloudflare Workers profile serves the SPA through Workers Static Assets and routes same-origin `/api/*` requests to a Fetch-compatible Hono entry point. See [deployment profiles](examples/deployments/README.md) for build commands, runtime boundaries, environment requirements, and CI validation.
 
-CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not deploy to a live Cloudflare account. Separate manual GitHub Actions workflows provide staging/production deployment, live smoke checks, automatic rollback after a failed deployment check, and explicit version rollback. They require the `staging` and `production` GitHub Environments and their Cloudflare secrets/URL variables to be configured. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
+CI smoke-tests the Cloudflare profile locally with the pinned Wrangler CLI and `workerd`; it does not itself deploy to a live Cloudflare account. Separate manual GitHub Actions workflows provide staging/production deployment, live smoke checks, automatic rollback after a failed deployment check, and explicit version rollback. The upstream repository has both GitHub Environments and their Cloudflare settings configured; a new fork or independent installation must configure its own environments, secrets, URL variables, protection rules, and Worker resources. Bun-specific database, authentication, process lifecycle, and in-memory rate-limit examples are not automatically portable to Workers.
 
 ## Testing
 
