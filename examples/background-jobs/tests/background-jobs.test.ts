@@ -7,6 +7,7 @@ import {
   createJob,
   createScheduledJob,
   D1IdempotencyStore,
+  JobEnvelopeSchema,
   defineJobHandler,
   type D1DatabaseLike,
   type D1PreparedStatementLike,
@@ -47,16 +48,12 @@ class TestD1 implements D1DatabaseLike {
   }
 }
 
-function createStore(retentionMs = 60_000) {
+async function createStore(retentionMs = 60_000) {
   const database = new Database(':memory:')
-  database.exec(
-    'CREATE TABLE background_job_idempotency (' +
-      'idempotency_key TEXT PRIMARY KEY, ' +
-      "state TEXT NOT NULL CHECK (state IN ('processing', 'completed')), " +
-      'lease_token TEXT, lease_expires_at INTEGER, completed_at INTEGER, expires_at INTEGER, ' +
-      "CHECK ((state = 'processing' AND lease_token IS NOT NULL AND lease_expires_at IS NOT NULL AND completed_at IS NULL AND expires_at IS NULL) OR " +
-      "(state = 'completed' AND lease_token IS NULL AND lease_expires_at IS NULL AND completed_at IS NOT NULL AND expires_at IS NOT NULL)))",
-  )
+  const migration = await Bun.file(
+    new URL('../migrations/0001_idempotency.sql', import.meta.url),
+  ).text()
+  database.exec(migration)
 
   let tokenSequence = 0
   const store = new D1IdempotencyStore(new TestD1(database), {
@@ -86,11 +83,12 @@ describe('background job contracts and runner', () => {
     expect(first.id).toBe(second.id)
     expect(first.createdAt).toBe('2026-12-01T00:00:00.000Z')
     expect(() => createJob({ id: 'bad id', type: 'Reports.Refresh', payload: {} })).toThrow()
+    expect(() => JobEnvelopeSchema.parse({ id: 'missing-payload', type: 'reports.refresh', createdAt: fixedTime })).toThrow()
     expect(() => createScheduledJob('reports.refresh', -1, {})).toThrow()
   })
 
   test('validates handler payloads and skips completed duplicates', async () => {
-    const { database, store } = createStore()
+    const { database, store } = await createStore()
     openDatabases.push(database)
     let executions = 0
     const handler = defineJobHandler(
@@ -169,7 +167,7 @@ describe('background job contracts and runner', () => {
   })
 
   test('fences stale leases and purges expired records', async () => {
-    const { database, store } = createStore(1_000)
+    const { database, store } = await createStore(1_000)
     openDatabases.push(database)
 
     const first = await store.claim({ key: 'fenced-1', now: 100, leaseExpiresAt: 200 })
